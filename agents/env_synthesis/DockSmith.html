@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DockSmith · 精读笔记</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #080c10;
+  --s0:      #0d1218;
+  --s1:      #121820;
+  --s2:      #181e28;
+  --border:  #1c2430;
+  --border2: #243040;
+  --text:    #c4ccd8;
+  --muted:   #4e6070;
+  --muted2:  #364450;
+  --head:    #dde6f0;
+  --cyan:    #5ec4d8;
+  --cyan2:   #3a9ab4;
+  --green:   #60c88a;
+  --red:     #d46e68;
+  --amber:   #c8a04a;
+  --blue:    #5090d0;
+  --purple:  #8878c0;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; font-size:15px; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 300;
+  line-height: 1.8;
+}
+
+/* ── layout ── */
+.layout { display:flex; min-height:100vh; }
+aside {
+  position:fixed; top:0; left:0;
+  width:210px; height:100vh;
+  background:var(--s0);
+  border-right:1px solid var(--border);
+  display:flex; flex-direction:column;
+  overflow-y:auto; z-index:200;
+}
+.aside-head { padding:26px 20px 20px; border-bottom:1px solid var(--border); }
+.back-link {
+  font-family:'JetBrains Mono',monospace;
+  font-size:9.5px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--muted); text-decoration:none;
+  display:flex; align-items:center; gap:6px;
+  margin-bottom:14px; transition:color .2s;
+}
+.back-link:hover { color:var(--cyan); }
+.aside-title { font-family:'Lora',serif; font-size:14px; font-weight:600; color:var(--head); line-height:1.4; }
+.aside-sub { font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--muted); margin-top:5px; letter-spacing:.06em; }
+nav { padding:14px 0; flex:1; }
+.nav-item {
+  display:flex; align-items:center; gap:9px;
+  padding:6px 20px; font-size:12px; color:var(--muted);
+  text-decoration:none; cursor:pointer;
+  transition:color .2s, background .2s;
+  border-left:2px solid transparent;
+}
+.nav-item:hover { color:var(--text); background:rgba(255,255,255,.02); }
+.nav-item.active { color:var(--cyan); border-left-color:var(--cyan); background:rgba(94,196,216,.05); }
+.nav-item .n { font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--muted2); min-width:16px; }
+.aside-foot {
+  padding:14px 20px; border-top:1px solid var(--border);
+  font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--muted2); line-height:1.8;
+}
+
+/* ── main ── */
+main { margin-left:210px; flex:1; max-width:780px; padding:52px 48px 100px; }
+
+/* ── hero ── */
+.hero { margin-bottom:52px; }
+.hero-eyebrow {
+  font-family:'JetBrains Mono',monospace; font-size:9.5px;
+  letter-spacing:.22em; text-transform:uppercase; color:var(--cyan); margin-bottom:14px;
+}
+.hero h1 {
+  font-family:'Lora',serif; font-size:36px; font-weight:500;
+  color:var(--head); line-height:1.2; margin-bottom:6px; letter-spacing:-.02em;
+}
+.hero h1 em { font-style:italic; color:var(--cyan); }
+.hero-sub { font-family:'Lora',serif; font-style:italic; font-size:16px; color:var(--muted); margin-bottom:20px; }
+.hero-chips { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:24px; }
+.chip { font-family:'JetBrains Mono',monospace; font-size:10px; padding:3px 10px; border-radius:3px; text-decoration:none; transition:opacity .15s; }
+.chip:hover { opacity:.75; }
+.chip-arxiv { background:rgba(94,196,216,.10); color:var(--cyan);   border:1px solid rgba(94,196,216,.22); }
+.chip-gh    { background:rgba(255,255,255,.04); color:var(--muted);  border:1px solid var(--border2); }
+.chip-venue { background:rgba(96,200,138,.10);  color:var(--green);  border:1px solid rgba(96,200,138,.2); }
+.chip-model { background:rgba(136,120,192,.10); color:var(--purple); border:1px solid rgba(136,120,192,.22); }
+
+.hero-abstract {
+  background:var(--s1); border:1px solid var(--border);
+  border-left:3px solid var(--cyan); border-radius:0 8px 8px 0;
+  padding:16px 20px; font-size:13.5px; color:#8898a8; line-height:1.75;
+}
+.hero-abstract strong { color:var(--text); }
+
+/* ── section ── */
+.sec { margin-bottom:56px; }
+.sec-header {
+  display:flex; align-items:center; gap:12px;
+  margin-bottom:24px; padding-bottom:12px; border-bottom:1px solid var(--border);
+}
+.sec-num { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted2); letter-spacing:.08em; min-width:24px; }
+.sec-line { width:3px; height:20px; border-radius:2px; flex-shrink:0; }
+.sec-title { font-family:'Lora',serif; font-size:22px; font-weight:500; color:var(--head); }
+
+/* ── prose ── */
+p { margin-bottom:12px; font-size:13.5px; }
+p:last-child { margin-bottom:0; }
+strong { color:var(--head); font-weight:500; }
+em { color:var(--amber); font-style:italic; }
+
+/* ── callout ── */
+.callout {
+  border-radius:7px; padding:13px 16px; font-size:13px; line-height:1.7;
+  margin:14px 0; display:flex; gap:12px;
+}
+.callout-icon { font-size:14px; flex-shrink:0; padding-top:1px; }
+.callout-body { flex:1; }
+.callout-body strong { font-weight:500; }
+.callout.warn  { background:rgba(200,160,74,.08);  border:1px solid rgba(200,160,74,.18);  color:#a89060; }
+.callout.info  { background:rgba(94,196,216,.07);  border:1px solid rgba(94,196,216,.16);  color:#5898a8; }
+.callout.good  { background:rgba(96,200,138,.08);  border:1px solid rgba(96,200,138,.18);  color:#5a9870; }
+.callout.key   { background:rgba(136,120,192,.08); border:1px solid rgba(136,120,192,.18); color:#8070b0; }
+
+/* ── agents grid ── */
+.agents-grid { display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--border); border-radius:8px; overflow:hidden; margin:20px 0; }
+.agent-card { background:var(--s1); padding:16px 18px; transition:background .2s; }
+.agent-card:hover { background:var(--s2); }
+.agent-tag { font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--cyan); margin-bottom:6px; }
+.agent-name { font-size:13.5px; font-weight:500; color:var(--head); margin-bottom:7px; }
+.agent-body { font-size:12.5px; color:var(--muted); line-height:1.65; }
+.agent-body code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--purple); padding:1px 5px; border-radius:3px; }
+.agent-body strong { color:var(--text); }
+
+/* ── pipeline / step ── */
+.pipeline { display:flex; flex-direction:column; gap:2px; margin-bottom:20px; }
+.pipeline-step { display:grid; grid-template-columns:40px 1fr; background:var(--s1); border:1px solid var(--border); border-radius:7px; overflow:hidden; transition:border-color .2s; }
+.pipeline-step:hover { border-color:var(--border2); }
+.step-gutter { background:var(--s0); display:flex; align-items:flex-start; justify-content:center; padding:16px 0 0; border-right:1px solid var(--border); }
+.step-badge { font-family:'JetBrains Mono',monospace; font-size:9.5px; font-weight:500; color:var(--cyan); letter-spacing:.06em; }
+.step-inner { padding:14px 18px; }
+.step-h { font-size:13.5px; font-weight:500; color:var(--head); margin-bottom:6px; }
+.step-p { font-size:12.5px; color:var(--muted); line-height:1.65; }
+.step-p code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--purple); padding:1px 5px; border-radius:3px; }
+.step-p strong { color:var(--text); }
+.step-connector { display:flex; align-items:center; justify-content:center; height:22px; color:var(--muted2); font-size:11px; }
+
+/* ── mechanism box ── */
+.mech-box {
+  background:var(--s1); border:1px solid var(--border); border-radius:8px;
+  overflow:hidden; margin:16px 0;
+}
+.mech-head {
+  display:flex; align-items:center; gap:10px;
+  padding:11px 18px; border-bottom:1px solid var(--border);
+  background:var(--s0);
+}
+.mech-icon { font-size:16px; }
+.mech-title { font-family:'Lora',serif; font-size:15px; font-weight:500; color:var(--head); }
+.mech-tag { font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-left:auto; }
+.mech-body { padding:16px 18px; }
+.mech-body p { font-size:13px; color:var(--muted); margin-bottom:10px; }
+.mech-body p:last-child { margin-bottom:0; }
+.mech-body strong { color:var(--text); }
+.mech-body code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--purple); padding:1px 5px; border-radius:3px; }
+
+/* ── flow diagram ── */
+.flow {
+  background:var(--s0); border:1px solid var(--border); border-radius:8px;
+  padding:16px 20px; margin:14px 0;
+  font-family:'JetBrains Mono',monospace; font-size:11px; overflow-x:auto;
+}
+.flow-row { display:flex; align-items:center; gap:0; white-space:nowrap; margin-bottom:6px; }
+.flow-row:last-child { margin-bottom:0; }
+.fbox { background:var(--s2); border:1px solid var(--border2); border-radius:5px; padding:5px 10px; color:var(--cyan); font-size:10.5px; }
+.fbox.red { color:var(--red); border-color:rgba(212,110,104,.3); background:rgba(212,110,104,.07); }
+.fbox.grn { color:var(--green); border-color:rgba(96,200,138,.3); background:rgba(96,200,138,.07); }
+.fbox.amb { color:var(--amber); border-color:rgba(200,160,74,.3); background:rgba(200,160,74,.07); }
+.farr { color:var(--muted2); padding:0 8px; }
+.flow-note { font-size:10px; color:var(--muted2); margin-top:8px; padding-left:8px; border-left:2px solid var(--border2); line-height:1.8; }
+
+/* ── code block ── */
+.codeblock { background:var(--s0); border:1px solid var(--border); border-radius:8px; overflow:hidden; margin:14px 0; font-family:'JetBrains Mono',monospace; font-size:11.5px; line-height:1.75; }
+.codeblock-head { background:var(--s1); border-bottom:1px solid var(--border); padding:7px 16px; font-size:9.5px; color:var(--muted); letter-spacing:.1em; display:flex; align-items:center; gap:8px; }
+.codeblock-head .dot { width:8px; height:8px; border-radius:50%; }
+.codeblock pre { padding:14px 18px; white-space:pre; overflow-x:auto; color:#506080; }
+.tok-comment { color:#26323e; }
+.tok-key     { color:var(--purple); }
+.tok-str     { color:var(--amber); }
+.tok-num     { color:var(--cyan); }
+.tok-op      { color:var(--green); }
+.tok-em      { color:var(--red); }
+
+/* ── stat grid ── */
+.stat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--border); border-radius:8px; overflow:hidden; margin:16px 0; }
+.stat-cell { background:var(--s1); padding:16px 18px; }
+.stat-val { font-family:'Lora',serif; font-size:24px; font-weight:500; color:var(--head); margin-bottom:3px; line-height:1.1; }
+.stat-val .unit { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); font-weight:400; }
+.stat-label { font-size:11.5px; color:var(--muted); }
+
+/* ── bench table ── */
+.bench-table { width:100%; border-collapse:collapse; font-size:13px; margin:16px 0; }
+.bench-table th { font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted2); padding:9px 14px; text-align:left; background:var(--s0); border-bottom:1px solid var(--border); }
+.bench-table td { padding:9px 14px; border-bottom:1px solid var(--border); color:var(--muted); vertical-align:middle; }
+.bench-table tr:last-child td { border-bottom:none; }
+.bench-table .best { color:var(--cyan); font-weight:500; font-family:'JetBrains Mono',monospace; }
+.bench-table .win  { color:var(--green); }
+.bench-table .us   { background:rgba(94,196,216,.04); }
+
+/* ── error table ── */
+.err-table { width:100%; border-collapse:collapse; font-size:12.5px; margin:16px 0; }
+.err-table th { font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted2); padding:8px 12px; text-align:left; background:var(--s0); border-bottom:1px solid var(--border); }
+.err-table td { padding:8px 12px; border-bottom:1px solid var(--border); color:var(--muted); }
+.err-table tr:last-child td { border-bottom:none; }
+.err-table .delta-good { color:var(--green); font-family:'JetBrains Mono',monospace; font-size:11px; }
+.err-table .delta-bad  { color:var(--red);   font-family:'JetBrains Mono',monospace; font-size:11px; }
+
+/* ── mix table ── */
+.mix-table { width:100%; border-collapse:collapse; font-size:12.5px; margin:16px 0; }
+.mix-table th { font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.10em; text-transform:uppercase; color:var(--muted2); padding:8px 12px; text-align:center; background:var(--s0); border-bottom:1px solid var(--border); }
+.mix-table td { padding:8px 12px; border-bottom:1px solid var(--border); color:var(--muted); text-align:center; }
+.mix-table td:first-child { text-align:left; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text); }
+.mix-table tr:last-child td { border-bottom:none; }
+.mix-table .peak { color:var(--cyan); font-weight:500; }
+.mix-table .highlight-row { background:rgba(94,196,216,.04); }
+
+/* ── curriculum vis ── */
+.curric { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--border); border-radius:8px; overflow:hidden; margin:16px 0; }
+.cv-cell { background:var(--s1); padding:14px 16px; }
+.cv-tag { font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.14em; text-transform:uppercase; margin-bottom:5px; }
+.cv-name { font-size:14px; font-weight:500; color:var(--head); margin-bottom:4px; font-family:'Lora',serif; }
+.cv-desc { font-size:11.5px; color:var(--muted); line-height:1.6; }
+.cv-weight { font-family:'JetBrains Mono',monospace; font-size:18px; font-weight:500; margin-top:8px; }
+
+/* ── insight cards ── */
+.insight-cards { display:flex; flex-direction:column; gap:10px; }
+.insight-card { display:grid; grid-template-columns:3px 1fr; gap:14px; background:var(--s1); border:1px solid var(--border); border-radius:7px; overflow:hidden; padding:14px 16px; transition:border-color .2s; }
+.insight-card:hover { border-color:var(--border2); }
+.insight-stripe { border-radius:2px; }
+.insight-title { font-size:13.5px; font-weight:500; color:var(--head); margin-bottom:5px; }
+.insight-body  { font-size:12.5px; color:var(--muted); line-height:1.65; }
+.insight-body strong { color:var(--text); }
+.insight-body code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--purple); padding:1px 5px; border-radius:3px; }
+
+/* ── bar rows ── */
+.bar-row { display:grid; grid-template-columns:200px 1fr 70px; align-items:center; gap:12px; margin:7px 0; font-size:12px; }
+.bar-track { background:var(--border); height:4px; border-radius:2px; overflow:hidden; }
+.bar-fill  { height:100%; border-radius:2px; }
+
+/* ── divider / scrollbar ── */
+.divider { border:none; border-top:1px solid var(--border); margin:28px 0; }
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+@media (max-width:700px) {
+  aside { display:none; }
+  main  { margin-left:0; padding:28px 18px 60px; }
+  .agents-grid, .curric { grid-template-columns:1fr; }
+  .stat-grid { grid-template-columns:1fr 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ─── Sidebar ─── -->
+<aside>
+  <div class="aside-head">
+    <a href="../../Reference.html" class="back-link">← 返回 Reference</a>
+    <div class="aside-title">DockSmith</div>
+    <div class="aside-sub">精读笔记 · 2026.02</div>
+  </div>
+  <nav>
+    <a class="nav-item active" href="#overview"><span class="n">00</span>概览</a>
+    <a class="nav-item" href="#framing"><span class="n">01</span>核心重构</a>
+    <a class="nav-item" href="#pipeline"><span class="n">02</span>四 Agent 流水线</a>
+    <a class="nav-item" href="#mechanisms"><span class="n">03</span>两大创新机制</a>
+    <a class="nav-item" href="#datacu"><span class="n">04</span>训练数据三层筛选</a>
+    <a class="nav-item" href="#curriculum"><span class="n">05</span>复杂度课程学习</a>
+    <a class="nav-item" href="#results"><span class="n">06</span>Multi-Docker-Eval</a>
+    <a class="nav-item" href="#transfer"><span class="n">07</span>迁移学习</a>
+    <a class="nav-item" href="#errors"><span class="n">08</span>错误分析</a>
+    <a class="nav-item" href="#takeaways"><span class="n">09</span>对我们的启发</a>
+  </nav>
+  <div class="aside-foot">
+    arXiv:2602.00592<br>
+    2026.02 · Jiaran Zhang et al.<br>
+    Qwen3-Coder-30B-A3B<br>
+    Multi-Docker-Eval SOTA
+  </div>
+</aside>
+
+<!-- ─── Main ─── -->
+<main>
+
+<!-- Hero -->
+<div class="hero" id="overview">
+  <div class="hero-eyebrow">Paper Deep-Dive · arXiv:2602.00592</div>
+  <h1>Dock<em>Smith</em></h1>
+  <div class="hero-sub">Scaling Reliable Coding Environments via an Agentic Docker Builder</div>
+  <div class="hero-chips">
+    <a href="https://arxiv.org/abs/2602.00592" target="_blank" class="chip chip-arxiv">↗ arXiv:2602.00592</a>
+    <span class="chip chip-model">Qwen3-Coder-30B-A3B</span>
+    <span class="chip chip-venue">Multi-Docker-Eval SOTA · 2026.02</span>
+  </div>
+  <div class="hero-abstract">
+    DockSmith 的核心主张：<strong>Docker 环境构建不只是预处理步骤，而是一种需要专门训练的 Agentic 能力</strong>。这项能力包含长时程工具调用、依赖冲突推理和失败恢复——而这些 skill 并非 Docker 独有，会迁移到 SWE、Terminal 等下游任务。基于 SWE-Factory 风格流水线（扩展了 <em>Loop-Detection Controller</em> 和 <em>Cross-Task Success Memory</em>），收集 30K+ 可执行验证的 Docker 构建轨迹，训练 Qwen3-Coder-30B-A3B 达到 Multi-Docker-Eval <strong>39.72% F2P / 58.28% Commit Rate</strong>，并在 SWE-bench Verified（+2.25pt）、SWE-bench Multilingual（+2.09pt）、TerminalBench 2.0（+3.37pt）上同步提升。
+  </div>
+</div>
+
+<!-- ─── 01 核心重构 ─── -->
+<section class="sec" id="framing">
+  <div class="sec-header">
+    <span class="sec-num">01</span>
+    <div class="sec-line" style="background:var(--cyan)"></div>
+    <h2 class="sec-title">核心重构：Docker 构建作为 Agentic 能力</h2>
+  </div>
+
+  <p>传统视角把 Docker 环境构建视为「数据准备」的工程杂活——弄好就扔，不值得深入研究。DockSmith 打破了这个假设。</p>
+
+  <div class="mech-box">
+    <div class="mech-head">
+      <div class="mech-icon">🔍</div>
+      <div class="mech-title">为什么 Docker 构建是 Agentic 任务？</div>
+    </div>
+    <div class="mech-body">
+      <p>一个真实的 Docker 构建任务，agent 需要：</p>
+      <p>
+        · <strong>长时程工具调用</strong>：搜索 CI 配置 → 分析依赖清单 → 生成 Dockerfile → 执行构建 → 解析错误 → 修改 → 重试……往往需要 10–30+ 轮迭代<br>
+        · <strong>跨层依赖推理</strong>：OS 包（apt）→ 语言运行时版本 → 项目依赖（pip/npm/cargo）→ 测试框架，四层之间存在隐式约束<br>
+        · <strong>失败恢复</strong>：构建错误往往级联出现，需要判断根因（是 apt 源问题还是版本冲突）而不是逐行修补<br>
+        · <strong>不确定性处理</strong>：相同语言在不同 repo 里构建路径完全不同
+      </p>
+      <p>这些特性让 Docker 构建与 SWE（bug 修复）在 skill 结构上高度重叠——都需要<strong>「读懂 codebase → 定位问题 → 迭代修复 → 验证」</strong>的循环能力。这正是 DockSmith 迁移效应的机制来源。</p>
+    </div>
+  </div>
+
+  <div class="callout key">
+    <div class="callout-icon">💡</div>
+    <div class="callout-body">DockSmith 的关键 insight：<strong>Docker 构建的训练 signal 和 SWE 的训练 signal 共享底层 reasoning skill</strong>。因此，在 Docker 数据上训练不会只改善 Docker 任务，而是会提升模型整体的「在执行反馈中迭代修复」能力。这一发现改变了我们对 mid-training 数据多样性的理解。</div>
+  </div>
+</section>
+
+<!-- ─── 02 四 Agent 流水线 ─── -->
+<section class="sec" id="pipeline">
+  <div class="sec-header">
+    <span class="sec-num">02</span>
+    <div class="sec-line" style="background:var(--blue)"></div>
+    <h2 class="sec-title">四 Agent 流水线</h2>
+  </div>
+
+  <p>DockSmith 基于 SWE-Factory 风格的流水线，由四个专职 agent 协作完成 Docker 环境构建，每个 agent 负责单一职责。</p>
+
+  <div class="agents-grid">
+    <div class="agent-card">
+      <div class="agent-tag">Agent 01</div>
+      <div class="agent-name">Context Retrieval Agent</div>
+      <div class="agent-body">
+        通过迭代工具调用检索 repo 中的关键信息：<br><br>
+        · 依赖清单（<code>requirements.txt</code>, <code>go.mod</code>, <code>Cargo.toml</code>…）<br>
+        · CI 配置（<code>.github/workflows/</code>, <code>.travis.yml</code>…）<br>
+        · 测试入口点（<code>pytest</code> 配置, <code>Makefile</code>…）<br><br>
+        <strong>职责边界</strong>：只读取信息，不生成任何输出。
+      </div>
+    </div>
+    <div class="agent-card">
+      <div class="agent-tag">Agent 02</div>
+      <div class="agent-name">Dockerfile Agent</div>
+      <div class="agent-body">
+        基于 Context Retrieval 的信息和执行反馈，<strong>合成或修补 Dockerfile</strong>。<br><br>
+        核心难点：在「正确性」和「最简性」之间权衡——过度安装依赖会掩盖真实错误，缺少依赖则直接失败。<br><br>
+        接收 Test Analysis Agent 的结构化诊断作为修补指导。
+      </div>
+    </div>
+    <div class="agent-card">
+      <div class="agent-tag">Agent 03</div>
+      <div class="agent-name">Eval Script Agent</div>
+      <div class="agent-body">
+        生成<strong>可执行的工作区配置 + 测试调用脚本</strong>，在容器内运行。<br><br>
+        需要正确处理：路径设置、环境变量注入、测试框架参数、超时控制。<br><br>
+        eval script 的错误（<code>eval_patch_error</code>）在 DockSmith 训练后下降了 <strong>79.1%</strong>——是改善最显著的错误类别。
+      </div>
+    </div>
+    <div class="agent-card">
+      <div class="agent-tag">Agent 04</div>
+      <div class="agent-name">Test Analysis Agent</div>
+      <div class="agent-body">
+        执行构建/测试流水线，将原始日志<strong>提炼为结构化失败摘要</strong>，供下一轮修复迭代使用。<br><br>
+        输出结构化 JSON：<code>{layer, root_cause, suggested_fix, is_terminal}</code><br><br>
+        <code>is_terminal=true</code>：标记「无解」情形（依赖 404、编译器版本不存在），提前退出防止无限循环。
+      </div>
+    </div>
+  </div>
+
+  <div class="flow">
+    <div style="font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted2);margin-bottom:10px">迭代构建环</div>
+    <div class="flow-row">
+      <div class="fbox">Context Retrieval</div><div class="farr">→</div>
+      <div class="fbox">Dockerfile</div><div class="farr">→</div>
+      <div class="fbox">Eval Script</div><div class="farr">→</div>
+      <div class="fbox">Execute</div><div class="farr">→</div>
+      <div class="fbox">Test Analysis</div>
+    </div>
+    <div class="flow-row" style="margin-top:4px">
+      <span style="color:var(--muted2);font-size:10px;padding-left:10px">↑</span>
+      <span style="color:var(--muted2);font-size:10px;padding-left:4px">structured failure summary (JSON) ─────────────────────────── feedback routing</span>
+    </div>
+    <div class="flow-note">
+      · Dockerfile 不变时：复用已构建 image，只重跑 eval script → <strong style="color:var(--text)">5× 速度提升</strong><br>
+      · Loop-Detection Controller 监控此环，防止无效循环（见 §03）<br>
+      · Cross-Task Memory 在 repo 间复用成功方案（见 §03）
+    </div>
+  </div>
+</section>
+
+<!-- ─── 03 两大创新机制 ─── -->
+<section class="sec" id="mechanisms">
+  <div class="sec-header">
+    <span class="sec-num">03</span>
+    <div class="sec-line" style="background:var(--amber)"></div>
+    <h2 class="sec-title">两大创新机制</h2>
+  </div>
+
+  <p>DockSmith 在 SWE-Factory 的基础上新增了两个机制，专门针对 Docker 构建的两类特有失败模式。</p>
+
+  <div class="mech-box">
+    <div class="mech-head">
+      <div class="mech-icon">🔁</div>
+      <div class="mech-title">Loop-Detection Controller</div>
+      <div class="mech-tag">防死循环</div>
+    </div>
+    <div class="mech-body">
+      <p><strong>问题来源</strong>：Docker 构建中常见的「死循环」模式——agent 在同一个错误上反复尝试相同修法，消耗大量 token 却毫无进展。典型案例：</p>
+      <p>
+        · Dockerfile Agent 反复修改同一行 <code>apt-get install</code> 却没有改包名<br>
+        · Eval Script Agent 在同一测试路径上循环添加/删除参数<br>
+        · 两个 agent 互相推卸责任（Dockerfile 说是 script 问题，script 说是 Dockerfile 问题）
+      </p>
+      <p><strong>工作机制</strong>：控制器持续监控 <em>agent 调用序列</em> 和 <em>执行失败签名</em>（error type + error location 的哈希）。<br>
+      检测条件：同一 agent 组合 + 同一失败签名，连续出现 N 轮仍无改善。<br>
+      介入方式：<strong>强制多样化</strong>——激活替代 agent 或切换策略（如放弃当前 Dockerfile，从 CI 配置重新生成）。</p>
+      <p>训练后，<code>diag_loop_error</code>（循环诊断错误）下降 <strong>59.8%</strong>，<code>diag_vague_error</code>（模糊诊断）下降 <strong>71.7%</strong>。</p>
+    </div>
+  </div>
+
+  <div class="mech-box">
+    <div class="mech-head">
+      <div class="mech-icon">🧠</div>
+      <div class="mech-title">Cross-Task Success Memory</div>
+      <div class="mech-tag">跨任务知识复用</div>
+    </div>
+    <div class="mech-body">
+      <p><strong>问题来源</strong>：不同 repo 在构建上往往有相似的依赖模式（同一生态的项目通常用同一套工具链）。SWE-Factory 的 memory pool 只在单个任务的多次尝试之间共享经验，无法跨 repo 复用。</p>
+      <p><strong>工作机制</strong>：将已验证成功的 <code>(Dockerfile, eval_script)</code> 对持久化存储，并以 <em>repo 特征</em>（语言 + 依赖栈 + 构建工具）为索引。<br>
+      当处理新 repo 时，系统检索最相似的历史成功案例，以<strong>轻量级 demonstration</strong> 的形式注入当前 agent 的 context（类似 few-shot）。</p>
+      <p>效果：减少「重新发明轮子」——agent 不需要从零学 Go modules 的构建方式，而是直接参考已验证过的类似 repo 的 Dockerfile 结构。显著降低 <code>docker_env_error</code>（−48.7%）。</p>
+
+      <div class="flow" style="margin-top:12px">
+        <div style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);margin-bottom:8px">Cross-Task Memory 工作流</div>
+        <div class="flow-row">
+          <div class="fbox">新 repo</div>
+          <div class="farr">→</div>
+          <div class="fbox amb">特征提取<br><span style="font-size:9px">(lang+deps+toolchain)</span></div>
+          <div class="farr">→</div>
+          <div class="fbox">检索 Memory Pool</div>
+          <div class="farr">→</div>
+          <div class="fbox grn">Top-K 成功案例</div>
+        </div>
+        <div class="flow-row" style="margin-top:6px">
+          <span style="color:var(--muted2);padding-right:8px">↓</span>
+          <span style="font-size:10.5px;color:var(--muted)">注入为 few-shot demonstration → Dockerfile Agent / Eval Script Agent</span>
+        </div>
+        <div class="flow-row" style="margin-top:6px">
+          <span style="font-size:10.5px;color:var(--muted)">构建成功后</span>
+          <div class="farr">→</div>
+          <div class="fbox grn">写回 Memory Pool</div>
+          <div class="farr">→</div>
+          <span style="font-size:10.5px;color:var(--muted)">供未来 repo 复用</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-icon">ℹ</div>
+    <div class="callout-body">Loop-Detection 和 Cross-Task Memory 是<strong>互补的</strong>：前者处理「当前 repo 内的失败」，后者处理「跨 repo 的知识迁移」。两者都是为了提升轨迹质量——生成的训练数据中更少包含无效循环，更多包含高质量的问题诊断和修复推理。</div>
+  </div>
+</section>
+
+<!-- ─── 04 训练数据三层筛选 ─── -->
+<section class="sec" id="datacu">
+  <div class="sec-header">
+    <span class="sec-num">04</span>
+    <div class="sec-line" style="background:var(--green)"></div>
+    <h2 class="sec-title">训练数据三层筛选</h2>
+  </div>
+
+  <p>原始 repo 池：<strong>15,000+ 个 repo</strong>（≥500 stars，≥200 forks），覆盖 <strong>10 种语言</strong>（Python · PHP · TypeScript · Go · C++ · JavaScript · Java · Rust · C · Ruby）。从 ~200,000 个候选 PR 中筛选，只保留 merged 且包含实质代码变更 + 测试修改的 PR。</p>
+
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">L1</span></div>
+      <div class="step-inner">
+        <div class="step-h">Cross-Language Balancing — 跨语言均衡</div>
+        <div class="step-p">
+          不同语言的 repo 数量差距悬殊（Python 远多于 Ruby/Rust）。如果不控制，模型会严重偏向 Python，在其他语言上泛化差。<br><br>
+          解法：<strong>对每种语言设置 token 贡献上限</strong>，防止长尾语言在 batch 中占比过低。每批次从 10 种语言均匀采样，语言分布在训练过程中保持稳定。
+        </div>
+      </div>
+    </div>
+    <div class="step-connector">↓</div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">L2</span></div>
+      <div class="step-inner">
+        <div class="step-h">Redundancy Filtering — 冗余轨迹过滤</div>
+        <div class="step-p">
+          过滤掉低质量轨迹，判断标准（满足任一即过滤）：<br><br>
+          · 反复调用同一 agent 模块超过阈值次数（说明陷入无效循环，Loop-Detection 没有完全解决）<br>
+          · 对话轮数过多（超长轨迹通常包含大量无效尝试）<br>
+          · 消息数量异常多（消息膨胀通常来自错误处理不当）<br><br>
+          目标：<strong>保留「以最少步骤解决问题」的高效轨迹</strong>，让模型学习紧凑的问题解决策略而非低效的反复试错。
+        </div>
+      </div>
+    </div>
+    <div class="step-connector">↓</div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">L3</span></div>
+      <div class="step-inner">
+        <div class="step-h">Deduplication — 评估集去污染</div>
+        <div class="step-p">
+          在 repo 级别去重，与所有评估 benchmark 做交叉比对：<br><br>
+          · Multi-Docker-Eval 的 40 个 repo<br>
+          · SWE-bench Verified 的 repo 集<br>
+          · SWE-bench Multilingual 的 repo 集<br>
+          · TerminalBench 2.0 的 repo 集<br><br>
+          相关 repo 的所有数据从训练集中移除，<strong>确保评估结果不含数据泄露</strong>。
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── 05 复杂度课程学习 ─── -->
+<section class="sec" id="curriculum">
+  <div class="sec-header">
+    <span class="sec-num">05</span>
+    <div class="sec-line" style="background:var(--purple)"></div>
+    <h2 class="sec-title">复杂度课程学习</h2>
+  </div>
+
+  <p>这是 DockSmith 数据构建的精华：不是把所有过滤后的轨迹平等对待，而是根据 <strong>Dockerfile 复杂度</strong> 对训练实例分组，并用 <em>课程学习</em> 策略混合采样。</p>
+
+  <div class="mech-box">
+    <div class="mech-head">
+      <div class="mech-icon">📐</div>
+      <div class="mech-title">复杂度打分公式</div>
+      <div class="mech-tag">Acceptance Shaping</div>
+    </div>
+    <div class="mech-body">
+      <div class="codeblock" style="margin:0">
+        <div class="codeblock-head">
+          <div class="dot" style="background:#d46e68"></div>
+          <div class="dot" style="background:#c8a04a"></div>
+          <div class="dot" style="background:#60c88a"></div>
+          <span>complexity score · Dockerfile d</span>
+        </div>
+        <pre><span class="tok-key">Score</span>(d) = <span class="tok-num">0.5</span> · <span class="tok-op">L</span>(d)  <span class="tok-comment"># 非空行数（规模代理）</span>
+         + <span class="tok-num">5.0</span> · <span class="tok-op">R</span>(d)  <span class="tok-comment"># RUN 指令数（操作步骤数）</span>
+         + <span class="tok-num">3.0</span> · <span class="tok-op">P</span>(d)  <span class="tok-comment"># distinct apt packages 数（依赖复杂度）</span></pre>
+      </div>
+      <p style="margin-top:12px">三个维度分别捕捉不同层次的复杂度：<code>L</code> 反映文件规模，<code>R</code> 反映操作步骤的多少，<code>P</code> 反映依赖管理的难度。<strong>RUN 指令权重最高（5×）</strong>，因为每个 RUN 都可能引入新的错误点。</p>
+    </div>
+  </div>
+
+  <div class="curric">
+    <div class="cv-cell">
+      <div class="cv-tag" style="color:var(--green)">Easy</div>
+      <div class="cv-name">简单</div>
+      <div class="cv-desc">标准构建流程，<br><code>pip install -r</code> 即可完成，少量 RUN，无特殊依赖。</div>
+      <div class="cv-weight" style="color:var(--green)">×1</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">采样权重</div>
+    </div>
+    <div class="cv-cell">
+      <div class="cv-tag" style="color:var(--amber)">Medium</div>
+      <div class="cv-name">中等</div>
+      <div class="cv-desc">需要手动配置工具链，有版本约束，apt 包管理介入。</div>
+      <div class="cv-weight" style="color:var(--amber)">×2</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">采样权重</div>
+    </div>
+    <div class="cv-cell">
+      <div class="cv-tag" style="color:var(--red)">Hard</div>
+      <div class="cv-name">困难</div>
+      <div class="cv-desc">跨语言依赖、编译系统复杂（cmake/cargo/mvn），可能需要系统库。</div>
+      <div class="cv-weight" style="color:var(--red)">×2</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">采样权重</div>
+    </div>
+  </div>
+
+  <p>Easy : Medium : Hard = <strong>1 : 2 : 2</strong>——刻意过采样中等和困难实例，让模型在有挑战性的环境里多练，而不是被大量简单实例稀释学习信号。</p>
+
+  <p>消融实验结果：</p>
+  <div class="bar-row"><span style="color:var(--muted)">无任何筛选（Baseline）</span><div class="bar-track"><div class="bar-fill" style="width:65%;background:var(--muted2)"></div></div><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)">32.24%</span></div>
+  <div class="bar-row"><span style="color:var(--muted)">+Acceptance Shaping 质量筛选</span><div class="bar-track"><div class="bar-fill" style="width:69%;background:var(--blue)"></div></div><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue)">34.03%</span></div>
+  <div class="bar-row"><span style="color:var(--muted)">+Complexity Curriculum 课程学习</span><div class="bar-track"><div class="bar-fill" style="width:67%;background:var(--amber)"></div></div><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--amber)">33.13%</span></div>
+  <div class="bar-row"><span style="color:var(--head)">+AS + CC（完整方案）</span><div class="bar-track"><div class="bar-fill" style="width:71%;background:var(--cyan)"></div></div><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan)">34.93%</span></div>
+
+  <div class="callout good" style="margin-top:14px">
+    <div class="callout-icon">↑</div>
+    <div class="callout-body">AS（质量筛选）主要改善 Easy 实例（从 45.27% → 47.26%）；CC（课程学习）主要改善 Hard 实例（从 28.96% → 31.84%）。<strong>两者互补</strong>：AS 提升数据质量，CC 提升数据分布的覆盖度。</div>
+  </div>
+</section>
+
+<!-- ─── 06 Multi-Docker-Eval ─── -->
+<section class="sec" id="results">
+  <div class="sec-header">
+    <span class="sec-num">06</span>
+    <div class="sec-line" style="background:var(--cyan)"></div>
+    <h2 class="sec-title">Multi-Docker-Eval 结果</h2>
+  </div>
+
+  <p>Multi-Docker-Eval 是目前专门评估 Docker 环境自动构建能力的主要 benchmark：334 个 issue，40 个 repo，覆盖 9 种语言。</p>
+
+  <div class="stat-grid">
+    <div class="stat-cell">
+      <div class="stat-val">39.72<span class="unit">%</span></div>
+      <div class="stat-label">F2P Rate（主指标）</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-val">58.28<span class="unit">%</span></div>
+      <div class="stat-label">Commit Rate</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-val">+20.3<span class="unit">pt</span></div>
+      <div class="stat-label">相对 base model 绝对提升</div>
+    </div>
+  </div>
+
+  <table class="bench-table">
+    <thead>
+      <tr>
+        <th>Model</th>
+        <th>F2P (%)</th>
+        <th>Commit Rate (%)</th>
+        <th>规模</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="us">
+        <td><strong style="color:var(--cyan)">DockSmith</strong></td>
+        <td class="best">39.72</td>
+        <td class="best">58.28</td>
+        <td style="color:var(--muted)">30B-A3B</td>
+      </tr>
+      <tr>
+        <td>DeepSeek-v3.1</td>
+        <td>37.72</td>
+        <td>52.89</td>
+        <td style="color:var(--muted)">—</td>
+      </tr>
+      <tr>
+        <td>Kimi-K2-0905</td>
+        <td>37.62</td>
+        <td>55.49</td>
+        <td style="color:var(--muted)">—</td>
+      </tr>
+      <tr>
+        <td>Claude-Sonnet-4</td>
+        <td>35.53</td>
+        <td>47.41</td>
+        <td style="color:var(--muted)">—</td>
+      </tr>
+      <tr>
+        <td>Qwen3-Coder-30B (base)</td>
+        <td>19.46</td>
+        <td>34.13</td>
+        <td style="color:var(--muted)">30B-A3B</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>语言级别表现差异：</p>
+
+  <div class="bar-row"><span style="color:var(--muted)">Go</span><div class="bar-track"><div class="bar-fill" style="width:100%;background:var(--cyan)"></div></div><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan)">63.3%</span></div>
+  <div class="bar-row"><span style="color:var(--muted)">JavaScript</span><div class="bar-track"><div class="bar-fill" style="width:81%;background:var(--cyan)"></div></div><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan)">51.7%</span></div>
+  <div class="bar-row"><span style="color:var(--muted)">Python</span><div class="bar-track"><div class="bar-fill" style="width:81%;background:var(--cyan)"></div></div><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan)">51.3%</span></div>
+  <div class="bar-row"><span style="color:var(--muted)">Ruby</span><div class="bar-track"><div class="bar-fill" style="width:91%;background:var(--cyan)"></div></div><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan)">57.5%</span></div>
+  <div class="bar-row"><span style="color:var(--muted)">Java / C++ (复杂工具链)</span><div class="bar-track"><div class="bar-fill" style="width:40%;background:var(--muted2)"></div></div><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)">较低</span></div>
+
+  <div class="callout warn" style="margin-top:12px">
+    <div class="callout-icon">⚠</div>
+    <div class="callout-body">Java 和 C++ 的 F2P 显著低于其他语言，原因是编译器工具链（JDK 版本矩阵 / cmake + 系统库）的复杂性远超包管理器管理的依赖。这也是 DockSmith 指出的下一步改进方向。</div>
+  </div>
+</section>
+
+<!-- ─── 07 迁移学习 ─── -->
+<section class="sec" id="transfer">
+  <div class="sec-header">
+    <span class="sec-num">07</span>
+    <div class="sec-line" style="background:var(--blue)"></div>
+    <h2 class="sec-title">迁移学习：Docker ↔ SWE / Terminal 双向增益</h2>
+  </div>
+
+  <p>这是 DockSmith 最反直觉也最有价值的发现：<strong>在 Docker 构建数据上训练，可以提升 SWE 和 Terminal 任务的表现；反过来，SWE 数据也可以提升 Docker 构建表现。</strong></p>
+
+  <p>实验方式：以 token 级别混合 SWE 轨迹和 Docker 轨迹，测试不同混合比例（SWE : Docker）。</p>
+
+  <table class="mix-table">
+    <thead>
+      <tr>
+        <th style="text-align:left">SWE : Docker 比例</th>
+        <th>SWE-bench Verified</th>
+        <th>SWE-bench Multilingual</th>
+        <th>TerminalBench 2.0</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Only SWE（baseline）</td>
+        <td>49.65%</td>
+        <td>31.83%</td>
+        <td>10.67%</td>
+      </tr>
+      <tr class="highlight-row">
+        <td>1 : 0.5</td>
+        <td>51.75%</td>
+        <td>33.33%</td>
+        <td class="peak">14.04% ▲</td>
+      </tr>
+      <tr class="highlight-row">
+        <td>1 : 1</td>
+        <td class="peak">51.90% ▲</td>
+        <td class="peak">33.92% ▲</td>
+        <td>11.38%</td>
+      </tr>
+      <tr>
+        <td>1 : 2</td>
+        <td>49.55%</td>
+        <td>31.75%</td>
+        <td>11.52%</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p style="margin-top:8px;font-size:13px;color:var(--muted)">峰值增益：SWE.V <strong style="color:var(--cyan)">+2.25pt</strong>，SWE.M <strong style="color:var(--cyan)">+2.09pt</strong>，Terminal <strong style="color:var(--cyan)">+3.37pt</strong>。</p>
+
+  <div class="callout warn">
+    <div class="callout-icon">⚠</div>
+    <div class="callout-body">混合比例有「甜区」：1:0.5 ~ 1:1 之间效果最好。<strong>Docker 数据过多（1:2）会稀释 SWE skill，导致 SWE 性能反而下降</strong>。这个 trade-off 对我们的 mid-training 数据混合策略有直接参考价值。</div>
+  </div>
+
+  <p>反向实验（Docker 数据 + 少量 SWE）也成立：</p>
+  <table class="mix-table">
+    <thead>
+      <tr>
+        <th style="text-align:left">训练数据</th>
+        <th>SWE.V</th>
+        <th>SWE.M</th>
+        <th>Terminal</th>
+        <th>Multi-Docker-Eval</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Docker only</td>
+        <td>33.50%</td>
+        <td>18.25%</td>
+        <td>7.16%</td>
+        <td>34.43%</td>
+      </tr>
+      <tr class="highlight-row">
+        <td>Docker + 0.5× SWE</td>
+        <td class="peak">47.45%</td>
+        <td class="peak">31.00%</td>
+        <td class="peak">10.11%</td>
+        <td class="peak">35.63%</td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="font-size:13px;color:var(--muted)">加入少量 SWE 数据后，Docker 任务本身也提升了（34.43% → 35.63%）——<strong>SWE 的 code-reading skill 迁移到了 Docker 构建的依赖分析上</strong>。</p>
+</section>
+
+<!-- ─── 08 错误分析 ─── -->
+<section class="sec" id="errors">
+  <div class="sec-header">
+    <span class="sec-num">08</span>
+    <div class="sec-line" style="background:var(--red)"></div>
+    <h2 class="sec-title">错误分析：哪些错误被修复了？</h2>
+  </div>
+
+  <p>DockSmith 在 Multi-Docker-Eval 的轨迹上做了详细的错误统计对比（baseline vs DockSmith）：</p>
+
+  <table class="err-table">
+    <thead>
+      <tr>
+        <th>错误类别</th>
+        <th>Baseline</th>
+        <th>DockSmith</th>
+        <th>变化</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>总错误数</strong></td>
+        <td>3,757</td>
+        <td>2,161</td>
+        <td class="delta-good">−42.5%</td>
+      </tr>
+      <tr>
+        <td>平均错误/轨迹</td>
+        <td>11.81</td>
+        <td>6.67</td>
+        <td class="delta-good">−43.5%</td>
+      </tr>
+      <tr>
+        <td>Dockerfile 生成错误</td>
+        <td>1,434</td>
+        <td>765</td>
+        <td class="delta-good">−46.7%</td>
+      </tr>
+      <tr>
+        <td>Eval Script 错误</td>
+        <td>936</td>
+        <td>536</td>
+        <td class="delta-good">−42.7%</td>
+      </tr>
+      <tr>
+        <td>Test Analysis 错误</td>
+        <td>1,102</td>
+        <td>544</td>
+        <td class="delta-good">−50.6%</td>
+      </tr>
+      <tr>
+        <td>Context Retrieval 错误</td>
+        <td>285</td>
+        <td>316</td>
+        <td class="delta-bad">+10.9%</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>最显著的单类错误改善：</p>
+
+  <div class="bar-row"><span style="color:var(--muted);font-size:11.5px"><code style="font-size:10.5px;color:var(--purple);background:var(--s0);padding:1px 4px;border-radius:2px">eval_patch_error</code></span><div class="bar-track"><div class="bar-fill" style="width:79%;background:var(--green)"></div></div><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--green)">−79.1%</span></div>
+  <div class="bar-row"><span style="color:var(--muted);font-size:11.5px"><code style="font-size:10.5px;color:var(--purple);background:var(--s0);padding:1px 4px;border-radius:2px">diag_vague_error</code></span><div class="bar-track"><div class="bar-fill" style="width:72%;background:var(--green)"></div></div><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--green)">−71.7%</span></div>
+  <div class="bar-row"><span style="color:var(--muted);font-size:11.5px"><code style="font-size:10.5px;color:var(--purple);background:var(--s0);padding:1px 4px;border-radius:2px">diag_loop_error</code></span><div class="bar-track"><div class="bar-fill" style="width:60%;background:var(--green)"></div></div><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--green)">−59.8%</span></div>
+  <div class="bar-row"><span style="color:var(--muted);font-size:11.5px"><code style="font-size:10.5px;color:var(--purple);background:var(--s0);padding:1px 4px;border-radius:2px">docker_env_error</code></span><div class="bar-track"><div class="bar-fill" style="width:49%;background:var(--green)"></div></div><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--green)">−48.7%</span></div>
+
+  <div class="callout warn" style="margin-top:12px">
+    <div class="callout-icon">⚠</div>
+    <div class="callout-body">Context Retrieval 错误轻微上升（+10.9%）——可能是 DockSmith 在诊断阶段更频繁地要求更多上下文，导致 retrieval 调用增加但出错也略增。这是唯一的负面 trade-off，未来可以专门优化。</div>
+  </div>
+
+  <p style="margin-top:14px">轨迹质量整体提升：<strong style="color:var(--cyan)">72.4%</strong> 的轨迹在 DockSmith 上表现更好；0~4 错误的「优质轨迹」从 49 条增加到 128 条（+161%）。</p>
+</section>
+
+<!-- ─── 09 对我们的启发 ─── -->
+<section class="sec" id="takeaways">
+  <div class="sec-header">
+    <span class="sec-num">09</span>
+    <div class="sec-line" style="background:var(--green)"></div>
+    <h2 class="sec-title">对我们的启发</h2>
+  </div>
+
+  <div class="insight-cards">
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--cyan)"></div>
+      <div class="insight-content">
+        <div class="insight-title">D^env 构建可以加入 Loop-Detection 机制</div>
+        <div class="insight-body">我们的 D^env 数据收集流水线（daVinci-Env 风格）同样存在 agent 死循环问题。DockSmith 的 <strong>Loop-Detection Controller</strong>（监控 agent 调用序列 + 失败签名哈希，相同组合 N 轮无改善则强制多样化）可以直接迁移到我们的环境构建流水线，减少无效轨迹数量，提高数据质量。</div>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--amber)"></div>
+      <div class="insight-content">
+        <div class="insight-title">复杂度课程学习的采样策略值得参考</div>
+        <div class="insight-body">DockSmith 的 <code>Score(d) = 0.5·L + 5·R + 3·P</code> 公式和 Easy:Medium:Hard = 1:2:2 采样比是一个经过消融验证的配方。对我们的 D^env 实例，可以设计类似的复杂度分层：<strong>pass@1 在 25%–75% 之间的实例</strong>（参考 daVinci-Env 的 1-2/4 策略），在这个区间内再按 Dockerfile/issue 复杂度做二次分层，进一步优化学习信号密度。</div>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--blue)"></div>
+      <div class="insight-content">
+        <div class="insight-title">混合比例甜区：D^ctx : D^env ≈ 1 : 0.5 ~ 1 : 1</div>
+        <div class="insight-body">DockSmith 的混合实验表明，<strong>适度混合（1:0.5 ~ 1:1）是最优区间</strong>，过多 Docker/Env 数据反而会损害 SWE 性能。这直接映射到我们的 Proposal：D^ctx（PR 数据）和 D^env（执行轨迹数据）的混合比例应该在 1:0.5 ~ 1:1 左右，不应让 D^env 占比过高。这是有定量实验支撑的建议，而不只是直觉。</div>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--green)"></div>
+      <div class="insight-content">
+        <div class="insight-title">Docker 构建能力 = 通用 Agentic 基础能力，不只是预处理</div>
+        <div class="insight-body">如果我们在未来需要自己构建环境（而不是直接复用 OpenSWE），<strong>应该考虑先训练一个 DockSmith 风格的「环境构建 agent」</strong>，而不是用 GPT-4.1 或 Claude 直接做环境构建。DockSmith 已经证明：在这个 task 上专门训练的 30B 模型可以超过 Claude-Sonnet-4，且构建出的 skill 会迁移到主任务上，一份数据两份收益。</div>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--purple)"></div>
+      <div class="insight-content">
+        <div class="insight-title">Cross-Language Balancing 是多语言 D^env 的必须项</div>
+        <div class="insight-body">如果 Phase 1 D^env 要覆盖多语言（参考 TerminalTraj 的 8 语言设计），<strong>必须做跨语言均衡</strong>，否则 Python 数据会主导训练，其他语言能力形同虚设。DockSmith 用 per-language token 上限解决这个问题，我们可以在数据混合配方里设置类似的语言分布约束（例如每种语言不超过总 D^env token 的 30%）。</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+  <div class="callout good">
+    <div class="callout-icon">→</div>
+    <div class="callout-body">
+      <strong>建议行动</strong>：DockSmith 的模型和 Docker 构建轨迹已公开。优先考虑：① 用 DockSmith 驱动我们自己的环境构建流水线（替代 GPT-4.1）；② 将 DockSmith 的 Loop-Detection 逻辑移植到 daVinci-Env 风格的流水线中；③ 在 D^ctx : D^env 混合比例设计时，参考 1:0.5 的甜区结论。
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+
+<script>
+const secs = document.querySelectorAll('section[id], div[id]');
+const items = document.querySelectorAll('.nav-item');
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting)
+      items.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+  });
+}, { rootMargin: '-30% 0px -60% 0px' });
+secs.forEach(s => io.observe(s));
+</script>
+</body>
+</html>

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>精读: On the Interplay of Pre-Training, Mid-Training, and RL</title>
+<style>
+  :root { --bg:#0d1117; --s1:#161b22; --s2:#1c2333; --bd:#30363d; --t:#e6edf3; --m:#8b949e; --a:#58a6ff; --g:#3fb950; --y:#d29922; --r:#f85149; --p:#bc8cff; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--t);font-family:Inter,-apple-system,sans-serif;font-size:14px;line-height:1.7}
+  .c{max-width:960px;margin:0 auto;padding:40px 28px}
+  h1{font-size:1.6rem;font-weight:700;margin-bottom:4px}
+  .meta{color:var(--m);font-size:.82rem;margin-bottom:32px}
+  .meta a{color:var(--a);text-decoration:none}
+  h2{font-size:1.2rem;font-weight:700;color:var(--a);margin:40px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--bd)}
+  h3{font-size:1rem;font-weight:600;margin:20px 0 10px;color:#cdd}
+  p{margin-bottom:10px;color:#bcc}
+  strong{color:var(--t)}
+
+  /* Insight cards */
+  .insight{background:var(--s1);border-left:4px solid var(--g);border-radius:0 8px 8px 0;padding:16px 20px;margin:16px 0}
+  .insight.warn{border-left-color:var(--y)}
+  .insight.idea{border-left-color:var(--p)}
+  .insight.red{border-left-color:var(--r)}
+  .insight-title{font-weight:700;font-size:.9rem;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+  .insight-title .tag{font-size:.7rem;padding:1px 7px;border-radius:99px;font-weight:600}
+  .tag-core{background:rgba(63,185,80,.15);color:var(--g);border:1px solid rgba(63,185,80,.3)}
+  .tag-guide{background:rgba(210,153,34,.15);color:var(--y);border:1px solid rgba(210,153,34,.3)}
+  .tag-impl{background:rgba(188,140,255,.15);color:var(--p);border:1px solid rgba(188,140,255,.3)}
+  .tag-warn{background:rgba(248,81,73,.15);color:var(--r);border:1px solid rgba(248,81,73,.3)}
+  .insight p{margin-bottom:4px;font-size:.85rem}
+
+  /* Table */
+  table{width:100%;border-collapse:collapse;font-size:.82rem;margin:14px 0}
+  th{background:var(--s2);padding:8px 12px;text-align:left;color:var(--m);font-weight:600;border-bottom:2px solid var(--bd)}
+  td{padding:8px 12px;border-bottom:1px solid var(--bd);color:#bcc}
+  tr:hover td{background:rgba(255,255,255,.02)}
+
+  /* Code / diagram */
+  pre{background:#0a0d14;border:1px solid var(--bd);border-radius:6px;padding:14px;font-size:.78rem;line-height:1.6;overflow-x:auto;color:#9ca;margin:12px 0}
+  code{background:var(--s2);padding:1px 5px;border-radius:3px;font-size:.82rem;color:var(--a)}
+
+  /* Ordered list inside sections */
+  ol,ul{padding-left:20px;margin:8px 0}
+  li{margin-bottom:4px;color:#bcc}
+
+  /* Figure caption */
+  .fig{background:var(--s1);border:1px solid var(--bd);border-radius:8px;padding:16px;margin:16px 0}
+  .fig-cap{font-size:.8rem;color:var(--m);margin-top:8px}
+
+  /* TOC */
+  .toc{background:var(--s1);border:1px solid var(--bd);border-radius:8px;padding:16px 20px;margin-bottom:32px;display:inline-block}
+  .toc h3{font-size:.8rem;color:var(--m);text-transform:uppercase;letter-spacing:.05em;margin:0 0 8px}
+  .toc ol{padding-left:16px}
+  .toc li{font-size:.84rem;margin-bottom:3px}
+  .toc a{color:var(--m);text-decoration:none}
+  .toc a:hover{color:var(--t)}
+
+  .hl{color:var(--a)} .hg{color:var(--g)} .hy{color:var(--y)} .hr{color:var(--r)} .hp{color:var(--p)}
+  .dim{color:#556}
+</style>
+</head>
+<body>
+<div class="c">
+
+<h1>On the Interplay of Pre-Training, Mid-Training, and RL on Reasoning Language Models</h1>
+<div class="meta">
+  Charlie Zhang, Graham Neubig, Xiang Yue &nbsp;|&nbsp; Carnegie Mellon University &nbsp;|&nbsp; Dec 2025<br>
+  <a href="https://arxiv.org/abs/2512.07783">arxiv:2512.07783</a>
+</div>
+
+<div class="toc">
+  <h3>目录</h3>
+  <ol>
+    <li><a href="#tldr">一句话总结</a></li>
+    <li><a href="#insights">核心 Insights（4 个 Takeaway）</a></li>
+    <li><a href="#guidance">实践指导（4 条 Practical Guidance）</a></li>
+    <li><a href="#implications">对 ThothVL Agentic Mid-training 的启示</a></li>
+    <li><a href="#framework">实验框架设计</a></li>
+    <li><a href="#exp1">实验 1: RL 何时超越 Base Model</a></li>
+    <li><a href="#exp2">实验 2: Pre-training 暴露如何影响 RL 泛化</a></li>
+    <li><a href="#exp3">实验 3: Mid-training 与 RL 的 Compute 分配</a></li>
+    <li><a href="#exp4">实验 4: Process Reward 减少 Reward Hacking</a></li>
+    <li><a href="#setup">训练细节</a></li>
+  </ol>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<h2 id="tldr">1. 一句话总结</h2>
+<p>通过合成可控实验，论文解耦了 pre-training / mid-training / RL 三阶段各自对推理泛化的因果贡献：<strong>RL 只在模型"能力边缘"有效，mid-training 是被严重低估的关键桥梁，process reward 能缓解 reward hacking</strong>。</p>
+
+<!-- ═══════════════════════════════════════════ -->
+<h2 id="insights">2. 核心 Insights</h2>
+
+<div class="insight">
+  <div class="insight-title"><span class="tag tag-core">Takeaway 1</span> RL 只在模型的「能力边缘」产生真正的能力增益</div>
+
+  <p><strong>背景</strong>：论文用合成数学题来做��验。每道题本质是一个依赖图（DAG），图中边的数量 <code>op</code> 代表需要多少步算术运算才能得出答案。<code>op=2</code> 是两步简单题，<code>op=20</code> 是二十步复杂链式推理。Pre-training 阶段只让模型学了 <code>op=2-10</code>（最多 10 步）的题。</p>
+
+  <p><strong>为什么用 <code>pass@128</code></strong>：<code>pass@1</code> 衡量的是"一次做对"的概率（采样效率），而 <code>pass@128</code> 衡量的是"给 128 次机会，至少做对一次"的概率——本质上测试这个能力<strong>在不在</strong>模型的能力空间里。如果 <code>pass@128</code> 从 0 变成非零，说明模型学会了之前根本做不到的事。</p>
+
+  <p><strong>RL 真正扩展能力的两个条件</strong>：</p>
+  <ol>
+    <li>
+      <strong>条件 1：任务不能被 pre-training 充分覆盖（不能太简单）</strong><br>
+      模型在 pre-training 中学了 op=2-10 的题，这些题已经被学透了（<code>pass@128 ≈ 99.5%</code>）。对这些题做 RL，只能把 <code>pass@1</code> 从 87% 提到 95%（更准了），但 <code>pass@128</code> 纹丝不动——因为模型<strong>本来就会</strong>，RL 只是让它更稳定地一次命中，没有产生新能力。<br>
+      <span style="color:var(--m)">→ 通俗理解：对一个已经会做一位数加法的学生做强化训练，他做对的速度变快了，但你不能说他学会了新技能。</span>
+    </li>
+    <li>
+      <strong>条件 2：任务不能远超模型当前水平（不能太难）</strong><br>
+      对于 op=15-20 的题（远超 pre-training 范围），base model 的 <code>pass@128 ≈ 0%</code>——给 128 次机会也做不出来。在这些题上做 RL 几乎没效果，因为 RL 依赖模型偶尔能"蒙对"来获得正向 reward，如果完全做不到，就收不到任何有效梯度信号。<br>
+      <span style="color:var(--m)">→ 通俗理解：让一个小学生直接做微积分题，做一万道也学不会——完全超出探索范围。</span>
+    </li>
+  </ol>
+
+  <p><strong>真正有效的区间："能力边缘"（edge of competence）</strong></p>
+  <p>只有 op=11-14 的题——模型 <code>pass@1 ≈ 0%</code>（单次几乎做不对）但 <code>pass@128 > 0%</code>（128 次里偶尔能蒙对）——RL 才产生真正的能力增益：<code>pass@128</code> 从 ~30% 飙升到 ~72%。这个区间恰好在模型能力的"边界"上：<strong>够得着但还不稳</strong>，RL 能把偶尔的成功强化放大成稳定的能力。</p>
+
+  <div style="background:#0a0d14;border:1px solid var(--bd);border-radius:6px;padding:12px;margin:10px 0;font-size:.82rem;line-height:1.6">
+  <strong>能力边缘图示：</strong>
+  <pre style="border:none;padding:0;margin:4px 0;background:none">
+难度    pass@1  pass@128   RL 效果              区间名
+─────────────────────────────────────────────────────
+op=2-10   87%    99.5%    <span class="hy">只磨尖 pass@1，pass@128 不变</span>    ID（太简单）
+op=11-14   5%    30%      <span class="hg">pass@128: 30→72%，真正新能力</span>    Edge（边缘）✓
+op=15-20   0%     ~0%     <span class="hr">几乎无效果</span>                      Hard（太难）
+  </pre>
+  </div>
+
+  <p><strong>统一了两派观点</strong>：学术界关于"RL 到底能不能超越 base model"有争论。认为"RL 只是 sharpener"的人（Yue et al., Zhao et al.）实验对象是 ID 任务（模型本来就会的题），所以看到 pass@128 不动；认为"RL 能创造新能力"的人（Liu et al., Sun et al.）实验对象是 OOD 任务（模型原本做不好的题），所以看到了真正的泛化。<strong>两边都对，只是在看不同的难度区间</strong>。</p>
+</div>
+
+<div class="insight">
+  <div class="insight-title"><span class="tag tag-core">Takeaway 2</span> RL 的跨 context 泛化需要 pre-training 种下「种子」</div>
+  <p>Context B（长尾模板）在 pre-training 中的暴露比例实验：</p>
+  <table>
+    <tr><th>Pre-training 中 context B 比例</th><th>RL 后 context B 上 pass@128</th><th>结论</th></tr>
+    <tr><td>0%</td><td>~0%</td><td style="color:var(--r)">完全不泛化</td></tr>
+    <tr><td>0.1%</td><td>~0%</td><td style="color:var(--r)">不够</td></tr>
+    <tr><td><strong>1%</strong></td><td><strong>~60%</strong></td><td style="color:var(--g)">���破临界点，强泛化</td></tr>
+    <tr><td>10%</td><td>~60%</td><td style="color:var(--g)">收益饱和</td></tr>
+  </table>
+  <p><strong>关键发现</strong>：RL 无法凭空创造能力，但 pre-training 只需要极稀疏的「原子推理基元」种子（≥1%），RL 就能将其放大组合成复杂 OOD 解法。种子不需要复杂，只要基元到位。</p>
+</div>
+
+<div class="insight">
+  <div class="insight-title"><span class="tag tag-core">Takeaway 3</span> Mid-training 是被严重低估的关键阶段</div>
+  <p>在<strong>固定 compute budget</strong> 下对比 5 种 mid-training / RL 配比（β=0 纯 mid, β=1 纯 RL, 以及 0.2/0.5/0.8 三种混合）：</p>
+  <table>
+    <tr><th>目标</th><th>最优配比</th><th>说明</th></tr>
+    <tr><td>OOD-edge (op=11-14) 可靠性</td><td>Full mid + Light RL (β=0.2)</td><td>Mid-training 建立 prior，少量 RL 对齐即可</td></tr>
+    <tr><td>OOD-hard (op=15-20) 突破</td><td>Light mid + Heavy RL (β=0.8)</td><td>Mid 种种子，把 budget 留给 RL 探索</td></tr>
+  </table>
+  <p><strong>Mid-training + RL 组合比纯 RL 平均高 +10.8%</strong>（同等 compute 下）。Mid-training 的角色是<strong>分布桥梁</strong>：缩小 pre-training 与 RL 数据分布的 gap，让 RL 更高效。</p>
+</div>
+
+<div class="insight">
+  <div class="insight-title"><span class="tag tag-core">Takeaway 4</span> Process reward 减少 reward hacking 并提升推理忠实性</div>
+  <p>复合奖励 <code>R = α·R_out + (1-α)·R_pv</code>（outcome + process verification）：</p>
+  <ul>
+    <li>纯 outcome reward → 模型走捷径（正确答案但推理链错误 = reward hacking）</li>
+    <li>加入 process verification → <strong>pass@1 提升 4-5%</strong>，结构错误（dependency mismatch）减少 28%</li>
+    <li>最严格版（<code>R_out only if R_pv=1</code>）效果最好，但更难优化</li>
+    <li><strong>推荐</strong>：<code>0.2 × outcome + 0.8 × process</code> 是实际最佳平衡点</li>
+  </ul>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<h2 id="guidance">3. 实践指导</h2>
+
+<div class="insight warn">
+  <div class="insight-title"><span class="tag tag-guide">Guidance 1</span> RL 数据设计：瞄准模型能力边缘</div>
+  <p>过滤 RL 数据集，只保留 <code>pass@1≈0 且 pass@k>0</code> 的任务。太简单的（模型已解决）浪费 compute，太难的（pass@k=0）贡献零梯度。可以迭代式地做 curriculum：模型变强后重新评估"边缘"在哪。</p>
+</div>
+
+<div class="insight warn">
+  <div class="insight-title"><span class="tag tag-guide">Guidance 2</span> Pre-training 数据：广撒基元种子，不需要复杂样本</div>
+  <p>不需要在 pre-training 中塞大量复杂示例，只要确保<strong>原子推理基元</strong>（基本规则、基本技能）在长尾 context 中有 ≥1% 的覆盖。RL 会自动把这些基元组合出复杂解法。优先追求覆盖面而非深度。</p>
+</div>
+
+<div class="insight warn">
+  <div class="insight-title"><span class="tag tag-guide">Guidance 3</span> Compute 分配：Mid-training 装 prior，RL 做探索</div>
+  <p>把 mid-training 定位为 <strong>"安装 prior"</strong>，RL 定位为 <strong>"放大探索"</strong>。目标越难 → RL 占比越大；目标越近 → mid-training 占比越大。别把全部 budget 给 RL —— mid-training 是最被低估的杠杆。</p>
+</div>
+
+<div class="insight warn">
+  <div class="insight-title"><span class="tag tag-guide">Guidance 4</span> 奖励设计：混合 outcome + process 信号</div>
+  <p>稀疏 outcome reward 容易被 hack。将 dense process-level 验证混入 reward function，推荐 <code>0.2 outcome + 0.8 process</code>，在 process supervision 质量高的前提下效果最好。</p>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<h2 id="implications">4. 对 ThothVL Agentic Mid-training 的启示</h2>
+
+<div class="insight idea">
+  <div class="insight-title"><span class="tag tag-impl">启示 1</span> VLM Agentic 任务也有「能力边缘」</div>
+  <p>对于 VLM agent（如 web browsing, GUI 操作），RL 数据不应均匀分布在所有难度。应先评估 base model 在各环境上的 pass@k，然后只在"边缘区"采样 RL trajectory。</p>
+</div>
+
+<div class="insight idea">
+  <div class="insight-title"><span class="tag tag-impl">启示 2</span> Mid-training 对 Agentic 能力尤其关键</div>
+  <p>论文在合成数学上验证了 mid-training 的桥梁作用。类比到 agentic 场景：base VLM 可能有视觉理解但无 tool-use/multi-turn 能力。Mid-training 用 SFT 注入 agent 基元（ReAct 格式、CodeAct 格式、tool call schema），然后 RL 在真实 env 中 fine-tune 组合策略。不做 mid-training 直接 RL 大概率 reward 信号太稀疏。</p>
+</div>
+
+<div class="insight idea">
+  <div class="insight-title"><span class="tag tag-impl">启示 3</span> 1% 基元覆盖 → 自己构造长尾 context</div>
+  <p>论文发现 1% 的长尾 context 暴露就足够。对 VLM：只需在 mid-training 中混入少量（~1%）目标 env 的 interaction trace（比如 WebShop 的 search→click 序列），RL 就有可能泛化到未见过的网站。不需要每个 env 都大量标注。</p>
+</div>
+
+<div class="insight idea">
+  <div class="insight-title"><span class="tag tag-impl">启示 4</span> Process reward 对 agentic task 更自然</div>
+  <p>Agentic 任务天然有 step-level signal（每步 env.step() 返回 reward/info），比数学推理的 process verification 更容易获取。GiGPO 的 step-level 信用分配 + 论文的 process reward 思路高度互补。</p>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<h2 id="framework">5. 实验框架设计</h2>
+
+<p>论文最大的方法论贡献是建了一个<strong>完全可控的合成实验框架</strong>，解决了现实 LLM 训练中 "pre-training 数据不透明、无法归因" 的根本问题。</p>
+
+<h3>5.1 合成数据生成（基于 GSM-Infinite）</h3>
+<p>核心思路：用<strong>依赖图（DAG）</strong>生成推理问题，精确控制每一个维度。</p>
+<pre>
+dependency graph G = (V, E)
+  V = ���量节点（每个有数值）
+  E = 依赖边（算术操作: +, -, ×, mod, ...）
+  v* = 答案节点
+
+复杂度 = op(G) = |E| = 边数 = 推理步数
+
+contextual template τ（如 "animals-zoo", "teachers-school"）
+  → 将抽象 DAG 渲染成自然语言数学题
+
+训练/测试数据完全不重叠:
+  Pre-training: op=2-10, context A
+  Mid-training: op=11-14, context A
+  RL:           op=7-20, context A+B (多种配比)
+  Test:         op=2-20, context A+B
+</pre>
+
+<h3>5.2 两个泛化维度</h3>
+<table>
+  <tr><th>维度</th><th>含义</th><th>怎么测</th></tr>
+  <tr><td><strong>Extrapolative (Depth)</strong></td><td>能否解比训练更深的推理链？</td><td>Pre-train 在 op≤10，测 op=11-20</td></tr>
+  <tr><td><strong>Contextual (Breadth)</strong></td><td>能否迁移到没见过的表面形式？</td><td>Pre-train 在 context A，测 context B（相同 DAG 结构但不同模板）</td></tr>
+</table>
+
+<h3>5.3 Process-Verified 评估</h3>
+<p>不只看最终答案，还解析模型输出为<strong>预测依赖图 Ĝ</strong>，与 gold 图 G 对比每个节点的依赖关系和数值。Process accuracy = 所有节点准确率的平均。只有 <code>ProcessAcc(Ĝ, G) = 1 且 â = a*</code> 才算完全正确。</p>
+
+<!-- ═══════════════════════════════════════════ -->
+<h2 id="exp1">6. 实验 1: RL 何时真正超越 Base Model?（Section 3）</h2>
+
+<h3>Setup</h3>
+<ul>
+  <li><strong>Pre-training</strong>: 100M 参数 Qwen2.5-style 模型，10B token，op=2-10（ID 任务饱和）</li>
+  <li><strong>RL</strong>: GRPO，200K 样本，4 种 RL 数据配置：op=7-10 (ID), op=9-12 (混合), op=11-14 (edge), op=17-20 (hard)</li>
+  <li><strong>指标</strong>: pass@k (k=1,2,4,...,128)，在 ID/OOD-edge/OOD-hard 三个区间分别评估</li>
+</ul>
+
+<h3>关键结果</h3>
+<table>
+  <tr><th>评估区间</th><th>RL 效果</th><th>分析</th></tr>
+  <tr><td>ID (op=2-10)</td><td>pass@1 ↑，<strong>pass@128 不变</strong></td><td>RL 只做了 sharpening（采样效率提升），没有新能力</td></tr>
+  <tr><td>OOD-edge (op=11-14)</td><td><strong>pass@128 显著 ↑ (+42%)</strong></td><td>真正的能力增益，RL 数据在 edge (op=11-14) 时效果最大</td></tr>
+  <tr><td>OOD-hard (op=15-20)</td><td>pass@128 小幅 ↑</td><td>RL 有少量溢出泛化，但增幅远小于 edge</td></tr>
+</table>
+<p><strong>核心洞察</strong>: <code>pass@1</code> 提升 ≠ 新能力。只有 <code>pass@128</code> 提升才是真正的能力边界扩展。RL 数据必须对准模型的 "edge of competence"。</p>
+
+<!-- ═══════════════════════════════════════════ -->
+<h2 id="exp2">7. 实验 2: Pre-training 暴露如何影响 RL 泛化?（Section 4）</h2>
+
+<h3>Setup</h3>
+<ul>
+  <li>固定 RL 配方（50% context A + 50% context B, op=2-20）</li>
+  <li>变量：pre-training 中 context B 原子基元（op=2）的混入比例：0%, 0.1%, 1%, 10%</li>
+</ul>
+
+<h3>关键结果</h3>
+<p>在 context B 上的 pass@128 表现：</p>
+<pre>
+Pre-training B 比例    RL 后 Context B pass@128
+       0%                    ≈ 0%          <span class="hr">← 完全不泛化</span>
+     0.1%                    ≈ 0%          <span class="hr">← 仍然不泛化</span>
+       1%                   ~60%           <span class="hg">← 临界突破！</span>
+      10%                   ~60%           <span class="hy">← 饱和</span>
+</pre>
+<p><strong>Figure 5 拓扑相似度分析</strong>：简单任务（op=2-10）上模型<strong>复制</strong> context A 的推理结构到 B；复杂任务（op=11-20）上模型开始<strong>创造</strong>新结构。这说明 RL 不只是记忆迁移，还能在基元基础上做组合创新。</p>
+
+<!-- ═══════════════════════════════════════════ -->
+<h2 id="exp3">8. 实验 3: Mid-training 与 RL 的 Compute 分配（Section 5）</h2>
+
+<h3>Setup</h3>
+<p>固定总 compute budget <code>T</code>，通过参数 <code>β ∈ [0,1]</code> 分配给 mid-training 和 RL：</p>
+<pre>
+T_mid = (1-β)·T    T_RL = β·T
+
+β=0:   Full mid-training, no RL
+β=0.2: Light RL (80% mid + 20% RL)
+β=0.5: Medium RL
+β=0.8: Heavy RL (20% mid + 80% RL)
+β=1:   Full RL, no mid-training
+</pre>
+<p>Mid-training: 1B token SFT on op=11-14; RL: GRPO, batch 1024, 100 steps on op=11-14</p>
+<p>RL 的 compute 用 <code>T_RL ≈ (5/3)·N·r·L</code> 折算（N=样本数, r=6 rollout, L=2048 token）</p>
+
+<h3>关键结果</h3>
+<table>
+  <tr><th>任务区间</th><th>最优配比</th><th>对比纯 RL 改善</th></tr>
+  <tr><td>OOD-edge (op=11-14) pass@1</td><td>Full mid + Light RL (β=0.2)</td><td>—</td></tr>
+  <tr><td>OOD-edge (op=11-14) pass@128</td><td>Full mid + Light RL (β=0.2)</td><td>—</td></tr>
+  <tr><td>OOD-hard (op=15-20) pass@1</td><td>Heavy RL (β=0.8)</td><td>—</td></tr>
+  <tr><td>OOD-hard (op=15-20) pass@128</td><td>Heavy RL (β=0.8)</td><td>—</td></tr>
+  <tr><td>全区间 平均</td><td>Mid+RL 混合</td><td><strong>+10.8%</strong></td></tr>
+</table>
+<p><strong>核心结论</strong>：任何配比的 mid+RL 都比纯 RL 好。目标越接近 → mid 越重（安装 prior）；目标越难 → RL 越重（放大探索）。</p>
+
+<!-- ═══════════════════════════════════════════ -->
+<h2 id="exp4">9. 实验 4: Process Reward 减少 Reward Hacking（Section 6）</h2>
+
+<h3>Setup</h3>
+<p>复合奖励函数：</p>
+<pre>
+R = α·R_out + (1-α)·R_pv
+
+R_out = 1 if final answer correct, else 0
+R_pv  = process-verified accuracy (每步推理是否正确)
+
+四种配置:
+  1.0 Outcome                   (α=1.0, 纯 outcome)
+  0.2 Outcome + 0.8 Process     (α=0.2)
+  0.5 Outcome + 0.5 Process     (α=0.5)
+  1.0 Outcome if Process=1      (严格版: R_out only when R_pv=1)
+</pre>
+
+<h3>关键结果</h3>
+<table>
+  <tr><th>奖励配置</th><th>pass@1 (op=2-14)</th><th>pass@1 (op=15-20)</th><th>dependency mismatch 减少</th></tr>
+  <tr><td>纯 Outcome</td><td>70.7%</td><td>5.6%</td><td>—</td></tr>
+  <tr><td>0.2 Out + 0.8 Process</td><td>+4.7%</td><td>+4.3%</td><td>-28%</td></tr>
+  <tr><td>0.5 Out + 0.5 Process</td><td>+4.6%</td><td>+3.4%</td><td>-18.6%</td></tr>
+  <tr><td>Out if Process=1</td><td>+5.2%</td><td>+4.1%</td><td>-27.9%</td></tr>
+</table>
+<p>Process reward 同时提高了 accuracy 和推理忠实性（结构错误大幅减少），从根本上改变了 RL 的优化方向：从"找答案捷径"转向"学正确推理路径"。</p>
+
+<!-- ═══════════════════════════════════════════ -->
+<h2 id="setup">10. 训练细节</h2>
+
+<table>
+  <tr><th>参数</th><th>值</th></tr>
+  <tr><td>模型</td><td>100M Qwen2.5-style decoder-only</td></tr>
+  <tr><td>Tokenizer</td><td>Qwen2.5 (151K vocab)</td></tr>
+  <tr><td>Pre-training 数据</td><td>30B token (op=2-10, 多模板), 训练用 10B token (100× Chinchilla)</td></tr>
+  <tr><td>Mid-training</td><td>1B supervised token, op=11-14, next-token prediction</td></tr>
+  <tr><td>RL 算法</td><td>GRPO (Group Relative Policy Optimization)</td></tr>
+  <tr><td>RL 参数</td><td>200K 样本, batch 1024, 100 steps, rollout×6</td></tr>
+  <tr><td>评估指标</td><td>pass@k (k=1,...,128), process-verified evaluation</td></tr>
+  <tr><td>数据隔离</td><td>Pre/Mid/Post 三阶段使用不同 op 范围和 context, 无重叠</td></tr>
+</table>
+
+<hr style="border:none;border-top:1px solid var(--bd);margin:40px 0">
+<div style="color:var(--m);font-size:.78rem;text-align:center;padding-bottom:24px">
+  精读报告 · arxiv:2512.07783 · 2026-03-30
+</div>
+
+</div>
+</body>
+</html>

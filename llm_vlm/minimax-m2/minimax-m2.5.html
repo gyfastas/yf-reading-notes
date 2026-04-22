@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MiniMax M2.5 | 精读笔记</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    :root {
+        --bg-deep: #0a0e17; --bg-card: #111827; --border: rgba(56,189,248,0.12);
+        --border-bright: rgba(56,189,248,0.3); --cyan: #22d3ee; --cyan-dim: rgba(34,211,238,0.15);
+        --blue: #38bdf8; --blue-dim: rgba(56,189,248,0.12); --purple: #a78bfa;
+        --purple-dim: rgba(167,139,250,0.12); --green: #34d399; --green-dim: rgba(52,211,153,0.12);
+        --amber: #fbbf24; --amber-dim: rgba(251,191,36,0.10); --red: #f87171;
+        --red-dim: rgba(248,113,113,0.10); --text: #e2e8f0; --text-dim: #94a3b8; --text-muted: #64748b;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-deep); color: var(--text); line-height: 1.75;
+        background-image: radial-gradient(ellipse 600px 200px at 20% 0%, rgba(56,189,248,0.04) 0%, transparent 100%),
+        radial-gradient(ellipse 400px 300px at 80% 100%, rgba(251,191,36,0.03) 0%, transparent 100%); }
+    .container { max-width: 920px; margin: 0 auto; padding: 48px 24px; }
+    .paper-header { position: relative; background: linear-gradient(135deg, rgba(56,189,248,0.1) 0%, rgba(251,191,36,0.08) 100%);
+        border: 1px solid rgba(56,189,248,0.25); padding: 44px 40px; border-radius: 16px; margin-bottom: 32px; overflow: hidden; }
+    .paper-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+        background: linear-gradient(90deg, var(--blue), var(--amber), var(--blue)); opacity: 0.8; }
+    .paper-header h1 { font-size: 1.85rem; font-weight: 700; margin-bottom: 14px; letter-spacing: -0.02em;
+        background: linear-gradient(135deg, #fff 40%, var(--blue) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .paper-header .meta { font-size: 0.82rem; color: var(--text-dim); }
+    .badge { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; margin-right: 8px; margin-bottom: 10px;
+        background: rgba(56,189,248,0.1); color: var(--blue); border: 1px solid rgba(56,189,248,0.2); letter-spacing: 0.03em; text-transform: uppercase; }
+    .section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 32px; margin-bottom: 24px; transition: border-color 0.3s; }
+    .section:hover { border-color: var(--border-bright); }
+    .section h2 { font-size: 0.95rem; font-weight: 700; color: var(--cyan); margin-bottom: 20px; padding-bottom: 14px;
+        border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.06em; }
+    .section h3 { font-size: 1.02rem; font-weight: 600; color: var(--text); margin: 24px 0 12px; }
+    .section p, .section ul, .section ol { color: var(--text-dim); font-size: 0.92rem; }
+    .section ul, .section ol { padding-left: 20px; } .section li { margin-bottom: 6px; } .section li strong { color: var(--text); }
+    .highlight-box { background: var(--amber-dim); border-left: 3px solid var(--amber); padding: 18px 22px; margin: 18px 0; border-radius: 0 10px 10px 0; font-size: 0.92rem; color: var(--text-dim); }
+    .highlight-box strong { color: var(--amber); }
+    .key-point { background: var(--blue-dim); border-left: 3px solid var(--blue); padding: 18px 22px; margin: 18px 0; border-radius: 0 10px 10px 0; font-size: 0.92rem; color: var(--text-dim); }
+    .key-point strong { color: var(--blue); }
+    .success-box { background: var(--green-dim); border-left: 3px solid var(--green); padding: 18px 22px; margin: 18px 0; border-radius: 0 10px 10px 0; font-size: 0.92rem; color: var(--text-dim); }
+    .success-box strong { color: var(--green); }
+    .purple-box { background: var(--purple-dim); border-left: 3px solid var(--purple); padding: 18px 22px; margin: 18px 0; border-radius: 0 10px 10px 0; font-size: 0.92rem; color: var(--text-dim); }
+    .purple-box strong { color: var(--purple); }
+    .danger-box { background: var(--red-dim); border-left: 3px solid var(--red); padding: 18px 22px; margin: 18px 0; border-radius: 0 10px 10px 0; font-size: 0.92rem; color: var(--text-dim); }
+    .danger-box strong { color: var(--red); }
+    table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 18px 0; font-size: 0.85rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { background: rgba(34,211,238,0.06); font-weight: 600; color: var(--cyan); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; }
+    td { color: var(--text-dim); } td strong { color: var(--text); }
+    tr:last-child td { border-bottom: none; } tr:hover td { background: rgba(56,189,248,0.04); }
+    .metric { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--cyan); font-size: 0.84rem; }
+    .up { color: var(--green) !important; }
+    code { font-family: 'JetBrains Mono', monospace; background: rgba(34,211,238,0.08); border: 1px solid rgba(34,211,238,0.15); padding: 2px 7px; border-radius: 5px; font-size: 0.82em; color: var(--cyan); }
+    .footer-section { text-align: center; color: var(--text-muted); font-size: 0.82rem; padding: 20px; border-top: 1px solid var(--border); margin-top: 8px; }
+    ::selection { background: rgba(56,189,248,0.25); color: #fff; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="paper-header">
+<span class="badge">MiniMax</span>
+<span class="badge">Feb 2026</span>
+<span class="badge">Open Source</span>
+<span class="badge">MIT License</span>
+<h1>MiniMax M2.5: Built for Real-World<br/>Productivity</h1>
+<div class="meta">MiniMax | 230B MoE / 10B Active | 204K Context | Forge RL | $1/hr @ 100 TPS</div>
+</div>
+
+<!-- TL;DR -->
+<div class="section">
+<h2>01 &mdash; TL;DR</h2>
+<div class="highlight-box">
+<strong>核心定位：</strong>"$1/hour Frontier Model"。架构不变（同 M2/M2.1 的 230B/10B MoE），核心升级是 <strong>Forge RL 框架</strong>——在 200,000+ 真实环境中端到端训练，训练加速 40x。
+</div>
+<div class="success-box">
+<strong>关键数字：</strong>
+<ul>
+<li>SWE-Bench Verified: <strong>80.2%</strong>（Opus 4.6: 80.8%, GPT-5.2: 80%）</li>
+<li>BrowseComp (w/ CM): <strong>76.3%</strong></li>
+<li>成本: Opus 4.6 的 <strong>1/10</strong></li>
+<li>两个变体: Standard (50 tok/s) + Lightning (100 tok/s)</li>
+</ul>
+</div>
+</div>
+
+<!-- Architecture -->
+<div class="section">
+<h2>02 &mdash; 架构（同 M2 系列）</h2>
+<table>
+<tr><th>组件</th><th>配置</th></tr>
+<tr><td><strong>总参数量</strong></td><td class="metric">~230B</td></tr>
+<tr><td><strong>激活参数量</strong></td><td class="metric">~10B per token</td></tr>
+<tr><td><strong>架构</strong></td><td>Transformer MoE + Lightning Attention</td></tr>
+<tr><td><strong>注意力</strong></td><td>MHA + RoPE</td></tr>
+<tr><td><strong>Routing</strong></td><td>Top-8 experts per token</td></tr>
+<tr><td><strong>上下文</strong></td><td>204,800 tokens</td></tr>
+<tr><td><strong>稀疏比</strong></td><td>23:1</td></tr>
+</table>
+<div class="key-point">
+<strong>架构不变，训练方法升级：</strong>M2 → M2.1 → M2.5 三代共享 230B/10B MoE 架构。每一代的提升来自 post-training 方法的迭代（CISPO → CISPO + Forge RL）。这说明在 MoE 架构固定的情况下，<strong>RL 训练方法 + 环境质量是持续增益的核心</strong>。
+</div>
+</div>
+
+<!-- Forge RL -->
+<div class="section">
+<h2>03 &mdash; Forge RL 框架（核心创新）</h2>
+<div class="purple-box">
+<strong>Agent-Native RL：</strong>不是在静态数据上优化，而是将模型部署到<strong>真实环境</strong>中——代码仓库、浏览器、办公应用、API 端点——基于<strong>任务完成结果</strong>做强化学习。
+</div>
+
+<h3>关键设计</h3>
+<table>
+<tr><th>特性</th><th>说明</th></tr>
+<tr><td><strong>解耦层</strong></td><td>训练/推理引擎 与 Agent scaffolding 解耦，模型学习跨不同 scaffold 泛化</td></tr>
+<tr><td><strong>训练环境</strong></td><td class="metric">200,000+</td></tr>
+<tr><td><strong>编程语言</strong></td><td>13 种（Go/C/C++/TS/Rust/Kotlin/Python/Java/JS/PHP/Lua/Dart/Ruby）</td></tr>
+<tr><td><strong>训练加速</strong></td><td class="metric up">40x（异步调度 + tree-structured sample merging）</td></tr>
+<tr><td><strong>Process Reward</strong></td><td>长 context agent rollout 中端到端监控生成质量</td></tr>
+</table>
+
+<h3>CISPO 延续 + Process Reward</h3>
+<div class="key-point">
+<strong>新增：</strong>为解决 agent 长 rollout 中的 credit assignment 问题，引入 <strong>process reward</strong> 机制。在每个生成步骤监控质量，而非只看最终任务完成。
+<br/><br/>
+这与 2512.07783 (pre-train/mid-train/RL interplay) 的 Finding 4（process-level reward 抑制 reward hacking）高度一致。
+</div>
+
+<h3>涌现行为：Spec-Writing</h3>
+<div class="highlight-box">
+<strong>训练涌现：</strong>M2.5 在真实环境 RL 训练中自发学会了"先写 spec 再写代码"——从软件架构师视角分解需求、规划结构、设计 UI，然后才动手实现。
+<br/><br/>
+<strong>解释：</strong>当 reward 信号是端到端任务完成时，模型发现预先规划可以减少后续错误、节省总 token 消耗。这是一种<strong>learned planning</strong> behavior。
+</div>
+</div>
+
+<!-- Benchmarks -->
+<div class="section">
+<h2>04 &mdash; Benchmark 性能</h2>
+
+<h3>代码</h3>
+<table>
+<tr><th>Benchmark</th><th>M2.5</th><th>Opus 4.6</th><th>GPT-5.2</th></tr>
+<tr><td><strong>SWE-Bench Verified</strong></td><td class="metric">80.2%</td><td>80.8%</td><td>80%</td></tr>
+<tr><td><strong>Multi-SWE-Bench</strong></td><td class="metric">51.3%</td><td>—</td><td>—</td></tr>
+<tr><td><strong>Droid harness</strong></td><td class="metric up">79.7%</td><td>78.9%</td><td>—</td></tr>
+<tr><td><strong>OpenCode harness</strong></td><td class="metric up">76.1%</td><td>75.9%</td><td>—</td></tr>
+</table>
+
+<h3>搜索 & 工具使用</h3>
+<table>
+<tr><th>Benchmark</th><th>M2.5</th><th>说明</th></tr>
+<tr><td><strong>BrowseComp (w/ CM)</strong></td><td class="metric up">76.3%</td><td>需要 context management</td></tr>
+<tr><td><strong>RISE</strong></td><td>Expert-level 搜索</td><td>真实场景搜索任务</td></tr>
+<tr><td><strong>搜索效率</strong></td><td class="metric up">-20% rounds vs M2.1</td><td>更少搜索轮次达到同等结果</td></tr>
+</table>
+
+<h3>效率</h3>
+<table>
+<tr><th>指标</th><th>M2.5</th><th>vs M2.1</th></tr>
+<tr><td><strong>SWE-Bench 完成速度</strong></td><td class="metric">22.8 min</td><td>快 37%（Opus 4.6: 22.9 min）</td></tr>
+<tr><td><strong>Token 消耗/任务</strong></td><td class="metric">3.52M</td><td>M2.1: 3.72M</td></tr>
+</table>
+</div>
+
+<!-- Variants & Pricing -->
+<div class="section">
+<h2>05 &mdash; 变体 & 定价</h2>
+<table>
+<tr><th>变体</th><th>速度</th><th>Input 价格</th><th>Output 价格</th></tr>
+<tr><td><strong>M2.5</strong></td><td class="metric">50 tok/s</td><td>$0.15/1M</td><td>$1.20/1M</td></tr>
+<tr><td><strong>M2.5-Lightning</strong></td><td class="metric up">100 tok/s</td><td>$0.30/1M</td><td>$2.40/1M</td></tr>
+</table>
+<div class="success-box">
+<strong>成本对比：</strong>
+<ul>
+<li>每任务成本: Opus 4.6 的 <strong>1/10</strong></li>
+<li>连续运行: $1/hr @ 100 TPS (Lightning), $0.30/hr @ 50 TPS (Standard)</li>
+<li>IPO 后一个月即发布，训练周期约 <strong>2 个月</strong></li>
+</ul>
+</div>
+</div>
+
+<!-- Internal Adoption -->
+<div class="section">
+<h2>06 &mdash; 内部实践数据</h2>
+<div class="highlight-box">
+<strong>MiniMax 内部部署：</strong>
+<ul>
+<li><strong>30%</strong> 的整体任务由 M2.5 自主完成</li>
+<li><strong>80%</strong> 的新提交代码由 M2.5 生成</li>
+<li>用户创建了 <strong>10,000+</strong> 个 Experts（结合 Office Skills + 领域知识）</li>
+<li>标准化 Office Skills: Word / PowerPoint / Excel 自动化</li>
+</ul>
+</div>
+</div>
+
+<!-- M1→M2→M2.5 Evolution -->
+<div class="section">
+<h2>07 &mdash; MiniMax 模型演进</h2>
+<table>
+<tr><th>模型</th><th>Total / Active</th><th>Attention</th><th>SWE-Bench</th><th>发布</th></tr>
+<tr><td><strong>M1</strong></td><td>456B / 45.9B</td><td>Linear + Softmax Hybrid</td><td>—</td><td>2025 早期</td></tr>
+<tr><td><strong>M2</strong></td><td>230B / 10B</td><td>Full MHA</td><td>~65%</td><td>2025.10</td></tr>
+<tr><td><strong>M2.1</strong></td><td>230B / 10B</td><td>Full MHA</td><td>74%</td><td>2025.12</td></tr>
+<tr><td><strong>M2.5</strong></td><td>230B / 10B</td><td>Full MHA + Lightning</td><td class="metric up">80.2%</td><td>2026.02</td></tr>
+</table>
+<div class="key-point">
+<strong>趋势：</strong>M1→M2 是架构变革（更小更快），M2→M2.5 是 post-training 方法论驱动的持续提升（SWE-Bench 从 ~65% → 74% → 80.2%），架构不变。证明了<strong>RL 方法 + 环境质量 + 数据规模</strong>是同架构下持续提升的关键。
+</div>
+</div>
+
+<!-- Takeaway -->
+<div class="section">
+<h2>08 &mdash; 关键启发</h2>
+<div class="success-box">
+<ul>
+<li><strong>Forge RL "解耦层"：</strong>Agent scaffold 与训练引擎解耦，模型泛化到新 scaffold 而非过拟合特定工具接口</li>
+<li><strong>Process Reward for Agent：</strong>长 rollout 的 credit assignment 需要步骤级监控，与纯 outcome reward 互补</li>
+<li><strong>涌现 Spec-Writing：</strong>端到端环境 RL 可以涌现出 planning behavior，不需要显式教</li>
+<li><strong>230B/10B = Agent 最优点？</strong>三代模型固定此规格，说明对 agent 场景（高频多轮调用），10B active 可能是延迟/质量最优平衡点</li>
+<li><strong>同架构，纯 RL 方法驱动 15 ppt SWE-Bench 提升：</strong>从 M2 到 M2.5，post-training 方法的迭代本身就能带来巨大增益</li>
+</ul>
+</div>
+</div>
+
+<div class="section" style="background: transparent; border: none;">
+<div class="footer-section">
+<p>MiniMax M2.5: Built for Real-World Productivity</p>
+<p style="margin-top: 4px; font-size: 0.75rem;">MiniMax | Feb 2026 | MIT License | 精读笔记 2026-03-30</p>
+</div>
+</div>
+
+</div>
+</body>
+</html>

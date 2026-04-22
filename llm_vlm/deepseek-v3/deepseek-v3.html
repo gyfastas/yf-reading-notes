@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DeepSeek-V3 | 精读笔记</title>
+<style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --highlight: #fef3c7;
+            --code-bg: #f1f5f9;
+            --success: #10b981;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .paper-header {
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+        .paper-header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 12px; }
+        .paper-header .meta { font-size: 0.85rem; opacity: 0.9; }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.2);
+        }
+        .section {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .section h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+        .section h3 {
+            font-size: 1.1rem;
+            color: var(--text);
+            margin: 20px 0 12px;
+        }
+        .highlight-box {
+            background: var(--highlight);
+            border-left: 4px solid #f59e0b;
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .key-point {
+            background: #eff6ff;
+            border-left: 4px solid var(--primary);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background: var(--code-bg);
+            font-weight: 600;
+            color: var(--text);
+        }
+        tr:hover { background: #f8fafc; }
+        .metric { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+    </style>
+</head>
+<body>
+<div class="container">
+<!-- Header -->
+<div class="paper-header">
+<span class="badge">arXiv:2412.19437</span>
+<span class="badge">Dec 2024</span>
+<h1>DeepSeek-V3 Technical Report</h1>
+<div class="meta">DeepSeek-AI | 671B MoE | 14.8T Tokens | FP8训练</div>
+</div>
+
+<!-- TL;DR -->
+<div class="section">
+<h2>📌 TL;DR 核心规格</h2>
+<div class="highlight-box">
+<strong>Pre-training Data:</strong> <span class="metric">14.8 trillion tokens</span>
+            <br/>
+            <strong>Model Size:</strong> 671B total / 37B active per token
+            <br/>
+            <strong>Training Cost:</strong> $5.58M (2.664M H800 GPU hours)
+            <br/>
+            <strong>效率:</strong> 比Llama 3高效10倍
+        </div>
+<div class="key-point">
+<strong>关键创新：</strong>
+            <ul>
+<li>首次大规模验证FP8训练 (8-bit浮点)</li>
+<li>Auxiliary-Loss-Free负载均衡</li>
+<li>Multi-Token Prediction (MTP)</li>
+<li>DualPipe流水线并行 (92%硬件利用率)</li>
+</ul>
+</div>
+</div>
+
+<!-- Pre-training -->
+<div class="section">
+<h2>🎯 Pre-training 详情</h2>
+<table>
+<tr>
+<th>参数</th>
+<th>数值</th>
+</tr>
+<tr>
+<td>总Token数</td>
+<td class="metric">14.8T</td>
+</tr>
+<tr>
+<td>Tokenizer</td>
+<td>Byte-level BPE, 128K词汇</td>
+</tr>
+<tr>
+<td>初始上下文</td>
+<td>4K</td>
+</tr>
+<tr>
+<td>数学/代码比例</td>
+<td>相比V2增强</td>
+</tr>
+<tr>
+<td>多语言</td>
+<td>中英文外扩展</td>
+</tr>
+</table>
+<h3>数据组成</h3>
+<ul>
+<li>高质量多样化token</li>
+<li>FIM (Fill-in-the-Middle) 策略: 0.1 rate</li>
+<li>文档打包方法</li>
+<li>标点和换行符合并token</li>
+</ul>
+</div>
+
+<!-- Mid-training -->
+<div class="section">
+<h2>🔄 Mid-training / Context Extension</h2>
+<h3>渐进式上下文扩展</h3>
+<table>
+<tr>
+<th>阶段</th>
+<th>上下文长度</th>
+<th>方法</th>
+</tr>
+<tr>
+<td>Pre-training</td>
+<td>4K</td>
+<td>标准</td>
+</tr>
+<tr>
+<td>Extension 1</td>
+<td>32K</td>
+<td>YaRN-like</td>
+</tr>
+<tr>
+<td>Extension 2</td>
+<td>128K</td>
+<td> continual pre-training</td>
+</tr>
+</table>
+<div class="key-point">
+<strong>扩展阶段成本：</strong>仅119K GPU hours (32K→128K)
+            <br/>
+            总计Post-training: ~0.1M GPU hours
+        </div>
+</div>
+
+<!-- Architecture -->
+<div class="section">
+<h2>🏗️ 架构详情</h2>
+<table>
+<tr>
+<th>组件</th>
+<th>配置</th>
+</tr>
+<tr>
+<td>总参数量</td>
+<td>671B</td>
+</tr>
+<tr>
+<td>激活参数量</td>
+<td>37B per token</td>
+</tr>
+<tr>
+<td>注意力</td>
+<td>Multi-head Latent Attention (MLA)</td>
+</tr>
+<tr>
+<td>MoE</td>
+<td>DeepSeekMoE + 无辅助损失均衡</td>
+</tr>
+<tr>
+<td>精度</td>
+<td>FP8 (首個大规模验证)</td>
+</tr>
+</table>
+</div>
+
+<!-- Training Strategy -->
+<div class="section">
+<h2>⚙️ 训练策略</h2>
+<h3>超参数</h3>
+<table>
+<tr>
+<th>参数</th>
+<th>数值</th>
+</tr>
+<tr>
+<td>优化器</td>
+<td>AdamW (β1=0.9, β2=0.95)</td>
+</tr>
+<tr>
+<td>Weight Decay</td>
+<td>0.1</td>
+</tr>
+<tr>
+<td>Peak LR</td>
+<td>2.2×10⁻⁴</td>
+</tr>
+<tr>
+<td>Warmup</td>
+<td>2K steps</td>
+</tr>
+<tr>
+<td>Batch Size</td>
+<td>3072 → 15360 (渐进)</td>
+</tr>
+<tr>
+<td>MTP λ</td>
+<td>0.3 (前10T) → 0.1 (后4.8T)</td>
+</tr>
+</table>
+</div>
+
+<!-- Performance -->
+<div class="section">
+<h2>📊 关键性能</h2>
+<table>
+<tr>
+<th>基准</th>
+<th>得分</th>
+</tr>
+<tr>
+<td>MMLU</td>
+<td class="metric">88.5%</td>
+</tr>
+<tr>
+<td>MMLU-Pro</td>
+<td class="metric">75.9%</td>
+</tr>
+<tr>
+<td>GPQA</td>
+<td class="metric">59.1%</td>
+</tr>
+<tr>
+<td>MATH</td>
+<td class="metric">90.2%</td>
+</tr>
+</table>
+</div>
+
+<div class="section" style="text-align: center; color: var(--text-light);">
+<p>精读笔记框架 | DeepSeek-V3 Technical Report</p>
+<p>GitHub: https://github.com/deepseek-ai/DeepSeek-V3</p>
+</div>
+</div>
+</body>
+</html>

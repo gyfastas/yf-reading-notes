@@ -1,0 +1,1821 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VLM Agent Bench · 调研笔记</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #090c0b;
+  --s0:       #0e1310;
+  --s1:       #141a17;
+  --s2:       #1a2220;
+  --border:   #1e2926;
+  --border2:  #28352f;
+  --text:     #c8cec4;
+  --muted:    #587060;
+  --muted2:   #40524a;
+  --head:     #dde8d8;
+  --green:    #6dbb84;
+  --red:      #d9736a;
+  --amber:    #c8a04a;
+  --blue:     #5ea8c0;
+  --purple:   #8878b8;
+  --teal:     #4db8a4;
+  --teal2:    #38907e;
+  --rust:     #c86a3a;
+  --violet:   #a07cc8;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; font-size:15px; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 300;
+  line-height: 1.8;
+}
+
+/* ─── layout ─── */
+.layout { display:flex; min-height:100vh; }
+aside {
+  position: fixed;
+  top: 0; left: 0;
+  width: 216px;
+  height: 100vh;
+  background: var(--s0);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  z-index: 200;
+}
+.aside-head {
+  padding: 26px 20px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.back-link {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+  transition: color .2s;
+}
+.back-link:hover { color: var(--teal); }
+.aside-title {
+  font-family: 'Lora', serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--head);
+  line-height: 1.4;
+}
+.aside-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  margin-top: 5px;
+  letter-spacing: .06em;
+}
+nav { padding: 14px 0; flex: 1; }
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 20px;
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color .2s, background .2s;
+  border-left: 2px solid transparent;
+}
+.nav-item:hover { color: var(--text); background: rgba(255,255,255,.02); }
+.nav-item.active { color: var(--teal); border-left-color: var(--teal); background: rgba(77,184,164,.05); }
+.nav-item .n {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted2);
+  min-width: 16px;
+}
+.nav-group {
+  padding: 8px 20px 2px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8.5px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted2);
+}
+.aside-foot {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted2);
+  line-height: 1.8;
+}
+
+/* ─── main ─── */
+main {
+  margin-left: 216px;
+  flex: 1;
+  max-width: 860px;
+  padding: 52px 48px 100px;
+}
+
+/* ─── hero ─── */
+.hero { margin-bottom: 52px; }
+.hero-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 14px;
+}
+.hero h1 {
+  font-family: 'Lora', serif;
+  font-size: 34px;
+  font-weight: 500;
+  color: var(--head);
+  line-height: 1.2;
+  margin-bottom: 6px;
+  letter-spacing: -.02em;
+}
+.hero h1 em { font-style: italic; color: var(--teal); }
+.hero-sub {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 15px;
+  color: var(--muted);
+  margin-bottom: 24px;
+}
+.hero-abstract {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--teal);
+  border-radius: 0 8px 8px 0;
+  padding: 16px 20px;
+  font-size: 13.5px;
+  color: #909c8c;
+  line-height: 1.75;
+}
+.hero-abstract strong { color: var(--text); }
+
+/* ─── section ─── */
+.sec { margin-bottom: 56px; }
+.sec-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.sec-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted2);
+  letter-spacing: .08em;
+  min-width: 24px;
+}
+.sec-line { width: 3px; height: 20px; border-radius: 2px; flex-shrink: 0; }
+.sec-title {
+  font-family: 'Lora', serif;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--head);
+}
+
+/* ─── prose ─── */
+p { margin-bottom: 12px; font-size: 13.5px; }
+p:last-child { margin-bottom: 0; }
+strong { color: var(--head); font-weight: 500; }
+em { color: var(--amber); font-style: italic; }
+
+/* ─── inline code ─── */
+.ic {
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  background:var(--s1);
+  color:var(--purple);
+  padding:1px 5px;
+  border-radius:3px;
+}
+
+/* ─── insight box ─── */
+.insight {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--amber);
+  border-radius: 0 8px 8px 0;
+  padding: 12px 18px;
+  margin: 14px 0;
+  font-size: 13px;
+  color: #9ca890;
+  line-height: 1.7;
+}
+.insight strong { color: var(--amber); }
+
+/* ─── VL tag grid ─── */
+.vl-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 16px 0;
+}
+.vl-col {
+  background: var(--s1);
+  padding: 16px 20px;
+}
+.vl-col-head {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dot-vl  { width:8px; height:8px; border-radius:50%; background:var(--teal); display:inline-block; }
+.dot-txt { width:8px; height:8px; border-radius:50%; background:var(--muted); display:inline-block; }
+.vl-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+.vl-list li { font-size: 13px; color: var(--muted); display: flex; align-items: baseline; gap: 8px; }
+.vl-list li strong { color: var(--text); }
+.vl-list li span { font-family:'JetBrains Mono',monospace; font-size:9px; }
+.tag-vl   { color:var(--teal);   background:rgba(77,184,164,.1);  border:1px solid rgba(77,184,164,.25); padding:1px 6px; border-radius:3px; }
+.tag-txt  { color:var(--muted);  background:rgba(88,112,96,.1);   border:1px solid rgba(88,112,96,.25);  padding:1px 6px; border-radius:3px; }
+.tag-both { color:var(--amber);  background:rgba(200,160,74,.1);  border:1px solid rgba(200,160,74,.25); padding:1px 6px; border-radius:3px; }
+
+/* ─── bench card ─── */
+.bench-list { display: flex; flex-direction: column; gap: 2px; margin-bottom: 20px; }
+.bench-card {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.bench-card:hover { border-color: var(--border2); }
+.bench-head {
+  display: grid;
+  grid-template-columns: 48px 1fr auto;
+  align-items: center;
+  gap: 0;
+}
+.bench-index {
+  background: var(--s0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 0;
+  border-right: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted2);
+  align-self: stretch;
+}
+.bench-title-block { padding: 12px 16px; }
+.bench-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--head);
+  margin-bottom: 2px;
+}
+.bench-sub { font-size: 12px; color: var(--muted); }
+.bench-tags {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  padding: 12px 16px;
+}
+.bench-body {
+  border-top: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+}
+.bench-cell {
+  background: var(--s0);
+  padding: 10px 14px;
+}
+.bench-cell-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted2);
+  margin-bottom: 5px;
+}
+.bench-cell-val { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.bench-cell-val strong { color: var(--text); }
+.bench-cell-val a { color: var(--blue); text-decoration: none; }
+.bench-cell-val a:hover { text-decoration: underline; }
+.bench-cell-val code { font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--purple); }
+
+/* ─── tags ─── */
+.tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+.tag-req-vl  { background:rgba(77,184,164,.12);  color:var(--teal);   border:1px solid rgba(77,184,164,.3);  }
+.tag-req-txt { background:rgba(88,112,96,.1);    color:var(--muted);  border:1px solid rgba(88,112,96,.25); }
+.tag-req-both{ background:rgba(200,160,74,.1);   color:var(--amber);  border:1px solid rgba(200,160,74,.25); }
+.tag-docker  { background:rgba(94,168,192,.1);   color:var(--blue);   border:1px solid rgba(94,168,192,.25); }
+.tag-no-dock { background:rgba(40,53,47,.5);     color:var(--muted2); border:1px solid var(--border2); }
+.tag-kvm     { background:rgba(217,115,106,.1);  color:var(--red);    border:1px solid rgba(217,115,106,.25); }
+
+/* ─── global table ─── */
+.global-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin: 16px 0;
+}
+.global-table th {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 400;
+  padding: 8px 12px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.global-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid rgba(30,41,38,.8);
+  vertical-align: middle;
+  line-height: 1.5;
+}
+.global-table tr:last-child td { border-bottom: none; }
+.global-table tr:hover td { background: rgba(255,255,255,.012); }
+.global-table .name-cell { color: var(--head); font-weight: 500; }
+.global-table .dim { color: var(--muted); font-size: 11px; }
+.global-table a { color: var(--blue); text-decoration: none; font-family:'JetBrains Mono',monospace; font-size:10px; }
+.global-table a:hover { text-decoration: underline; }
+
+/* ─── score bar (mini) ─── */
+.score-val { color: var(--teal); font-family:'JetBrains Mono',monospace; font-size:11px; }
+.score-na  { color: var(--muted2); font-family:'JetBrains Mono',monospace; font-size:11px; }
+
+/* ─── section divider label ─── */
+.table-group-row td {
+  background: var(--s0) !important;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted2);
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+/* ─── bench sub-group divider ─── */
+.bench-subgroup {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--muted2);
+  padding: 14px 0 6px;
+  margin: 4px 0 4px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.bench-subgroup .sg-line {
+  width: 2px; height: 12px;
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+
+/* ─── scrollbar ─── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+@media (max-width: 900px) {
+  aside { width: 170px; }
+  main { margin-left: 170px; padding: 40px 28px 80px; }
+  .bench-body { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 680px) {
+  aside { display: none; }
+  main { margin-left: 0; padding: 32px 20px 60px; }
+  .bench-body { grid-template-columns: 1fr; }
+  .vl-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ─── sidebar ─── -->
+<aside>
+  <div class="aside-head">
+    <a href="../Reference.html" class="back-link">← Reference</a>
+    <div class="aside-title">VLM Agent Bench<br>调研笔记</div>
+    <div class="aside-sub">23 BENCHMARKS · 2026<br>VL关联 · Docker · 分数</div>
+  </div>
+
+  <nav>
+    <div class="nav-group">概览</div>
+    <a href="#sec-overview" class="nav-item">
+      <span class="n">01</span>分类总览
+    </a>
+    <a href="#sec-vl" class="nav-item">
+      <span class="n">02</span>VL 关联分析
+    </a>
+    <div class="nav-group">VL Required</div>
+    <a href="#sec-vl-light" class="nav-item">
+      <span class="n">03</span>VL · 无需 Docker
+    </a>
+    <a href="#sec-vl-heavy" class="nav-item">
+      <span class="n">04</span>VL · 需虚拟化
+    </a>
+    <div class="nav-group">Text Only</div>
+    <a href="#sec-text" class="nav-item">
+      <span class="n">05</span>纯文本 Benchmarks
+    </a>
+    <div class="nav-group">汇总</div>
+    <a href="#sec-table" class="nav-item">
+      <span class="n">06</span>全局对比表
+    </a>
+  </nav>
+
+  <div class="aside-foot">
+    来源: Qwen3.5 report + web<br>
+    整理日期: 2026-03<br>
+    共 23 个 benchmark
+  </div>
+</aside>
+
+<!-- ─── main ─── -->
+<main>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-eyebrow">VLM Agent Benchmark Survey · 2026</div>
+  <h1>VLM Agent Bench<br><em>调研全景</em></h1>
+  <div class="hero-sub">VL关联性 · Docker要求 · 环境搭建 · 当前SOTA分数</div>
+  <div class="hero-abstract">
+    本文档汇总 <strong>23 个主流 Agent / 视觉推理 Benchmark</strong>，重点关注三个维度：
+    (1) <strong>是否需要视觉/VL能力</strong>——GUI grounding、多模态搜索、Think-with-Image/Video 等 16 个 benchmark 要求 VLM，TAU2/BFCL/DeepPlanning 等 7 个纯文本可跑；
+    (2) <strong>环境复杂度</strong>——OSWorld/AndroidWorld/MobileWorld 需要 KVM 虚拟化或 Android 模拟器；MMSearch / ScreenSpot Pro / TIR-Bench / VideoHolmes 等最轻量（仅需 API key）；
+    (3) <strong>Think with Image/Video</strong>——TIR-Bench（图像工��操作）、ViC-Bench（视觉中间状态生成）、VideoHolmes（跨帧线索搜索）、VideoThinkBench、TwiFF（未来帧预测推理）。
+    来源：Qwen3.5 技术报告 + VisualAgentBench (THUDM) + MMSearch/MMSearch-Plus + 独立调研（2026-03）。
+  </div>
+</div>
+
+<!-- ══ Section 1: 分类总览 ══ -->
+<section class="sec" id="sec-overview">
+  <div class="sec-header">
+    <span class="sec-num">01</span>
+    <div class="sec-line" style="background:var(--teal)"></div>
+    <h2 class="sec-title">分类总览</h2>
+  </div>
+
+  <p>按任务类型将 16 个 benchmark 分为 5 类：</p>
+
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border-radius:8px;overflow:hidden;margin:16px 0">
+    <div style="background:var(--s1);padding:14px 16px;text-align:center">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">GUI/桌面</div>
+      <div style="font-size:22px;font-weight:500;color:var(--teal);font-family:'Lora',serif">4</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">ScreenSpot Pro<br>OSWorld<br>ScreenAgent<br>ScreenSuite</div>
+    </div>
+    <div style="background:var(--s1);padding:14px 16px;text-align:center">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">移动端</div>
+      <div style="font-size:22px;font-weight:500;color:var(--teal);font-family:'Lora',serif">2</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">AndroidWorld<br>MobileWorld</div>
+    </div>
+    <div style="background:var(--s1);padding:14px 16px;text-align:center">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">多模态Web</div>
+      <div style="font-size:22px;font-weight:500;color:var(--teal);font-family:'Lora',serif">3</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">VisualWebArena<br>WebVoyager<br>VisualAgentBench</div>
+    </div>
+    <div style="background:var(--s1);padding:14px 16px;text-align:center">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">纯文本Web</div>
+      <div style="font-size:22px;font-weight:500;color:var(--amber);font-family:'Lora',serif">3</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">WebArena<br>BrowseComp<br>WebChoreArena</div>
+    </div>
+    <div style="background:var(--s1);padding:14px 16px;text-align:center">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">工具/规划</div>
+      <div style="font-size:22px;font-weight:500;color:var(--muted);font-family:'Lora',serif">4</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">BFCL-V4<br>TAU2-Bench<br>DeepPlanning<br>AgentBench</div>
+    </div>
+  </div>
+
+  <div class="insight">
+    <strong>Qwen3.5 报告中涉及的 4 个</strong>：TAU2-Bench（对话 agent）、BFCL-V4（函数调用）、DeepPlanning（长程规划）、BrowseComp（网页检索）——<em>均为纯文本任务，不需要 VL 能力</em>。如果目标是提升 ThothVL 的 agent 能力，应重点关注 §03–§05 中的视觉相关 benchmark（GUI grounding + 多模态 web）。
+  </div>
+</section>
+
+<!-- ══ Section 2: VL 关联分析 ══ -->
+<section class="sec" id="sec-vl">
+  <div class="sec-header">
+    <span class="sec-num">02</span>
+    <div class="sec-line" style="background:var(--amber)"></div>
+    <h2 class="sec-title">VL 关联分析</h2>
+  </div>
+
+  <p>判断标准：benchmark 的任务是否需要处理图像输入（截图、GUI 界面、网页视觉渲染）。</p>
+
+  <div class="vl-grid">
+    <div class="vl-col">
+      <div class="vl-col-head" style="color:var(--teal)"><span class="dot-vl"></span>VL Required（视觉必须）</div>
+      <ul class="vl-list">
+        <li><strong>ScreenSpot Pro</strong> <span class="tag-req-vl">GUI grounding</span></li>
+        <li><strong>AndroidWorld</strong> <span class="tag-req-vl">Android GUI</span></li>
+        <li><strong>MobileWorld</strong> <span class="tag-req-vl">Android GUI</span></li>
+        <li><strong>OSWorld</strong> <span class="tag-req-vl">Computer Use</span></li>
+        <li><strong>VisualAgentBench</strong> <span class="tag-req-vl">多环境VL</span></li>
+        <li><strong>VisualWebArena</strong> <span class="tag-req-vl">多模态Web</span></li>
+        <li><strong>WebVoyager</strong> <span class="tag-req-vl">多模态Web</span></li>
+        <li><strong>ScreenAgent</strong> <span class="tag-req-vl">桌面GUI</span></li>
+        <li><strong>ScreenSuite</strong> <span class="tag-req-vl">综合GUI</span></li>
+      </ul>
+    </div>
+    <div class="vl-col">
+      <div class="vl-col-head" style="color:var(--muted)"><span class="dot-txt"></span>Text Only（纯文本可跑）</div>
+      <ul class="vl-list">
+        <li><strong>TAU2-Bench</strong> <span class="tag-req-txt">对话客服</span></li>
+        <li><strong>BFCL-V4</strong> <span class="tag-req-txt">函数调用</span></li>
+        <li><strong>DeepPlanning</strong> <span class="tag-req-txt">长程规划</span></li>
+        <li><strong>BrowseComp</strong> <span class="tag-req-both">文本为主†</span></li>
+        <li><strong>WebArena</strong> <span class="tag-req-txt">文本Web</span></li>
+        <li><strong>WebChoreArena</strong> <span class="tag-req-txt">文本Web</span></li>
+        <li><strong>AgentBench</strong> <span class="tag-req-txt">通用Agent</span></li>
+      </ul>
+      <div style="margin-top:10px;font-size:11.5px;color:var(--muted2)">† BrowseComp 有 MM-BrowseComp 多模态扩展版（400题，需截图理解）</div>
+    </div>
+  </div>
+
+  <div class="insight">
+    <strong>VLM 专属赛道</strong>：ScreenSpot Pro → OSWorld → AndroidWorld/MobileWorld 构成从"静态 GUI 定位"到"动态 OS 交互"的难度梯度。VisualAgentBench (THUDM) 覆盖最广（Embodied + GUI + CSS 设计），是最接近"全能视觉 agent"评测的 benchmark。如需快速测出 ThothVL 的 agent 基线，推荐优先跑 <strong>ScreenSpot Pro</strong>（轻量，无 Docker，纯 API）和 <strong>VisualWebArena</strong>（910题，Docker）。
+  </div>
+</section>
+
+<!-- ══ Section 3: VL · 无需 Docker ══ -->
+<section class="sec" id="sec-vl-light">
+  <div class="sec-header">
+    <span class="sec-num">03</span>
+    <div class="sec-line" style="background:var(--teal)"></div>
+    <h2 class="sec-title">VL · 无需 Docker</h2>
+  </div>
+
+  <p>以下 benchmark 均需要视觉/VL 能力，且<strong>无需额外 Docker 或 KVM 虚拟化</strong>——标准 Python + API key 即可运行，是快速评测 ThothVL 的最低成本起点。</p>
+
+  <div class="bench-subgroup">
+    <div class="sg-line" style="background:var(--teal)"></div>
+    GUI Grounding
+  </div>
+
+  <div class="bench-list">
+
+    <!-- ScreenSpot Pro -->
+    <div class="bench-card">
+      <div class="bench-head">
+        <div class="bench-index">B01</div>
+        <div class="bench-title-block">
+          <div class="bench-name">ScreenSpot Pro</div>
+          <div class="bench-sub">专业软件高分辨率 GUI Grounding · 1,581 截图 · 23 个专业应用</div>
+        </div>
+        <div class="bench-tags">
+          <span class="tag tag-req-vl">VL Required</span>
+          <span class="tag tag-no-dock">No Docker</span>
+        </div>
+      </div>
+      <div class="bench-body">
+        <div class="bench-cell">
+          <div class="bench-cell-label">GitHub</div>
+          <div class="bench-cell-val"><a href="https://github.com/likaixin2000/ScreenSpot-Pro-GUI-Grounding">likaixin2000/ScreenSpot-Pro</a></div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">环境搭建</div>
+          <div class="bench-cell-val">
+            <strong>最轻量</strong>。设置 <code>OPENAI_API_KEY</code>，运行 <code>bash run_ss_pro.sh</code>（英文）或 <code>run_ss_pro_cn.sh</code>（中文）。含 Jupyter notebooks 提交 leaderboard。
+          </div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">当前 SOTA 分数</div>
+          <div class="bench-cell-val">
+            ScreenSeekeR：<span class="score-val">48.1%</span>（无额外训练）<br>
+            SE-GUI (7B)：<span class="score-val">47.2%</span><br>
+            OpenAI 最佳基线：<span class="score-val">18.9%</span><br>
+            <span class="dim">任务：专业软件（VSCode, Photoshop, AutoCAD 等）UI 元素定位</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bench-subgroup">
+    <div class="sg-line" style="background:var(--blue)"></div>
+    多模态 Web Agent
+  </div>
+
+  <div class="bench-list">
+
+    <!-- WebVoyager -->
+    <div class="bench-card">
+      <div class="bench-head">
+        <div class="bench-index">B09</div>
+        <div class="bench-title-block">
+          <div class="bench-name">WebVoyager</div>
+          <div class="bench-sub">643 任务 · 15 个真实网站 · GPT-4V 自动评测 · 腾讯研究</div>
+        </div>
+        <div class="bench-tags">
+          <span class="tag tag-req-vl">VL Required</span>
+          <span class="tag tag-no-dock">No Docker</span>
+        </div>
+      </div>
+      <div class="bench-body">
+        <div class="bench-cell">
+          <div class="bench-cell-label">GitHub</div>
+          <div class="bench-cell-val"><a href="https://github.com/MinorJerry/WebVoyager">MinorJerry/WebVoyager</a><br>Apache 2.0</div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">环境搭建</div>
+          <div class="bench-cell-val">
+            轻量。Python 3.10+，Chrome/Chromium，<code>pip install -r requirements.txt</code>，GPT-4V API key。Selenium 驱动真实网站。评测：人工 + GPT-4V 自动（一致率 85.3%）。
+          </div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">当前 SOTA 分数</div>
+          <div class="bench-cell-val">
+            WebVoyager（多模态）：<span class="score-val">59.1%</span><br>
+            GPT-4（纯文本）：<span class="score-val">30.8%</span><br>
+            WebVoyager（文本 a11y tree）：<span class="score-val">40.1%</span><br>
+            <span class="dim">视觉 vs 文本差距 +28.3pp，VL 显著增益</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bench-subgroup">
+    <div class="sg-line" style="background:var(--blue)"></div>
+    多模态搜索
+  </div>
+
+  <div class="bench-list">
+
+    <!-- MMSearch -->
+    <div class="bench-card">
+      <div class="bench-head">
+        <div class="bench-index">B17</div>
+        <div class="bench-title-block">
+          <div class="bench-name">MMSearch</div>
+          <div class="bench-sub">LMM 作为多模态搜索引擎 · 300 query · 14 子领域 · 端到端评测</div>
+        </div>
+        <div class="bench-tags">
+          <span class="tag tag-req-vl">VL Required</span>
+          <span class="tag tag-no-dock">No Docker</span>
+        </div>
+      </div>
+      <div class="bench-body">
+        <div class="bench-cell">
+          <div class="bench-cell-label">GitHub / 项目</div>
+          <div class="bench-cell-val">
+            <a href="https://github.com/CaraJ7/MMSearch">CaraJ7/MMSearch</a><br>
+            项目页：<a href="https://mmsearch.github.io/">mmsearch.github.io</a>
+          </div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">环境搭建</div>
+          <div class="bench-cell-val">
+            标准 Python + <code>pip install -r requirements.txt</code>。通过 MMSearch-Engine pipeline 运行，demo query 配置在 <code>demo/query_cli.json</code>。无需 Docker 或虚拟化，API key 即可。
+          </div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">当前 SOTA 分数</div>
+          <div class="bench-cell-val">
+            GPT-4o：<span class="score-val">62.3</span>（第一，超越商用 Perplexity Pro）<br>
+            Claude 3.5 Sonnet：<span class="score-val">53.5</span>（第三）<br>
+            <span class="dim">三子任务：requery / rerank / summarization + 端到端总分</span><br>
+            <span class="dim">300 题涵盖 News（2024年8月最新新闻）+ Knowledge（稀有知识）</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MMSearch-Plus -->
+    <div class="bench-card">
+      <div class="bench-head">
+        <div class="bench-index">B18</div>
+        <div class="bench-title-block">
+          <div class="bench-name">MMSearch-Plus</div>
+          <div class="bench-sub">Provenance-Aware 多模态搜索 · 311 任务 · 强制视觉���证 · SoM 模块</div>
+        </div>
+        <div class="bench-tags">
+          <span class="tag tag-req-vl">VL Required</span>
+          <span class="tag tag-no-dock">No Docker</span>
+        </div>
+      </div>
+      <div class="bench-body">
+        <div class="bench-cell">
+          <div class="bench-cell-label">GitHub / 项目</div>
+          <div class="bench-cell-val">
+            <a href="https://github.com/mmsearch-plus/MMSearch-Plus">mmsearch-plus/MMSearch-Plus</a><br>
+            项目页：<a href="https://mmsearch-plus.github.io/">mmsearch-plus.github.io</a><br>
+            数据集：<code>Cie1/MMSearch-Plus</code>（HuggingFace）
+          </div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">环境搭建</div>
+          <div class="bench-cell-val">
+            标准 Python 环境，无 Docker。Model-agnostic agent 框架 + 标准浏览工具 + Set-of-Mark (SoM) 模块。API key 配置后运行评测脚本。<br>
+            <strong>设计要点</strong>：强制 LMM 做真正的图文推理，无法只靠文本绕过。
+          </div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">当前 SOTA 分数</div>
+          <div class="bench-cell-val">
+            最强端到端系统：<span class="score-val">36.0%</span><br>
+            集成 SoM 后：<span class="score-val">+3.9pp → ~39.9%</span><br>
+            <span class="dim">311 题；迭代式图文检索 + 细粒度视觉线索抽取；检索噪声鲁棒性测试</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bench-subgroup">
+    <div class="sg-line" style="background:var(--violet)"></div>
+    Think with Image
+  </div>
+
+  <div class="bench-list">
+
+    <!-- TIR-Bench -->
+    <div class="bench-card">
+      <div class="bench-head">
+        <div class="bench-index">B19</div>
+        <div class="bench-title-block">
+          <div class="bench-name">TIR-Bench</div>
+          <div class="bench-sub">Agentic Thinking-with-Images · 13 任务类型 · 图像操作工具 + CoT · o3-TU 46.0%</div>
+        </div>
+        <div class="bench-tags">
+          <span class="tag tag-req-vl">VL + Tools</span>
+          <span class="tag tag-no-dock">No Docker</span>
+        </div>
+      </div>
+      <div class="bench-body">
+        <div class="bench-cell">
+          <div class="bench-cell-label">GitHub / Dataset</div>
+          <div class="bench-cell-val">
+            <a href="https://github.com/agents-x-project/TIR-Bench">agents-x-project/TIR-Bench</a><br>
+            数据集：<code>Agents-X/TIR-Bench</code>（HuggingFace）
+          </div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">环境搭建</div>
+          <div class="bench-cell-val">
+            标准 Python，无 Docker。评测脚本在 GitHub，数据集从 HuggingFace 下载。工具套件：zoom-in / rotate / adjust contrast / add auxiliary lines 等图像操作工具，模型在 CoT 推理中自由调用。
+          </div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">当前 SOTA 分数</div>
+          <div class="bench-cell-val">
+            o3-TU（工具使用）：<span class="score-val">46.0%</span><br>
+            Gemini-2.5-Pro（无工具）：<span class="score-val">28.9%</span><br>
+            o3（无工具）：<span class="score-val">27.0%</span><br>
+            o4-mini + PyVision：高性能<br>
+            <span class="dim">工具使用 vs 无工具差距显���（&gt;17pp），工具调用是关键</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ViC-Bench -->
+    <div class="bench-card">
+      <div class="bench-head">
+        <div class="bench-index">B20</div>
+        <div class="bench-title-block">
+          <div class="bench-name">ViC-Bench</div>
+          <div class="bench-sub">Visual-Interleaved CoT · 4 任务（迷宫/拼图/具身规划/计数）· 中间视觉状态生成</div>
+        </div>
+        <div class="bench-tags">
+          <span class="tag tag-req-vl">VL + Gen</span>
+          <span class="tag tag-no-dock">No Docker</span>
+        </div>
+      </div>
+      <div class="bench-body">
+        <div class="bench-cell">
+          <div class="bench-cell-label">论文 / Dataset</div>
+          <div class="bench-cell-val">
+            arXiv：<a href="https://arxiv.org/abs/2505.14404">2505.14404</a><br>
+            数据集：HuggingFace 可获取<br>
+            <span class="dim">三阶段渐进评测框架</span>
+          </div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">核心设计</div>
+          <div class="bench-cell-val">
+            模型需在推理链中<strong>生成中间视觉状态（IVS）</strong>，每步视觉更新后再继续推理。任务：maze navigation / jigsaw puzzle / embodied long-horizon planning / complex counting。
+          </div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">当前 SOTA 分数</div>
+          <div class="bench-cell-val">
+            Gemini-2.5-pro-preview：成功利用视觉上下文提升规划<br>
+            弱 MLLM：信息过载导致性能下降<br>
+            <span class="dim">May 2025；考察 VI-CoT 能力，区分"看图推理"与"用图推理"</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bench-subgroup">
+    <div class="sg-line" style="background:var(--rust)"></div>
+    Think with Video
+  </div>
+
+  <div class="bench-list">
+
+    <!-- VideoHolmes -->
+    <div class="bench-card">
+      <div class="bench-head">
+        <div class="bench-index">B21</div>
+        <div class="bench-title-block">
+          <div class="bench-name">VideoHolmes</div>
+          <div class="bench-sub">TencentARC · 主动线索搜索范式 · 1,837 题 · 270 悬疑短片 · 7 推理任务类型</div>
+        </div>
+        <div class="bench-tags">
+          <span class="tag tag-req-vl">Video CoT</span>
+          <span class="tag tag-no-dock">No Docker</span>
+        </div>
+      </div>
+      <div class="bench-body">
+        <div class="bench-cell">
+          <div class="bench-cell-label">GitHub / 项目</div>
+          <div class="bench-cell-val">
+            <a href="https://github.com/TencentARC/Video-Holmes">TencentARC/Video-Holmes</a><br>
+            项目页：<a href="https://video-holmes.github.io/Page.github.io/">video-holmes.github.io</a>
+          </div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">环境搭建</div>
+          <div class="bench-cell-val">
+            Git clone + pip install，数据下载命令已提供，all-in-one 评测代码。无需 Docker 或���拟化。视频素材：270 部人工标注的悬疑短片（1-5分钟）。
+          </div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">7 大推理任务</div>
+          <div class="bench-cell-val">
+            SR（社会推理）/ IMC（意图动机链）/ TCI（时序因果推理）/ TA（时间线分析）/ MHR（多模态提示推理）/ PAR（物理异常推理）/ CTI（核心主题推断）<br>
+            <span class="dim">"Active seeking paradigm"：需跨多个视频片段定位并连接视觉线索</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VideoThinkBench -->
+    <div class="bench-card">
+      <div class="bench-head">
+        <div class="bench-index">B22</div>
+        <div class="bench-title-block">
+          <div class="bench-name">VideoThinkBench</div>
+          <div class="bench-sub">Thinking-with-Video · 视频生成模型推理 · 视觉谜题 + MMMU/GSM8K 视频版 · Sora-2 40.2%</div>
+        </div>
+        <div class="bench-tags">
+          <span class="tag tag-req-vl">Video Gen</span>
+          <span class="tag tag-no-dock">No Docker</span>
+        </div>
+      </div>
+      <div class="bench-body">
+        <div class="bench-cell">
+          <div class="bench-cell-label">GitHub / 项目</div>
+          <div class="bench-cell-val">
+            <a href="https://github.com/tongjingqi/Thinking-with-Video">tongjingqi/Thinking-with-Video</a><br>
+            项目页：<a href="https://thinking-with-video.github.io/">thinking-with-video.github.io</a><br>
+            数据集：<code>OpenMOSS-Team/VideoThinkBench</code>
+          </div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">核心设计</div>
+          <div class="bench-cell-val">
+            视频生成模型通过生成视频帧进行"思考"。视觉中心任务（eyeballing puzzles：Ray Intersection / Circle Center / Color-filling / Shape-drawing）+ 文本中心任务（MMMU / MATH / GSM8K 的视频版）。
+          </div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">当前 SOTA 分数</div>
+          <div class="bench-cell-val">
+            Sora-2 eyeballing avg：<span class="score-val">40.2%</span>（Ray Intersection: 88%，Circle Center: 70%）<br>
+            Sora-2 MATH：<span class="score-val">92%</span>，MMMU：<span class="score-val">75.5%</span><br>
+            <span class="dim">对比：Claude 4.5 35.1%，GPT5-High 29.7%，Gemini 2.5 26.5%（eyeballing）</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TwiFF -->
+    <div class="bench-card">
+      <div class="bench-head">
+        <div class="bench-index">B23</div>
+        <div class="bench-title-block">
+          <div class="bench-name">TwiFF</div>
+          <div class="bench-sub">Think with Future Frames · 动态视觉 CoT · 2.7M 训练视频 + 1,078 评测样本</div>
+        </div>
+        <div class="bench-tags">
+          <span class="tag tag-req-vl">Video + Gen</span>
+          <span class="tag tag-no-dock">No Docker</span>
+        </div>
+      </div>
+      <div class="bench-body">
+        <div class="bench-cell">
+          <div class="bench-cell-label">GitHub</div>
+          <div class="bench-cell-val">
+            <a href="https://github.com/LiuJunhua02/TwiFF">LiuJunhua02/TwiFF</a><br>
+            TwiFF-2.7M + TwiFF-Bench（评测集）
+          </div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">核心设计</div>
+          <div class="bench-cell-val">
+            模型通过<strong>预测/生成未来帧</strong>进行时序推理（迭代帧预测）。任务：instructional（步骤推理）/ predictive（结果预测）/ camera viewpoint（视角推理）。2.7M 视频片段带 Visual CoT 标注可用于训练。
+          </div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">特点</div>
+          <div class="bench-cell-val">
+            超越现有 VCoT 方法和 Textual CoT baseline<br>
+            <span class="dim">训练数据集 TwiFF-2.7M 可直接用于 VLM mid-training</span><br>
+            <span class="dim">评测集 TwiFF-Bench：1,078 高质量样本</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="insight">
+    <strong>无 Docker VL 评测路径</strong>：ScreenSpot Pro（GUI grounding 基线）→ WebVoyager（多模态 Web）→ MMSearch / MMSearch-Plus（视觉搜索，SoM 集成 +3.9pp）→ TIR-Bench / ViC-Bench（视觉 CoT 工具调用）→ VideoHolmes / TwiFF（视频时序推理）。全部只需 API key，ThothVL 可在无额外虚拟化环境下完成首轮基线评测。TwiFF-2.7M 训练集还可直接用于 mid-training visual CoT 数据扩充。
+  </div>
+</section>
+
+<!-- ══ Section 4: VL · 需要 Docker / 虚拟化 ══ -->
+<section class="sec" id="sec-vl-heavy">
+  <div class="sec-header">
+    <span class="sec-num">04</span>
+    <div class="sec-line" style="background:var(--green)"></div>
+    <h2 class="sec-title">VL · 需要 Docker / 虚拟化</h2>
+  </div>
+
+  <p>以下 benchmark 需要 <strong>Docker、KVM 虚拟机或 Android 模拟器</strong>，环境搭建成本较高，但任务更接近真实使用场景（OS 操控、手机 App 控制、多模态 Web 交互）。</p>
+
+  <div class="bench-subgroup">
+    <div class="sg-line" style="background:var(--teal)"></div>
+    GUI / 桌面 Agent
+  </div>
+
+  <div class="bench-list">
+
+    <!-- OSWorld -->
+    <div class="bench-card">
+      <div class="bench-head">
+        <div class="bench-index">B02</div>
+        <div class="bench-title-block">
+          <div class="bench-name">OSWorld</div>
+          <div class="bench-sub">真实操作系统上的 Computer Use · 369 任务 · Ubuntu/Windows/macOS</div>
+        </div>
+        <div class="bench-tags">
+          <span class="tag tag-req-vl">VL Required</span>
+          <span class="tag tag-kvm">KVM / VMware</span>
+        </div>
+      </div>
+      <div class="bench-body">
+        <div class="bench-cell">
+          <div class="bench-cell-label">GitHub</div>
+          <div class="bench-cell-val"><a href="https://github.com/xlang-ai/OSWorld">xlang-ai/OSWorld</a><br>扩展：OSWorld-MCP / OSWorld-G</div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">环境搭建</div>
+          <div class="bench-cell-val">
+            Python 3.10+，需虚拟化软件（VMware/VirtualBox）或 Docker+KVM。<br>
+            AWS 部署可 50× 并行（评测 &lt;1h）。<br>
+            <code>python quickstart.py</code> → <code>python scripts/python/run_multienv.py</code><br>
+            设置 <code>OPENAI_API_KEY</code>。
+          </div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">当前 SOTA 分数</div>
+          <div class="bench-cell-val">
+            已支持：Gemini 3 Pro、Claude 4.5、Qwen-3.5、Seed-2.0-Pro<br>
+            <span class="dim">NeurIPS 2024/2025；OSWorld-Verified (Jul 2025) 改进任务质量</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ScreenAgent -->
+    <div class="bench-card">
+      <div class="bench-head">
+        <div class="bench-index">B03</div>
+        <div class="bench-title-block">
+          <div class="bench-name">ScreenAgent</div>
+          <div class="bench-sub">桌面 GUI 控制 · VNC-based · 支持 GPT-4V / LLaVA / CogAgent</div>
+        </div>
+        <div class="bench-tags">
+          <span class="tag tag-req-vl">VL Required</span>
+          <span class="tag tag-docker">Docker可选</span>
+        </div>
+      </div>
+      <div class="bench-body">
+        <div class="bench-cell">
+          <div class="bench-cell-label">GitHub</div>
+          <div class="bench-cell-val"><a href="https://github.com/niuzaisheng/ScreenAgent">niuzaisheng/ScreenAgent</a><br>Web client: May 2024</div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">环境搭建</div>
+          <div class="bench-cell-val">
+            在被控桌面启 VNC server，本地运行 controller client（管理 VNC 连接）。Docker 容器可快速测试。支持多种 VLM worker（GPT-4V、LLaVA-1.5、CogAgent、ScreenAgent 自有模型）。
+          </div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">当前 SOTA 分数</div>
+          <div class="bench-cell-val">
+            ��� OSWorld 上与 UiPath Screen Agent 竞争头名<br>
+            <span class="dim">IJCAI 2024 论文</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ScreenSuite -->
+    <div class="bench-card">
+      <div class="bench-head">
+        <div class="bench-index">B04</div>
+        <div class="bench-title-block">
+          <div class="bench-name">ScreenSuite</div>
+          <div class="bench-sub">HuggingFace 综合 GUI 评测套件 · 13 个统一 benchmark · 仅视觉（无 a11y tree）</div>
+        </div>
+        <div class="bench-tags">
+          <span class="tag tag-req-vl">VL Required</span>
+          <span class="tag tag-kvm">KVM + Docker</span>
+        </div>
+      </div>
+      <div class="bench-body">
+        <div class="bench-cell">
+          <div class="bench-cell-label">GitHub</div>
+          <div class="bench-cell-val"><a href="https://github.com/huggingface/screensuite">huggingface/screensuite</a></div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">环境搭建</div>
+          <div class="bench-cell-val">
+            Python 3.11+，<code>uv</code> 包管理器。需 KVM（<code>egrep -c '(vmx|svm)' /proc/cpuinfo</code>）。Docker 容器自动管理 Ubuntu Desktop + Android 环境。<code>uv sync --extra submodules</code>。
+          </div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">覆盖范围</div>
+          <div class="bench-cell-val">
+            ScreenSpot / ScreenQA / Mind2Web / AndroidControl / GAIA / AndroidWorld / OSWorld 等 13 个 benchmark 统一接口<br>
+            <span class="dim">视觉模态强制（无 accessibility tree fallback）</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bench-subgroup">
+    <div class="sg-line" style="background:var(--green)"></div>
+    移动端 Agent
+  </div>
+
+  <div class="bench-list">
+
+    <!-- AndroidWorld -->
+    <div class="bench-card">
+      <div class="bench-head">
+        <div class="bench-index">B05</div>
+        <div class="bench-title-block">
+          <div class="bench-name">AndroidWorld</div>
+          <div class="bench-sub">Android 真实应用 · 116 任务 · 20 个 App · Google Research</div>
+        </div>
+        <div class="bench-tags">
+          <span class="tag tag-req-vl">VL Required</span>
+          <span class="tag tag-docker">Docker 实验性</span>
+        </div>
+      </div>
+      <div class="bench-body">
+        <div class="bench-cell">
+          <div class="bench-cell-label">GitHub</div>
+          <div class="bench-cell-val"><a href="https://github.com/google-research/android_world">google-research/android_world</a></div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">环境搭建</div>
+          <div class="bench-cell-val">
+            Python 3.11+，Android Studio + Pixel 6 AVD（API Level 33），FFmpeg。<br>
+            <code>emulator -avd AndroidWorldAvd -no-snapshot -grpc 8554</code><br>
+            最小占用：2GB RAM，8GB 磁盘。<br>
+            <code>python minimal_task_runner.py</code> / <code>python run.py</code>
+          </div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">当前 SOTA 分数</div>
+          <div class="bench-cell-val">
+            步骤预算 = ~2× 人类平均完成时间<br>
+            平均步骤：<span class="score-val">14.3 步</span>（vs MobileWorld 27.8步）<br>
+            <span class="dim">Nov 2024 更新步骤预算；任务动态实例化</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MobileWorld -->
+    <div class="bench-card">
+      <div class="bench-head">
+        <div class="bench-index">B06</div>
+        <div class="bench-title-block">
+          <div class="bench-name">MobileWorld</div>
+          <div class="bench-sub">Tongyi MAI · 201 任务 · 20 App · 含用户交互 + MCP 扩展</div>
+        </div>
+        <div class="bench-tags">
+          <span class="tag tag-req-vl">VL Required</span>
+          <span class="tag tag-kvm">Docker + KVM</span>
+        </div>
+      </div>
+      <div class="bench-body">
+        <div class="bench-cell">
+          <div class="bench-cell-label">GitHub</div>
+          <div class="bench-cell-val"><a href="https://github.com/Tongyi-MAI/MobileWorld">Tongyi-MAI/MobileWorld</a><br>发布：Dec 2025</div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">环境搭建</div>
+          <div class="bench-cell-val">
+            Python 3.12+，<code>uv sync</code>，需 Linux（WSL2 可，macOS in progress）。Docker + KVM 加速。配置 <code>.env</code> API key，<code>mw</code> CLI 启动并运行评测。
+          </div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">当前 SOTA 分数</div>
+          <div class="bench-cell-val">
+            GUI-only：Seed-1.8 <span class="score-val">52.1%</span><br>
+            GUI+用户交互：MAI-UI-235B <span class="score-val">45.4%</span><br>
+            Planner-Executor：<span class="score-val">51.7%</span><br>
+            <span class="dim">平均 27.8 步；62.2% 跨 App 任务</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bench-subgroup">
+    <div class="sg-line" style="background:var(--blue)"></div>
+    多模态 Web Agent
+  </div>
+
+  <div class="bench-list">
+
+    <!-- VisualAgentBench -->
+    <div class="bench-card">
+      <div class="bench-head">
+        <div class="bench-index">B07</div>
+        <div class="bench-title-block">
+          <div class="bench-name">VisualAgentBench (VAB)</div>
+          <div class="bench-sub">THUDM · 5 环境 · Embodied + GUI + Visual Design · 含轨迹训练数据</div>
+        </div>
+        <div class="bench-tags">
+          <span class="tag tag-req-vl">VL Required</span>
+          <span class="tag tag-docker">Docker Required</span>
+        </div>
+      </div>
+      <div class="bench-body">
+        <div class="bench-cell">
+          <div class="bench-cell-label">GitHub</div>
+          <div class="bench-cell-val"><a href="https://github.com/THUDM/VisualAgentBench">THUDM/VisualAgentBench</a><br>含 behavior cloning 训练集</div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">环境搭建</div>
+          <div class="bench-cell-val">
+            Python 3.9+，Docker（必须），OpenAI API。YAML 配置 agent，自动化脚本启动各环境 task server。组件：agent-controller + task-controller + assigner，支持并发多环境。<br>
+            5 个环境：VAB-OmniGibson / VAB-Minecraft / VAB-Mobile / VAB-WebArena-Lite / VAB-CSS
+          </div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">当前 SOTA 分数</div>
+          <div class="bench-cell-val">
+            专有模型（GPT-4o、Claude 3.5 Sonnet）领先<br>
+            开源追赶：InternVL、GLM-4V<br>
+            <span class="dim">指标：success rate；模式类似 AgentBench 的 LLM 版差距</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VisualWebArena -->
+    <div class="bench-card">
+      <div class="bench-head">
+        <div class="bench-index">B08</div>
+        <div class="bench-title-block">
+          <div class="bench-name">VisualWebArena</div>
+          <div class="bench-sub">910 多模态 Web 任务 · Classifieds + Shopping + Reddit · Set-of-Mark</div>
+        </div>
+        <div class="bench-tags">
+          <span class="tag tag-req-vl">VL Required</span>
+          <span class="tag tag-docker">Docker</span>
+        </div>
+      </div>
+      <div class="bench-body">
+        <div class="bench-cell">
+          <div class="bench-cell-label">GitHub</div>
+          <div class="bench-cell-val"><a href="https://github.com/web-arena-x/visualwebarena">web-arena-x/visualwebarena</a><br>MIT 协议</div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">环境搭建</div>
+          <div class="bench-cell-val">
+            Python 3.10+，Playwright（<code>playwright install</code>），Docker 部署本地 web 服务或使用 pre-built AMI。建议启用 Set-of-Mark (SoM) prompting 提升视觉定位精度。
+          </div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">当前 SOTA 分数</div>
+          <div class="bench-cell-val">
+            GPT-4V + SoM 最高<br>
+            人类成功率（验证集）：<span class="score-val">~89%</span><br>
+            <span class="dim">VideoWebArena 扩展版支持长视频理解</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="insight">
+    <strong>AndroidWorld vs MobileWorld</strong>：AndroidWorld 任务短（14.3步）、更成熟（Google Research，Nov 2024更新）。MobileWorld 更难（27.8步，62% 跨 App，含用户交互），由阿里通义 MAI 组发布（Dec 2025），SOTA 分数更新鲜。VisualAgentBench 覆盖最广（Embodied + GUI + CSS 设计），含 behavior cloning 训练数据，是 ThothVL mid-training 的潜在数据来源之一。
+  </div>
+</section>
+
+<!-- ══ Section 5: 纯文本 Benchmarks ══ -->
+<section class="sec" id="sec-text">
+  <div class="sec-header">
+    <span class="sec-num">05</span>
+    <div class="sec-line" style="background:var(--muted)"></div>
+    <h2 class="sec-title">纯文本 Benchmarks</h2>
+  </div>
+
+  <p>以下 benchmark <strong>纯文本可跑，不需要 VL 能力</strong>，可反映 ThothVL 底层 LLM 的 agent 推理能力。Qwen3.5 报告中的 TAU2-Bench、BFCL-V4、DeepPlanning、BrowseComp 均在此列。</p>
+
+  <div class="bench-subgroup">
+    <div class="sg-line" style="background:var(--muted)"></div>
+    Web Agent
+  </div>
+
+  <div class="bench-list">
+
+    <!-- WebArena -->
+    <div class="bench-card">
+      <div class="bench-head">
+        <div class="bench-index">B10</div>
+        <div class="bench-title-block">
+          <div class="bench-name">WebArena</div>
+          <div class="bench-sub">812 Web 任务 · 本地 self-hosted 网站 · WebArena-Verified (Jul 2025)</div>
+        </div>
+        <div class="bench-tags">
+          <span class="tag tag-req-txt">Text Only</span>
+          <span class="tag tag-docker">Docker</span>
+        </div>
+      </div>
+      <div class="bench-body">
+        <div class="bench-cell">
+          <div class="bench-cell-label">GitHub</div>
+          <div class="bench-cell-val"><a href="https://github.com/web-arena-x/webarena">web-arena-x/webarena</a><br>多模态变体：VisualWebArena</div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">环境搭建</div>
+          <div class="bench-cell-val">
+            Docker 部署 self-hosted 网站（购物/论坛/地图等），Python 3.10+，Playwright。生成测试配置，获取 auto-login 凭证，运行 agent。
+          </div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">当前 SOTA 分数</div>
+          <div class="bench-cell-val">
+            GPT-4 变体最高；leaderboard：<a href="https://webarena.dev/">webarena.dev</a><br>
+            <span class="dim">WebArena-Verified (Jul 2025) 修复 300+ 已知问题，评测更可信</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BrowseComp -->
+    <div class="bench-card">
+      <div class="bench-head">
+        <div class="bench-index">B11</div>
+        <div class="bench-title-block">
+          <div class="bench-name">BrowseComp / MM-BrowseComp</div>
+          <div class="bench-sub">OpenAI · 1266 问题（文���）· 400 问题（多模态扩展）· Qwen3.5 报告涉及</div>
+        </div>
+        <div class="bench-tags">
+          <span class="tag tag-req-both">文本+多模态†</span>
+          <span class="tag tag-no-dock">No Docker</span>
+        </div>
+      </div>
+      <div class="bench-body">
+        <div class="bench-cell">
+          <div class="bench-cell-label">GitHub</div>
+          <div class="bench-cell-val">
+            文本版：<a href="https://github.com/openai/simple-evals">openai/simple-evals</a><br>
+            多模态：<a href="https://github.com/MMBrowseComp/MM-BrowseComp">MMBrowseComp/MM-BrowseComp</a>
+          </div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">环境搭建</div>
+          <div class="bench-cell-val">
+            文本版：standard Python + API key，Selenium/Playwright 网页浏览。<br>
+            MM 版：<code>python3 src/decrypt.py data/MMBrowseComp.jsonl out.jsonl</code> → <code>gen_answer.py</code> → <code>eval.py</code>（GPT-4o 作评判）。含 canary 字符串防止直接记忆答案。
+          </div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">当前 SOTA 分数</div>
+          <div class="bench-cell-val">
+            文本版：OpenAI o1 最高（具体分数未公开）<br>
+            MM-BrowseComp：o3 <span class="score-val">&lt;30%</span>，大部分模型 <span class="score-val">&lt;10%</span><br>
+            <span class="dim">Jan 2026 扩展至 400 题；极难，天花板很高</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WebChoreArena -->
+    <div class="bench-card">
+      <div class="bench-head">
+        <div class="bench-index">B12</div>
+        <div class="bench-title-block">
+          <div class="bench-name">WebChoreArena</div>
+          <div class="bench-sub">532 繁琐 Web 任务 · 大量内存/计算/跨页长期记忆 · Jun 2025</div>
+        </div>
+        <div class="bench-tags">
+          <span class="tag tag-req-txt">Text Only</span>
+          <span class="tag tag-no-dock">No Docker</span>
+        </div>
+      </div>
+      <div class="bench-body">
+        <div class="bench-cell">
+          <div class="bench-cell-label">GitHub</div>
+          <div class="bench-cell-val"><a href="https://github.com/WebChoreArena/WebChoreArena">WebChoreArena/WebChoreArena</a></div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">环境搭建</div>
+          <div class="bench-cell-val">
+            标准 Python，配置 Azure OpenAI / Anthropic / Google Gemini API key。支持 AgentOccam 和 BrowserGym 两种 agent 实现，可用小 subset 控制 cost。
+          </div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">当前 SOTA 分数</div>
+          <div class="bench-cell-val">
+            Gemini 2.5 Pro (BrowserGym)：<span class="score-val">44.9%</span><br>
+            Claude 3.7 Sonnet：<span class="score-val">23.1%</span><br>
+            GPT-4o：<span class="score-val">2.6%</span><br>
+            <span class="dim">Gemini 2.5 Pro 显著领先，GPT-4o 极差（计算型任务弱）</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bench-subgroup">
+    <div class="sg-line" style="background:var(--amber)"></div>
+    工具调用 / 规划（来自 Qwen3.5 报告）
+  </div>
+
+  <div class="bench-list">
+
+    <!-- TAU2-Bench -->
+    <div class="bench-card">
+      <div class="bench-head">
+        <div class="bench-index">B13</div>
+        <div class="bench-title-block">
+          <div class="bench-name">TAU2-Bench / τ²-Bench</div>
+          <div class="bench-sub">Sierra Research · 对话式客服 Agent · 航空/零售/电信/银行 · 含语音模态</div>
+        </div>
+        <div class="bench-tags">
+          <span class="tag tag-req-txt">Text Only</span>
+          <span class="tag tag-no-dock">No Docker</span>
+        </div>
+      </div>
+      <div class="bench-body">
+        <div class="bench-cell">
+          <div class="bench-cell-label">GitHub</div>
+          <div class="bench-cell-val"><a href="https://github.com/sierra-research/tau2-bench">sierra-research/tau2-bench</a><br>原版：tau-bench (τ-bench)</div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">环境搭建</div>
+          <div class="bench-cell-val">
+            Python 3.12+，<code>uv</code> 包管理器，<code>uv sync</code>。LiteLLM 兼容任意 provider。<code>.env</code> 配置 API key。<code>tau2 run --domain airline --agent-llm gpt-4.1</code>，结果用 <code>tau2 view</code> 查看。
+          </div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">特点</div>
+          <div class="bench-cell-val">
+            τ³-Bench 新增：语音全双工模态、银行 domain、75+ 任务改进<br>
+            <span class="dim">半双工（turn-based）+ 全双工（同时对话）双模式；对话轮次追踪</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BFCL-V4 -->
+    <div class="bench-card">
+      <div class="bench-head">
+        <div class="bench-index">B14</div>
+        <div class="bench-title-block">
+          <div class="bench-name">BFCL-V4</div>
+          <div class="bench-sub">Berkeley Function-Calling Leaderboard V4 · Agentic 场景 · 多跳推理 + 错误恢复</div>
+        </div>
+        <div class="bench-tags">
+          <span class="tag tag-req-txt">Text Only</span>
+          <span class="tag tag-no-dock">No Docker</span>
+        </div>
+      </div>
+      <div class="bench-body">
+        <div class="bench-cell">
+          <div class="bench-cell-label">GitHub</div>
+          <div class="bench-cell-val"><a href="https://github.com/ShishirPatil/gorilla">ShishirPatil/gorilla</a><br>子目录：<code>/berkeley-function-call-leaderboard</code><br>PyPI：<code>pip install bfcl-eval</code></div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">环境搭建</div>
+          <div class="bench-cell-val">
+            <code>pip install bfcl-eval</code>，配置 <code>.env</code> API key。<code>bfcl generate --model MODEL --test-category CATEGORY</code> 生成，<code>bfcl evaluate</code> 打分，结果存 <code>result/</code> 和 <code>score/</code>。
+          </div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">当前 SOTA 分数</div>
+          <div class="bench-cell-val">
+            Leaderboard：<a href="https://gorilla.cs.berkeley.edu/leaderboard.html">gorilla.cs.berkeley.edu/leaderboard</a><br>
+            V4 新增：web search、agent memory、格式敏感性测试<br>
+            <span class="dim">Jul 2025 更新至 Agentic 场景</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DeepPlanning -->
+    <div class="bench-card">
+      <div class="bench-head">
+        <div class="bench-index">B15</div>
+        <div class="bench-title-block">
+          <div class="bench-name">DeepPlanning</div>
+          <div class="bench-sub">Qwen-Agent · 长程约束规划 · 旅行/购物场景 · Jan 2026</div>
+        </div>
+        <div class="bench-tags">
+          <span class="tag tag-req-txt">Text Only</span>
+          <span class="tag tag-no-dock">No Docker</span>
+        </div>
+      </div>
+      <div class="bench-body">
+        <div class="bench-cell">
+          <div class="bench-cell-label">GitHub / Dataset</div>
+          <div class="bench-cell-val"><a href="https://github.com/QwenLM/Qwen-Agent">QwenLM/Qwen-Agent</a><br>HuggingFace: Qwen/DeepPlanning<br>文档：qwenlm.github.io/Qwen-Agent/en/benchmarks/deepplanning</div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">环境搭建</div>
+          <div class="bench-cell-val">
+            <code>pip install -U "qwen-agent[gui,rag,code_interpreter,mcp]"</code>。配置 DashScope API 或自托管 OpenAI 兼容服务，Qwen-Agent CLI 运行 benchmark。
+          </div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">特点</div>
+          <div class="bench-cell-val">
+            三维度：主动信息获取 / 局部约束推理 / 全局约束优化（预算上限、时间可行性）<br>
+            场景：多日旅行规划、购物方案<br>
+            <span class="dim">Qwen3.5 和 GPT-4 变体表现最好</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AgentBench -->
+    <div class="bench-card">
+      <div class="bench-head">
+        <div class="bench-index">B16</div>
+        <div class="bench-title-block">
+          <div class="bench-name">AgentBench</div>
+          <div class="bench-sub">THUDM · 8 环境通用 Agent · ICLR'24 · AgentRL 框架集成</div>
+        </div>
+        <div class="bench-tags">
+          <span class="tag tag-req-txt">Text Only</span>
+          <span class="tag tag-no-dock">No Docker</span>
+        </div>
+      </div>
+      <div class="bench-body">
+        <div class="bench-cell">
+          <div class="bench-cell-label">GitHub</div>
+          <div class="bench-cell-val"><a href="https://github.com/THUDM/AgentBench">THUDM/AgentBench</a><br>ICLR 2024；AgentRL 集成</div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">环境搭建</div>
+          <div class="bench-cell-val">
+            Python，clone repo，install dependencies，配置 agent，跨 8 环境运行（代码执行/工具使用/网页浏览等）。
+          </div>
+        </div>
+        <div class="bench-cell">
+          <div class="bench-cell-label">当前 SOTA 分数</div>
+          <div class="bench-cell-val">
+            GPT-4 / Claude 商用模型显著领先开源<br>
+            商用 vs 70B 开源差距明显<br>
+            <span class="dim">VisualAgentBench 是其视觉扩展版（同 THUDM）</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="insight">
+    <strong>Qwen3.5 报告对标项均在此</strong>：TAU2-Bench（对话 agent）、BFCL-V4（函数调用）、DeepPlanning（长程规划）、BrowseComp（网页检索）——<em>均为纯文本任务，不需要 VL 能力</em>。可反映 ThothVL 底座 LLM 的 agent 推理水平，是与同期模型横向比较的参照系。
+  </div>
+</section>
+
+<!-- ══ Section 6: 全局对比表 ══ -->
+<section class="sec" id="sec-table">
+  <div class="sec-header">
+    <span class="sec-num">06</span>
+    <div class="sec-line" style="background:var(--purple)"></div>
+    <h2 class="sec-title">全局对比表</h2>
+  </div>
+
+  <table class="global-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Benchmark</th>
+        <th>VL 需要？</th>
+        <th>Docker / 环境</th>
+        <th>任务数</th>
+        <th>SOTA 分数</th>
+        <th>GitHub</th>
+      </tr>
+    </thead>
+    <tbody>
+            <tr class="table-group-row"><td colspan="7">VL · 无需 Docker</td></tr>
+      <tr>
+        <td class="dim">B01</td>
+        <td class="name-cell">ScreenSpot Pro</td>
+        <td><span class="tag tag-req-vl">VL</span></td>
+        <td><span class="tag tag-no-dock">无 Docker</span></td>
+        <td class="dim">1,581 截图</td>
+        <td><span class="score-val">48.1%</span> <span class="dim">(ScreenSeekeR)</span></td>
+        <td><a href="https://github.com/likaixin2000/ScreenSpot-Pro-GUI-Grounding">likaixin2000/…</a></td>
+      </tr>
+      <tr>
+        <td class="dim">B09</td>
+        <td class="name-cell">WebVoyager</td>
+        <td><span class="tag tag-req-vl">VL</span></td>
+        <td><span class="tag tag-no-dock">无 Docker</span></td>
+        <td class="dim">643 任务</td>
+        <td><span class="score-val">59.1%</span> <span class="dim">(multimodal)</span></td>
+        <td><a href="https://github.com/MinorJerry/WebVoyager">MinorJerry/…</a></td>
+      </tr>
+      <tr>
+        <td class="dim">B17</td>
+        <td class="name-cell">MMSearch</td>
+        <td><span class="tag tag-req-vl">VL</span></td>
+        <td><span class="tag tag-no-dock">无 Docker</span></td>
+        <td class="dim">300 query</td>
+        <td><span class="score-val">62.3</span> <span class="dim">(GPT-4o)</span></td>
+        <td><a href="https://github.com/CaraJ7/MMSearch">CaraJ7/MMSearch</a></td>
+      </tr>
+      <tr>
+        <td class="dim">B18</td>
+        <td class="name-cell">MMSearch-Plus</td>
+        <td><span class="tag tag-req-vl">VL</span></td>
+        <td><span class="tag tag-no-dock">无 Docker</span></td>
+        <td class="dim">311 任务</td>
+        <td><span class="score-val">39.9%</span> <span class="dim">(+SoM)</span></td>
+        <td><a href="https://github.com/mmsearch-plus/MMSearch-Plus">mmsearch-plus/…</a></td>
+      </tr>
+      <tr>
+        <td class="dim">B19</td>
+        <td class="name-cell">TIR-Bench</td>
+        <td><span class="tag tag-req-vl">VL+Tools</span></td>
+        <td><span class="tag tag-no-dock">无 Docker</span></td>
+        <td class="dim">13 任务类型</td>
+        <td><span class="score-val">46.0%</span> <span class="dim">(o3-TU)</span></td>
+        <td><a href="https://github.com/agents-x-project/TIR-Bench">agents-x/TIR-Bench</a></td>
+      </tr>
+      <tr>
+        <td class="dim">B20</td>
+        <td class="name-cell">ViC-Bench</td>
+        <td><span class="tag tag-req-vl">VL+Gen</span></td>
+        <td><span class="tag tag-no-dock">无 Docker</span></td>
+        <td class="dim">4 任务类型</td>
+        <td><span class="score-na">Gemini-2.5+领先</span></td>
+        <td><a href="https://arxiv.org/abs/2505.14404">arXiv:2505.14404</a></td>
+      </tr>
+      <tr>
+        <td class="dim">B21</td>
+        <td class="name-cell">VideoHolmes</td>
+        <td><span class="tag tag-req-vl">Video CoT</span></td>
+        <td><span class="tag tag-no-dock">无 Docker</span></td>
+        <td class="dim">1,837 题</td>
+        <td><span class="score-na">见GitHub</span></td>
+        <td><a href="https://github.com/TencentARC/Video-Holmes">TencentARC/Video-Holmes</a></td>
+      </tr>
+      <tr>
+        <td class="dim">B22</td>
+        <td class="name-cell">VideoThinkBench</td>
+        <td><span class="tag tag-req-vl">Video Gen</span></td>
+        <td><span class="tag tag-no-dock">无 Docker</span></td>
+        <td class="dim">视觉+文本</td>
+        <td><span class="score-val">40.2%</span> <span class="dim">(Sora-2)</span></td>
+        <td><a href="https://github.com/tongjingqi/Thinking-with-Video">tongjingqi/…</a></td>
+      </tr>
+      <tr>
+        <td class="dim">B23</td>
+        <td class="name-cell">TwiFF</td>
+        <td><span class="tag tag-req-vl">Video+Gen</span></td>
+        <td><span class="tag tag-no-dock">无 Docker</span></td>
+        <td class="dim">1,078 bench</td>
+        <td><span class="score-na">超VCoT基线</span></td>
+        <td><a href="https://github.com/LiuJunhua02/TwiFF">LiuJunhua02/TwiFF</a></td>
+      </tr>
+            <tr class="table-group-row"><td colspan="7">VL · 需 Docker / 虚拟化</td></tr>
+      <tr>
+        <td class="dim">B02</td>
+        <td class="name-cell">OSWorld</td>
+        <td><span class="tag tag-req-vl">VL</span></td>
+        <td><span class="tag tag-kvm">KVM / VMware</span></td>
+        <td class="dim">369 任务</td>
+        <td><span class="score-na">见leaderboard</span></td>
+        <td><a href="https://github.com/xlang-ai/OSWorld">xlang-ai/OSWorld</a></td>
+      </tr>
+      <tr>
+        <td class="dim">B03</td>
+        <td class="name-cell">ScreenAgent</td>
+        <td><span class="tag tag-req-vl">VL</span></td>
+        <td><span class="tag tag-docker">Docker可选</span></td>
+        <td class="dim">OSWorld套件</td>
+        <td><span class="score-na">top on OSWorld</span></td>
+        <td><a href="https://github.com/niuzaisheng/ScreenAgent">niuzaisheng/…</a></td>
+      </tr>
+      <tr>
+        <td class="dim">B04</td>
+        <td class="name-cell">ScreenSuite</td>
+        <td><span class="tag tag-req-vl">VL</span></td>
+        <td><span class="tag tag-kvm">KVM + Docker</span></td>
+        <td class="dim">13 benchmark 统一</td>
+        <td><span class="score-na">综合套件</span></td>
+        <td><a href="https://github.com/huggingface/screensuite">huggingface/…</a></td>
+      </tr>
+      <tr>
+        <td class="dim">B05</td>
+        <td class="name-cell">AndroidWorld</td>
+        <td><span class="tag tag-req-vl">VL</span></td>
+        <td><span class="tag tag-docker">Android AVD</span></td>
+        <td class="dim">116 任务</td>
+        <td><span class="dim">avg 14.3步</span></td>
+        <td><a href="https://github.com/google-research/android_world">google-research/…</a></td>
+      </tr>
+      <tr>
+        <td class="dim">B06</td>
+        <td class="name-cell">MobileWorld</td>
+        <td><span class="tag tag-req-vl">VL</span></td>
+        <td><span class="tag tag-kvm">Docker + KVM</span></td>
+        <td class="dim">201 任务</td>
+        <td><span class="score-val">52.1%</span> <span class="dim">(Seed-1.8)</span></td>
+        <td><a href="https://github.com/Tongyi-MAI/MobileWorld">Tongyi-MAI/…</a></td>
+      </tr>
+      <tr>
+        <td class="dim">B07</td>
+        <td class="name-cell">VisualAgentBench</td>
+        <td><span class="tag tag-req-vl">VL</span></td>
+        <td><span class="tag tag-docker">Docker Required</span></td>
+        <td class="dim">5环境</td>
+        <td><span class="score-na">GPT-4o领先</span></td>
+        <td><a href="https://github.com/THUDM/VisualAgentBench">THUDM/VAB</a></td>
+      </tr>
+      <tr>
+        <td class="dim">B08</td>
+        <td class="name-cell">VisualWebArena</td>
+        <td><span class="tag tag-req-vl">VL</span></td>
+        <td><span class="tag tag-docker">Docker</span></td>
+        <td class="dim">910 任务</td>
+        <td><span class="score-val">~89%</span> <span class="dim">(人类)</span></td>
+        <td><a href="https://github.com/web-arena-x/visualwebarena">web-arena-x/…</a></td>
+      </tr>
+            <tr class="table-group-row"><td colspan="7">纯文本 Benchmarks</td></tr>
+      <tr>
+        <td class="dim">B10</td>
+        <td class="name-cell">WebArena</td>
+        <td><span class="tag tag-req-txt">Text</span></td>
+        <td><span class="tag tag-docker">Docker</span></td>
+        <td class="dim">812 任务</td>
+        <td><span class="score-na">见webarena.dev</span></td>
+        <td><a href="https://github.com/web-arena-x/webarena">web-arena-x/…</a></td>
+      </tr>
+      <tr>
+        <td class="dim">B11</td>
+        <td class="name-cell">BrowseComp</td>
+        <td><span class="tag tag-req-both">Text†VL</span></td>
+        <td><span class="tag tag-no-dock">无 Docker</span></td>
+        <td class="dim">1266 / 400(MM)</td>
+        <td><span class="score-val">&lt;30%</span> <span class="dim">(o3, MM版)</span></td>
+        <td><a href="https://github.com/openai/simple-evals">openai/simple-evals</a></td>
+      </tr>
+      <tr>
+        <td class="dim">B12</td>
+        <td class="name-cell">WebChoreArena</td>
+        <td><span class="tag tag-req-txt">Text</span></td>
+        <td><span class="tag tag-no-dock">无 Docker</span></td>
+        <td class="dim">532 任务</td>
+        <td><span class="score-val">44.9%</span> <span class="dim">(Gemini 2.5 Pro)</span></td>
+        <td><a href="https://github.com/WebChoreArena/WebChoreArena">WebChoreArena/…</a></td>
+      </tr>
+      <tr>
+        <td class="dim">B13</td>
+        <td class="name-cell">TAU2-Bench</td>
+        <td><span class="tag tag-req-txt">Text</span></td>
+        <td><span class="tag tag-no-dock">无 Docker</span></td>
+        <td class="dim">多 domain</td>
+        <td><span class="score-na">domain依赖</span></td>
+        <td><a href="https://github.com/sierra-research/tau2-bench">sierra-research/…</a></td>
+      </tr>
+      <tr>
+        <td class="dim">B14</td>
+        <td class="name-cell">BFCL-V4</td>
+        <td><span class="tag tag-req-txt">Text</span></td>
+        <td><span class="tag tag-no-dock">无 Docker</span></td>
+        <td class="dim">多 category</td>
+        <td><span class="score-na">见leaderboard</span></td>
+        <td><a href="https://github.com/ShishirPatil/gorilla">ShishirPatil/gorilla</a></td>
+      </tr>
+      <tr>
+        <td class="dim">B15</td>
+        <td class="name-cell">DeepPlanning</td>
+        <td><span class="tag tag-req-txt">Text</span></td>
+        <td><span class="tag tag-no-dock">无 Docker</span></td>
+        <td class="dim">旅行/购物</td>
+        <td><span class="score-na">Qwen3.5领先</span></td>
+        <td><a href="https://github.com/QwenLM/Qwen-Agent">QwenLM/Qwen-Agent</a></td>
+      </tr>
+      <tr>
+        <td class="dim">B16</td>
+        <td class="name-cell">AgentBench</td>
+        <td><span class="tag tag-req-txt">Text</span></td>
+        <td><span class="tag tag-no-dock">无 Docker</span></td>
+        <td class="dim">8 环境</td>
+        <td><span class="score-na">商用>>开源</span></td>
+        <td><a href="https://github.com/THUDM/AgentBench">THUDM/AgentBench</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="insight">
+    <strong>优先级建议（ThothVL agent 能力评测）</strong>：<br>
+    ① <em>最快上手（无 Docker）</em>：ScreenSpot Pro（GUI grounding）+ MMSearch（多模态搜索）+ TIR-Bench（Think w/ Image 工具调用）+ WebVoyager（多模态 Web）<br>
+    ② <em>全面 GUI agent</em>：AndroidWorld（Google，相对成熟）→ OSWorld（多 OS，AWS 可并行）<br>
+    ③ <em>最硬核 VL</em>：VisualAgentBench（5 环境，含训练轨迹数据）+ MMSearch-Plus（带来源追溯的深度视觉搜索）<br>
+    ④ <em>Think with Video</em>：VideoHolmes（跨帧时序推理）+ TwiFF（2.7M 训练数据可直接用于 mid-training visual CoT）<br>
+    ⑤ <em>Qwen3.5 报告对标（纯文本）</em>：BFCL-V4 / TAU2-Bench / DeepPlanning / BrowseComp——反映底座 LLM agent 能力，不需要 VLM 特有能力。
+  </div>
+</section>
+
+</main>
+</div>
+
+<script>
+const sections = document.querySelectorAll('section.sec[id]');
+const navItems = document.querySelectorAll('nav .nav-item');
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navItems.forEach(item => {
+        item.classList.remove('active');
+        if (item.getAttribute('href') === '#' + e.target.id) {
+          item.classList.add('active');
+        }
+      });
+    }
+  });
+}, { rootMargin: '-25% 0px -65% 0px' });
+sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>

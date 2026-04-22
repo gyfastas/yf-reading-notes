@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>R1-VL | 精读笔记</title>
+<style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --highlight: #fef3c7;
+            --code-bg: #f1f5f9;
+            --success: #10b981;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .paper-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+        .paper-header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 12px; }
+        .paper-header .meta { font-size: 0.85rem; opacity: 0.9; }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.2);
+        }
+        .section {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .section h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+        .section h3 {
+            font-size: 1.1rem;
+            color: var(--text);
+            margin: 20px 0 12px;
+        }
+        .highlight-box {
+            background: var(--highlight);
+            border-left: 4px solid #f59e0b;
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .key-point {
+            background: #eff6ff;
+            border-left: 4px solid var(--primary);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background: var(--code-bg);
+            font-weight: 600;
+            color: var(--text);
+        }
+        tr:hover { background: #f8fafc; }
+        .metric { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+        .up { color: var(--success); }
+    </style>
+</head>
+<body>
+<div class="container">
+<!-- Header -->
+<div class="paper-header">
+<span class="badge">ICCV 2025</span>
+<span class="badge">arXiv:2503.12937</span>
+<h1>R1-VL: Learning to Reason<br/>with Multimodal Large Language Models<br/>via Step-wise GRPO</h1>
+<div class="meta">NTU | Tsinghua | StepGRPO 密集奖励</div>
+</div>
+<!-- TL;DR -->
+<div class="section">
+<h2>📌 TL;DR 核心贡献</h2>
+<div class="highlight-box">
+<strong>核心问题：</strong>标准GRPO的<strong>稀疏奖励</strong>（仅最终答案）对小MLLM效率低，长推理链难以获得正反馈。
+            </div>
+<div class="key-point">
+<strong>解决方案：</strong><strong>StepGRPO</strong> (Step-wise Group Relative Policy Optimization)
+<ul>
+<li>引入<strong>步骤级密集奖励</strong>，无需额外PRM</li>
+<li>StepRAR：软关键步骤匹配</li>
+<li>StepRVR：推理完整性与逻辑一致性</li>
+</ul>
+</div>
+<div class="highlight-box">
+<strong>效果：</strong>2B/7B模型在8个基准上超越SFT和vanilla GRPO，首次证明小MLLM可通过步骤级RL实现自我改进。
+            </div>
+</div>
+<!-- 核心问题 -->
+<div class="section">
+<h2>🎯 核心问题：稀疏奖励困境</h2>
+<h3>标准GRPO的局限</h3>
+<div class="highlight-box">
+<strong>问题：</strong>GRPO仅使用<strong>结果奖励</strong>（答案正确/错误）
+            <ul>
+<li>长推理链中，大多数路径得不到任何正反馈</li>
+<li>小模型探索效率极低，训练不稳定</li>
+<li>即使部分正确、结构良好的推理也被全盘否定</li>
+</ul>
+</div>
+<h3>小MLLM的特殊挑战</h3>
+<p>相比大模型（70B+），小MLLM（2B-7B）：</p>
+<ul>
+<li>推理能力弱，更难产生正确完整答案</li>
+<li>需要更细粒度的引导信号</li>
+<li>稀疏奖励导致探索空间过大，难以收敛</li>
+</ul>
+</div>
+<!-- 方法详解 -->
+<div class="section">
+<h2>🔧 StepGRPO 方法详解</h2>
+<h3>核心思想：步骤级奖励</h3>
+<p>不只在最后给奖励，而是在<strong>每个推理步骤</strong>评估质量。</p>
+<h3>两种密集奖励</h3>
+<table>
+<tr>
+<th>奖励类型</th>
+<th>名称</th>
+<th>评估内容</th>
+<th>实现方式</th>
+</tr>
+<tr>
+<td><strong>准确性奖励</strong></td>
+<td>StepRAR</td>
+<td>是否包含必要中间步骤</td>
+<td>软关键步骤匹配</td>
+</tr>
+<tr>
+<td><strong>有效性奖励</strong></td>
+<td>StepRVR</td>
+<td>推理完整性、逻辑一致性</td>
+<td>规则-based验证</td>
+</tr>
+</table>
+<h3>StepRAR：软关键步骤匹配</h3>
+<div class="key-point">
+<strong>原理：</strong>即使最终答案错误，只要推理路径包含正确的关键中间步骤，就给部分奖励。
+            <br/><br/>
+            例如数学问题：
+            <ul>
+<li>设变量 ✓</li>
+<li>列方程 ✓</li>
+<li>解方程（此处出错）✗</li>
+</ul>
+            StepRAR会给前两个步骤正反馈。
+        </div>
+<h3>StepRVR：推理有效性</h3>
+<div class="key-point">
+<strong>评估维度：</strong>
+<ul>
+<li>推理步骤是否完整（不跳跃）</li>
+<li>逻辑是否自洽</li>
+<li>格式是否规范</li>
+</ul>
+            即使答案错误，结构良好的推理也能获得一定奖励。
+        </div>
+<h3>优势估计</h3>
+<p>StepGRPO使用组相对优势估计：</p>
+<ol>
+<li>采样一组推理路径</li>
+<li>计算每条路径的<strong>平均步骤奖励</strong>
+</li>
+<li>以组内平均为baseline估计优势</li>
+<li>使用裁剪+KL正则的似然损失优化</li>
+</ol>
+</div>
+<!-- 实验结果 -->
+<div class="section">
+<h2>📊 实验结果</h2>
+<h3>模型规格</h3>
+<ul>
+<li>
+<strong>R1-VL-2B：</strong>基于 Qwen2-VL-2B</li>
+<li>
+<strong>R1-VL-7B：</strong>基于 Qwen2-VL-7B</li>
+</ul>
+<h3>主要结果</h3>
+<table>
+<tr>
+<th>方法</th>
+<th>平均性能</th>
+<th>vs SFT</th>
+<th>vs GRPO</th>
+</tr>
+<tr>
+<td>SFT</td>
+<td>基线</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>GRPO</td>
+<td>提升</td>
+<td>+</td>
+<td>-</td>
+</tr>
+<tr>
+<td><strong>StepGRPO</strong></td>
+<td>最佳</td>
+<td class="metric up">++</td>
+<td class="metric up">+</td>
+</tr>
+</table>
+<h3>关键发现</h3>
+<div class="key-point">
+<strong>密集奖励的价值：</strong>
+<ul>
+<li>小模型（2B）受益更大，相对提升更显著</li>
+<li>长推理任务（>10步）改善最明显</li>
+<li>推理过程更可解释，步骤错误可定位</li>
+</ul>
+            </div>
+</div>
+<!-- 对比分析 -->
+<div class="section">
+<h2>🔬 与相关方法对比</h2>
+<table>
+<tr>
+<th>方法</th>
+<th>奖励粒度</th>
+<th>是否需要额外模型</th>
+<th>vs StepGRPO</th>
+</tr>
+<tr>
+<td><strong>GRPO</strong></td>
+<td>结果级（稀疏）</td>
+<td>否</td>
+<td>StepGRPO更精细</td>
+</tr>
+<tr>
+<td><strong>PRM+RL</strong></td>
+<td>步骤级</td>
+<td>是（需要PRM）</td>
+<td>StepGRPO无需PRM</td>
+</tr>
+<tr>
+<td><strong>StepGRPO</strong></td>
+<td><strong>步骤级（密集）</strong></td>
+<td><strong>否</strong></td>
+<td>纯规则-based，自包含</td>
+</tr>
+</table>
+</div>
+<!-- 实践启示 -->
+<div class="section">
+<h2>🛠️ 实践启示</h2>
+<h3>实施要点</h3>
+<table>
+<tr>
+<th>组件</th>
+<th>配置</th>
+<th>说明</th>
+</tr>
+<tr>
+<td>Base Model</td>
+<td>Qwen2-VL 2B/7B</td>
+<td>强视觉基础模型</td>
+</tr>
+<tr>
+<td>关键步骤定义</td>
+<td>任务相关规则</td>
+<td>如数学：设变量、列方程、求解</td>
+</tr>
+<tr>
+<td>奖励权重</td>
+<td>StepRAR: 0.6, StepRVR: 0.4</td>
+<td>平衡准确性与完整性</td>
+</tr>
+<tr>
+<td>组大小</td>
+<td>8-16</td>
+<td>标准GRPO配置</td>
+</tr>
+</table>
+<h3>适用场景</h3>
+<div class="key-point">
+<strong>StepGRPO最适合：</strong>
+<ul>
+<li><strong>小MLLM</strong>（≤7B）的推理增强</li>
+<li><strong>长推理链</strong>任务（多步骤数学、逻辑）</li>
+<li>需要<strong>可解释性</strong>的场景（定位错误步骤）</li>
+<li>无PRM资源的情况（纯规则-based）</li>
+</ul>
+            </div>
+</div>
+<!-- 关键洞察 -->
+<div class="section">
+<h2>💡 关键洞察</h2>
+<div class="highlight-box">
+<strong>"密集反馈是高效学习的关键"</strong>
+            <br/><br/>
+            StepGRPO验证了一个教育学的基本原则：学习需要及时的反馈。
+            <br/><br/>
+            仅告诉学生"答对了/错了"效率低下，指出哪一步出错、哪里做得好，才能加速学习。
+            <br/><br/>
+            在RL中，这种<strong>密集奖励</strong>对容量有限的小模型尤为重要。
+        </div>
+</div>
+<div class="section" style="text-align: center; color: var(--text-light);">
+<p>精读完成 | 论文: R1-VL (ICCV 2025)</p>
+<p>GitHub: https://github.com/jingyi0000/R1-VL</p>
+</div>
+</div>
+</body>
+</html>

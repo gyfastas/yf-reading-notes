@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Mid-Training Survey | 精读笔记</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+    :root {
+        --bg-deep: #0a0e17;
+        --bg-card: #111827;
+        --bg-card-hover: #1a2332;
+        --bg-elevated: #1e293b;
+        --border: rgba(56, 189, 248, 0.12);
+        --border-bright: rgba(56, 189, 248, 0.3);
+        --cyan: #22d3ee;
+        --cyan-dim: rgba(34, 211, 238, 0.15);
+        --cyan-glow: rgba(34, 211, 238, 0.08);
+        --blue: #38bdf8;
+        --blue-dim: rgba(56, 189, 248, 0.12);
+        --purple: #a78bfa;
+        --purple-dim: rgba(167, 139, 250, 0.12);
+        --green: #34d399;
+        --green-dim: rgba(52, 211, 153, 0.12);
+        --amber: #fbbf24;
+        --amber-dim: rgba(251, 191, 36, 0.10);
+        --red: #f87171;
+        --red-dim: rgba(248, 113, 113, 0.10);
+        --pink: #f472b6;
+        --pink-dim: rgba(244, 114, 182, 0.10);
+        --text: #e2e8f0;
+        --text-dim: #94a3b8;
+        --text-muted: #64748b;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        background: var(--bg-deep);
+        color: var(--text);
+        line-height: 1.75;
+        min-height: 100vh;
+        background-image:
+            radial-gradient(ellipse 600px 200px at 20% 0%, rgba(34, 211, 238, 0.04) 0%, transparent 100%),
+            radial-gradient(ellipse 400px 300px at 80% 100%, rgba(167, 139, 250, 0.03) 0%, transparent 100%);
+    }
+
+    .container {
+        max-width: 920px;
+        margin: 0 auto;
+        padding: 48px 24px;
+    }
+
+    /* ── Header ── */
+    .paper-header {
+        position: relative;
+        background: linear-gradient(135deg, rgba(34, 211, 238, 0.08) 0%, rgba(167, 139, 250, 0.08) 100%);
+        border: 1px solid var(--border-bright);
+        padding: 44px 40px;
+        border-radius: 16px;
+        margin-bottom: 32px;
+        overflow: hidden;
+    }
+    .paper-header::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--cyan), var(--purple), var(--cyan));
+        opacity: 0.8;
+    }
+    .paper-header::after {
+        content: '';
+        position: absolute;
+        top: -60px; right: -40px;
+        width: 200px; height: 200px;
+        background: radial-gradient(circle, rgba(34, 211, 238, 0.1) 0%, transparent 70%);
+        pointer-events: none;
+    }
+    .paper-header h1 {
+        font-size: 1.85rem;
+        font-weight: 700;
+        margin-bottom: 14px;
+        letter-spacing: -0.02em;
+        background: linear-gradient(135deg, #fff 40%, var(--cyan) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .paper-header .meta {
+        font-size: 0.82rem;
+        color: var(--text-dim);
+        font-weight: 400;
+    }
+    .badge {
+        display: inline-block;
+        padding: 4px 14px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        margin-right: 8px;
+        margin-bottom: 10px;
+        background: rgba(34, 211, 238, 0.1);
+        color: var(--cyan);
+        border: 1px solid rgba(34, 211, 238, 0.2);
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+    }
+
+    /* ── TOC ── */
+    .toc {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        padding: 24px 32px;
+        border-radius: 12px;
+        margin-bottom: 28px;
+    }
+    .toc h3 {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--cyan);
+        margin-bottom: 16px;
+        font-weight: 600;
+    }
+    .toc ol {
+        padding-left: 20px;
+        columns: 2;
+        column-gap: 32px;
+    }
+    .toc li {
+        margin-bottom: 6px;
+        font-size: 0.88rem;
+        break-inside: avoid;
+    }
+    .toc a {
+        color: var(--text-dim);
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    .toc a:hover {
+        color: var(--cyan);
+    }
+
+    /* ── Sections ── */
+    .section {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 32px;
+        margin-bottom: 24px;
+        transition: border-color 0.3s;
+    }
+    .section:hover {
+        border-color: var(--border-bright);
+    }
+    .section h2 {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--cyan);
+        margin-bottom: 20px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid var(--border);
+        letter-spacing: -0.01em;
+        text-transform: uppercase;
+        font-size: 0.95rem;
+        letter-spacing: 0.06em;
+    }
+    .section h3 {
+        font-size: 1.02rem;
+        font-weight: 600;
+        color: var(--text);
+        margin: 24px 0 12px;
+    }
+    .section h4 {
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: var(--purple);
+        margin: 20px 0 10px;
+        letter-spacing: 0.02em;
+    }
+    .section p {
+        color: var(--text-dim);
+        font-size: 0.92rem;
+        margin: 8px 0;
+    }
+    .section ul, .section ol {
+        padding-left: 20px;
+        color: var(--text-dim);
+        font-size: 0.92rem;
+    }
+    .section li {
+        margin-bottom: 6px;
+    }
+    .section li strong {
+        color: var(--text);
+    }
+
+    /* ── Callout boxes ── */
+    .highlight-box {
+        background: var(--amber-dim);
+        border-left: 3px solid var(--amber);
+        padding: 18px 22px;
+        margin: 18px 0;
+        border-radius: 0 10px 10px 0;
+        font-size: 0.92rem;
+        color: var(--text-dim);
+    }
+    .highlight-box strong { color: var(--amber); }
+
+    .key-point {
+        background: var(--blue-dim);
+        border-left: 3px solid var(--blue);
+        padding: 18px 22px;
+        margin: 18px 0;
+        border-radius: 0 10px 10px 0;
+        font-size: 0.92rem;
+        color: var(--text-dim);
+    }
+    .key-point strong { color: var(--blue); }
+
+    .danger-box {
+        background: var(--red-dim);
+        border-left: 3px solid var(--red);
+        padding: 18px 22px;
+        margin: 18px 0;
+        border-radius: 0 10px 10px 0;
+        font-size: 0.92rem;
+        color: var(--text-dim);
+    }
+    .danger-box strong { color: var(--red); }
+
+    .success-box {
+        background: var(--green-dim);
+        border-left: 3px solid var(--green);
+        padding: 18px 22px;
+        margin: 18px 0;
+        border-radius: 0 10px 10px 0;
+        font-size: 0.92rem;
+        color: var(--text-dim);
+    }
+    .success-box strong { color: var(--green); }
+
+    .purple-box {
+        background: var(--purple-dim);
+        border-left: 3px solid var(--purple);
+        padding: 18px 22px;
+        margin: 18px 0;
+        border-radius: 0 10px 10px 0;
+        font-size: 0.92rem;
+        color: var(--text-dim);
+    }
+    .purple-box strong { color: var(--purple); }
+
+    /* ── Tables ── */
+    table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin: 18px 0;
+        font-size: 0.85rem;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    th, td {
+        padding: 12px 14px;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+    }
+    th {
+        background: rgba(34, 211, 238, 0.06);
+        font-weight: 600;
+        color: var(--cyan);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+    td {
+        color: var(--text-dim);
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td {
+        background: rgba(56, 189, 248, 0.04);
+    }
+    td strong { color: var(--text); }
+
+    .metric {
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 600;
+        color: var(--cyan);
+        font-size: 0.84rem;
+    }
+    .up { color: var(--green) !important; }
+
+    /* ── Formulas ── */
+    .formula {
+        background: rgba(15, 23, 42, 0.8);
+        border: 1px solid var(--border);
+        padding: 16px 20px;
+        border-radius: 10px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.82rem;
+        margin: 14px 0;
+        overflow-x: auto;
+        line-height: 1.9;
+        color: var(--green);
+    }
+
+    /* ── Tags ── */
+    .tag {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 6px;
+        font-size: 0.68rem;
+        font-weight: 600;
+        margin-right: 4px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+    .tag-code { background: rgba(56, 189, 248, 0.15); color: var(--blue); border: 1px solid rgba(56, 189, 248, 0.2); }
+    .tag-math { background: var(--pink-dim); color: var(--pink); border: 1px solid rgba(244, 114, 182, 0.2); }
+    .tag-general { background: var(--green-dim); color: var(--green); border: 1px solid rgba(52, 211, 153, 0.2); }
+    .tag-long { background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(167, 139, 250, 0.2); }
+
+    /* ── Code inline ── */
+    code {
+        font-family: 'JetBrains Mono', monospace;
+        background: rgba(34, 211, 238, 0.08);
+        border: 1px solid rgba(34, 211, 238, 0.15);
+        padding: 2px 7px;
+        border-radius: 5px;
+        font-size: 0.82em;
+        color: var(--cyan);
+    }
+
+    /* ── Footer ── */
+    .footer-section {
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.82rem;
+        padding: 20px;
+        border-top: 1px solid var(--border);
+        margin-top: 8px;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-deep); }
+    ::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--cyan); }
+
+    /* ── Selection ── */
+    ::selection { background: rgba(34, 211, 238, 0.25); color: #fff; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- Header -->
+<div class="paper-header">
+<span class="badge">Survey</span>
+<span class="badge">arXiv:2510.06826</span>
+<span class="badge">First Mid-Training Survey</span>
+<h1>Mid-Training of Large Language Models:<br/>A Survey</h1>
+<div class="meta">Mo et al. | 2025.10 | Mid-Training 领域首篇系统性综述</div>
+</div>
+
+<!-- 目录 -->
+<div class="toc">
+<h3>Contents</h3>
+<ol>
+<li><a href="#tldr">TL;DR 核心贡献</a></li>
+<li><a href="#definition">Mid-Training 定义与定位</a></li>
+<li><a href="#taxonomy">三维分类体系</a></li>
+<li><a href="#lr">LR Scheduling 公式详解</a></li>
+<li><a href="#data">Data Mixing 策略</a></li>
+<li><a href="#longctx">Long Context Extension</a></li>
+<li><a href="#theory">理论基础 GNS / IB / Curriculum</a></li>
+<li><a href="#forgetting">灾难性遗忘缓解策略</a></li>
+<li><a href="#casestudy">工业系统配置汇总</a></li>
+<li><a href="#challenges">开放问题与研究前沿</a></li>
+<li><a href="#takeaway">对 ThothVL 的启发</a></li>
+</ol>
+</div>
+
+<!-- TL;DR -->
+<div class="section" id="tldr">
+<h2>01 &mdash; TL;DR 核心贡献</h2>
+<div class="highlight-box">
+<strong>定位：</strong>首篇系统性综述 Mid-Training 领域的论文。提出了覆盖<strong>数据分布、学习率调度、长上下文扩展</strong>三大维度的统一分类体系。
+</div>
+<div class="key-point">
+<strong>核心论点：</strong>Mid-training 缓解了 noisy tokens 的递减收益，稳定了收敛过程，扩展了模型晚期训练的能力。其有效性可通过三个理论视角解释：
+<ul>
+<li><strong>Gradient Noise Scale (GNS)：</strong>高质量数据提高梯度方差，帮助逃离 sharp minima</li>
+<li><strong>Information Bottleneck (IB)：</strong>高质量监督提供低熵指导，促进语义结构提取</li>
+<li><strong>Curriculum Learning：</strong>从多样/嘈杂语料逐渐过渡到挑战性样本，强化复杂推理</li>
+</ul>
+</div>
+</div>
+
+<!-- Mid-Training定义 -->
+<div class="section" id="definition">
+<h2>02 &mdash; Mid-Training 定义与定位</h2>
+<h3>什么是 Mid-Training？</h3>
+<div class="highlight-box">
+<strong>定义：</strong>Mid-training 是 Pre-training 后期到 Post-training 之前的中间阶段，通过在<strong>精选高质量数据</strong>上进行多阶段 annealing-style 训练，实现数据质量精炼、优化策略适配和上下文长度扩展。
+<br/><br/>
+<strong>核心目标：</strong>将模型从"大规模记忆"模式转向"高质量抽象"模式——当模型接近通用泛化的容量极限时，高质量样本通过引导 attention 聚焦于结构化推理、事实性和指令遵循来实现进一步增益。
+</div>
+
+<h3>在训练流程中的位置</h3>
+<table>
+<tr>
+<th>阶段</th>
+<th>数据规模</th>
+<th>数据类型</th>
+<th>学习率</th>
+<th>目标</th>
+</tr>
+<tr>
+<td><strong>Pre-training</strong></td>
+<td>数万亿 tokens</td>
+<td>通用互联网数据</td>
+<td>Peak LR</td>
+<td>通用能力、世界知识</td>
+</tr>
+<tr>
+<td><strong>Mid-training</strong></td>
+<td>数百亿 ~ 数千亿 tokens</td>
+<td>精选领域数据 + 通用数据</td>
+<td>Peak 的 10%–30%</td>
+<td>领域知识注入、长上下文、质量精炼</td>
+</tr>
+<tr>
+<td><strong>Post-training</strong></td>
+<td>数十万 ~ 数百万条</td>
+<td>指令 / 偏好数据</td>
+<td>更低</td>
+<td>对齐、指令遵循、RLHF</td>
+</tr>
+</table>
+
+<div class="key-point">
+<strong>与 Continued Pre-training (CPT) 的区别：</strong>
+<ul>
+<li><strong>CPT：</strong>直接在领域数据上继续训练，通常不改调度策略，容易遗忘</li>
+<li><strong>Mid-training：</strong>有意识地设计多阶段调度（数据混合 + LR decay + 上下文扩展），作为 pre→post 的"桥梁"</li>
+</ul>
+</div>
+</div>
+
+<!-- 分类体系 -->
+<div class="section" id="taxonomy">
+<h2>03 &mdash; 三维分类体系</h2>
+<div class="purple-box">
+<strong>Survey 的核心 Taxonomy：</strong>三个维度互相增强（mutually reinforcing），缺一不可。
+<ol>
+<li><strong>Data Distribution</strong> — 精选数据类型、混合比例、质量过滤</li>
+<li><strong>Learning Rate Scheduling</strong> — Warmup / Decay / 多阶段策略</li>
+<li><strong>Long Context Extension</strong> — RoPE 插值、分阶段扩展</li>
+</ol>
+没有精炼数据 → 缺乏专业化；没有合理调度 → 不稳定或浪费高质量 tokens；没有上下文扩展 → 受限于短序列。
+</div>
+</div>
+
+<!-- Learning Rate Scheduling -->
+<div class="section" id="lr">
+<h2>04 &mdash; Learning Rate Scheduling 公式详解</h2>
+
+<div class="highlight-box">
+<strong>关键发现：</strong>所有调度器共享结构 = <strong>Linear Warmup → Decay Phase</strong>，但 decay 形状影响收敛质量。Cosine decay 仍是经验性主流，但线性 decay 在某些设置下更优。Decay 策略的效果与 batch size、模型规模、优化器深度耦合，尚无统一理论。
+</div>
+
+<h3>4.1 Linear Scheduler</h3>
+<div class="formula">
+η_t = η_peak - (η_peak - η_end) · t / S_dc,  &nbsp; 0 ≤ t ≤ S_dc
+</div>
+<p>最简单的线性衰减。DeepSeek 系列使用 multi-step 变体（在固定 token ratio 处离散下降）。</p>
+
+<h3>4.2 Cosine Scheduler</h3>
+<div class="formula">
+η_t = η_end + 0.5 · (η_peak - η_end) · (1 + cos(π · t / S_dc))
+</div>
+<div class="key-point">
+<strong>关键设置：</strong>令 <code>S_dc = S_total</code>（decay 跨越整个训练长度）效果最佳——平衡了早期探索与后期收敛。LLaMA 3 用 cosine decay 到 peak 的 1%，再加 40M tokens 线性衰减到 0。
+</div>
+
+<h3>4.3 WSD Scheduler (Warmup-Stable-Decay)</h3>
+<div class="formula">
+WSD(T; s) = {
+  (s / W) · η,         s &lt; W           // Warmup
+  η,                    W ≤ s ≤ T       // Stable
+  f(s - T) · η,        T &lt; s &lt; S       // Decay
+}
+</div>
+<div class="key-point">
+<strong>优势：</strong>三阶段设计，在最后 10% tokens 内实现快速 loss 下降。核心价值：<strong>Checkpoint 可复用</strong>——Stable 阶段的 checkpoint 可以直接接续不同的 decay 分支，适合多轮 mid-training。MiniCPM 系列采用此策略。
+</div>
+
+<h3>4.4 Power Scheduler</h3>
+<div class="formula">
+η_power(n) = min(η_peak, β · a · n^b)
+
+三阶段：warmup → slow power-law decay → fast exponential decay
+</div>
+<p>核心价值：支持<strong>零样本 LR 迁移</strong>——通过 power-law 关系在不同超参数间迁移最优 LR。</p>
+
+<h3>4.5 Multi-step Scheduler (DeepSeek 风格)</h3>
+<div class="formula">
+在固定 token 比例处（如 60%, 80%）离散降低 LR
+例: η_peak → 0.316·η_peak → 0.1·η_peak
+</div>
+<p>DeepSeek-V2/V3 采用。优势：简单可控，便于继续训练时复用中间 checkpoint。</p>
+
+<h3>4.6 Mid-training 阶段的 LR 最佳实践</h3>
+<table>
+<tr>
+<th>参数</th>
+<th>推荐范围</th>
+<th>依据</th>
+</tr>
+<tr>
+<td><strong>Peak LR</strong></td>
+<td>Pre-training peak 的 10%–30%</td>
+<td>避免破坏已学知识</td>
+</tr>
+<tr>
+<td><strong>Warmup steps</strong></td>
+<td>较短（数百 ~ 2K steps）</td>
+<td>Pre-trained 权重已稳定</td>
+</tr>
+<tr>
+<td><strong>Decay 形状</strong></td>
+<td>Cosine 或 WSD</td>
+<td>Cosine 经验主流；WSD 支持 checkpoint 复用</td>
+</tr>
+<tr>
+<td><strong>Final LR</strong></td>
+<td>Peak 的 1%–10%</td>
+<td>过高影响收敛，过低浪费尾部 tokens</td>
+</tr>
+<tr>
+<td><strong>Batch size</strong></td>
+<td>可渐进增大</td>
+<td>Larger batch → 支持 higher LR；减少梯度方差</td>
+</tr>
+</table>
+</div>
+
+<!-- Data Mixing -->
+<div class="section" id="data">
+<h2>05 &mdash; Data Mixing 策略</h2>
+
+<h3>5.1 数据类型分类</h3>
+<table>
+<tr>
+<th>类型</th>
+<th>代表数据集</th>
+<th>作用</th>
+</tr>
+<tr>
+<td><span class="tag tag-general">Web</span> 高质量过滤网页</td>
+<td>FineWeb-Edu, DCLM-baseline, Dolma, C4</td>
+<td>通用知识基座，防遗忘</td>
+</tr>
+<tr>
+<td><span class="tag tag-code">Code</span> 代码数据</td>
+<td>Stack v1/v2, Stack-Edu</td>
+<td>编程能力、结构化推理</td>
+</tr>
+<tr>
+<td><span class="tag tag-math">Math</span> 数学内容</td>
+<td>OpenWebMath, FineMath4+</td>
+<td>数学推理（FineMath4+ 在 GSM8K 上 2x, MATH 上 6x vs InfiMM-WebMath）</td>
+</tr>
+<tr>
+<td><span class="tag tag-general">Instruct</span> 指令/QA</td>
+<td>UltraChat, EvolInstruct, FLAN, OpenOrca</td>
+<td>指令遵循、推理一致性</td>
+</tr>
+<tr>
+<td><span class="tag tag-general">Synthetic</span> 合成教材</td>
+<td>Cosmopedia v1/v2, TuluMath</td>
+<td>填补低资源领域，教学结构化</td>
+</tr>
+<tr>
+<td><span class="tag tag-long">Long</span> 长上下文</td>
+<td>书籍、代码仓库、长文档</td>
+<td>上下文扩展（需混合短数据，纯长数据会伤性能）</td>
+</tr>
+<tr>
+<td><span class="tag tag-math">CoT</span> 推理链</td>
+<td>Chain-of-thought 数据</td>
+<td>显式问题分解示范</td>
+</tr>
+<tr>
+<td><span class="tag tag-code">FIM</span> Fill-in-Middle</td>
+<td>DeepSeek FIM 数据</td>
+<td>双向推理能力，单样本多 span 预测</td>
+</tr>
+</table>
+
+<h3>5.2 工业系统的具体 Data Mix</h3>
+
+<h4>SmolLM2 (11T tokens, 5 stages)</h4>
+<table>
+<tr>
+<th>阶段</th>
+<th>Tokens</th>
+<th>Web</th>
+<th>Code</th>
+<th>Math</th>
+<th>Synthetic</th>
+<th>Long</th>
+</tr>
+<tr>
+<td><strong>Stage 1</strong></td>
+<td class="metric">6T</td>
+<td>60% FineWeb-Edu</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>Stage 2</strong></td>
+<td class="metric">2T</td>
+<td>75%</td>
+<td>20%</td>
+<td>5%</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>Stage 3</strong></td>
+<td class="metric">2T</td>
+<td>74%</td>
+<td>16%</td>
+<td>10%</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>Annealing</strong></td>
+<td class="metric">1T</td>
+<td>58%</td>
+<td>24%</td>
+<td>14%</td>
+<td>4%</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>Long-ctx</strong></td>
+<td class="metric">75B</td>
+<td colspan="4">60% Stage 4 mix</td>
+<td>40% long docs</td>
+</tr>
+</table>
+<div class="key-point">
+<strong>模式：</strong>随训练推进，Code/Math 占比逐渐上升，Web 占比下降。Annealing 阶段引入合成教材。最后单独做 long-context 扩展。
+</div>
+
+<h4>Qwen3 (30T + 5T + 500B)</h4>
+<table>
+<tr>
+<th>阶段</th>
+<th>规模</th>
+<th>重点</th>
+</tr>
+<tr>
+<td><strong>General Pre-train</strong></td>
+<td class="metric">30T</td>
+<td>119 种语言通用数据</td>
+</tr>
+<tr>
+<td><strong>High-quality Mid-train</strong></td>
+<td class="metric">5T</td>
+<td>STEM / Code / Reasoning 加权，4K seq</td>
+</tr>
+<tr>
+<td><strong>Long Context Extension</strong></td>
+<td class="metric">~500B</td>
+<td>渐进扩展到 32K+</td>
+</tr>
+</table>
+
+<h4>LLaMA 3 405B (15T + 40B + 800B)</h4>
+<table>
+<tr>
+<th>阶段</th>
+<th>规模</th>
+<th>Data Mix</th>
+</tr>
+<tr>
+<td><strong>Pre-training</strong></td>
+<td class="metric">15T</td>
+<td>多语言通用数据</td>
+</tr>
+<tr>
+<td><strong>Annealing</strong></td>
+<td class="metric">40B</td>
+<td>50% 通用知识 + 25% 数学/推理 + 17% 代码 + 8% 多语言</td>
+</tr>
+<tr>
+<td><strong>Long Context</strong></td>
+<td class="metric">800B</td>
+<td>6 阶段 4K → 32K 渐进扩展</td>
+</tr>
+</table>
+<div class="highlight-box">
+<strong>LLaMA 3 LR 策略：</strong>长线性 warmup → cosine decay 到 peak 的 1% → 最后 40M tokens 线性衰减到 0。Annealing 阶段 upsample 最高质量数据源。
+</div>
+
+<h4>Phi-4 (10T two-stage)</h4>
+<table>
+<tr>
+<th>阶段</th>
+<th>数据</th>
+</tr>
+<tr>
+<td><strong>Stage 1</strong></td>
+<td>过滤后的 web 数据</td>
+</tr>
+<tr>
+<td><strong>Stage 2</strong></td>
+<td>合成 tokens + 超精选推理 web 数据</td>
+</tr>
+<tr>
+<td><strong>Mid-training</strong></td>
+<td>75B 精选长上下文 + 175B recall tokens</td>
+</tr>
+</table>
+
+<h4>DeepSeek-V3</h4>
+<table>
+<tr>
+<th>阶段</th>
+<th>规模</th>
+<th>说明</th>
+</tr>
+<tr>
+<td><strong>Pre-training</strong></td>
+<td class="metric">14.8T</td>
+<td>FIM 数据强制双向推理</td>
+</tr>
+<tr>
+<td><strong>Long-ctx Stage 1</strong></td>
+<td class="metric">60B</td>
+<td>seq len = 32K</td>
+</tr>
+<tr>
+<td><strong>Long-ctx Stage 2</strong></td>
+<td class="metric">60B</td>
+<td>seq len = 128K</td>
+</tr>
+</table>
+
+<h3>5.3 Data Mixing 关键洞察</h3>
+<div class="success-box">
+<strong>经验法则总结：</strong>
+<ol>
+<li><strong>STEM 数据优先：</strong>少量 Math/Code 数据可带来不成比例的推理增益</li>
+<li><strong>分布连续性防遗忘：</strong>OpenCoder 保留 84% mid-training 数据来自原始 pre-training 分布</li>
+<li><strong>指令数据时机未定：</strong>DeepSeek 在预训练末尾加 5M 指令样本取得与 SFT 相当的增益，但最优时机仍未定论</li>
+<li><strong>适度重复 > 缺乏数据：</strong>将任务重写为模型友好格式可显著提升性能</li>
+<li><strong>长上下文数据选择关键：</strong>自然长文档 >> 人工拼接文档</li>
+<li><strong>动态混合 > 静态混合：</strong>随训练阶段调整比例（如 SmolLM2）</li>
+</ol>
+</div>
+
+<h3>5.4 Data Mixing Scaling Laws（相关工作）</h3>
+<table>
+<tr>
+<th>论文</th>
+<th>核心方法</th>
+</tr>
+<tr>
+<td><strong>Data Mixing Laws</strong> (ICLR 2025)</td>
+<td>发现混合比例对性能的定量可预测性；嵌套使用 step / size / mixing 三层 scaling law 预测大模型性能</td>
+</tr>
+<tr>
+<td><strong>MergeMix</strong> (2601.17858)</td>
+<td>线性权重插值作为数据梯度累积的高保真代理，将 data mix 优化转化为低成本模型合并问题</td>
+</tr>
+<tr>
+<td><strong>Capacity-Aware Mixture Law</strong> (2603.08022)</td>
+<td>Data mix scaling law 同时依赖混合比例和模型大小；MoE 7B-A150M 优化成本降低 50%，benchmark 提升 3%</td>
+</tr>
+</table>
+</div>
+
+<!-- Long Context Extension -->
+<div class="section" id="longctx">
+<h2>06 &mdash; Long Context Extension (RoPE 插值详解)</h2>
+
+<div class="highlight-box">
+<strong>统一公式：</strong>所有方法仅在频率重映射函数 h(θ) 上不同。
+</div>
+<div class="formula">
+f'_W(x_m, m, θ_j) = f_W(x_m, m, h(θ_j)) = R_{h(θ_j), m} · W · x_m
+
+原始 RoPE: θ_j = 10000^(-2(j-1)/d)
+</div>
+
+<h3>6.1 Position Interpolation (PI)</h3>
+<div class="formula">
+h_PI(θ_j) = α · θ_j,   α = (L_train - 1) / (L_target - 1)
+</div>
+<div class="key-point">
+<strong>优点：</strong>概念简单，轻量微调，中等扩展倍率下鲁棒。<br/>
+<strong>缺点：</strong>均匀压缩损伤高频（局部）信号——短距离位置区分度下降。
+</div>
+
+<h3>6.2 NTK-Aware Interpolation</h3>
+<div class="formula">
+h_NTK(θ_j) = (b')^(-2j/d),   b' = b · s^(d/(d-2))
+</div>
+<div class="key-point">
+<strong>核心思想：</strong>低频扩展多，高频扩展少——保留局部位置分辨率的同时扩展远距离 attention。相比 PI，减少长程 attention decay。<br/>
+<strong>问题：</strong>目标长度与曲率参数耦合，调参困难。
+</div>
+
+<h3>6.3 NTK-by-Parts（分段 NTK）</h3>
+<div class="formula">
+h(θ) = {
+  θ               // 高频：保持不变，保留局部细节
+  θ / s           // 低频：完全压缩
+  θ / s^ρ(θ)      // 中频：平滑插值
+}
+</div>
+<p>分段处理保留最短波长（局部细节），短上下文性能保持更好。</p>
+
+<h3>6.4 YaRN (Yet another RoPE extensioN)</h3>
+<div class="key-point">
+<strong>在 NTK-by-Parts 基础上增加：</strong>长度依赖的 logit temperature t(s) 用于稳定化。
+<br/><br/>
+<strong>效果：</strong>以更少的数据/步数达到 32K–128K 上下文。快速扩展 + 稳健收敛的最佳平衡。
+</div>
+
+<h3>6.5 LongRoPE</h3>
+<div class="key-point">
+<strong>方法：</strong>通过搜索���非手工设计）发现非均匀 h(θ)。
+<ul>
+<li>多阶段渐进扩展</li>
+<li>短长度重调节恢复短上下文性能</li>
+<li>可达 ~2M 上下文</li>
+</ul>
+<strong>Trade-off：</strong>Pipeline 复杂度高，但突破了手工规则的上限。
+</div>
+
+<h3>6.6 工业系统的长上下文实践</h3>
+<table>
+<tr>
+<th>系统</th>
+<th>扩展方案</th>
+<th>目标长度</th>
+</tr>
+<tr>
+<td><strong>LLaMA 3 405B</strong></td>
+<td>6 阶段渐进，800B tokens</td>
+<td>4K → 32K</td>
+</tr>
+<tr>
+<td><strong>DeepSeek-V3</strong></td>
+<td>2 阶段：60B@32K + 60B@128K</td>
+<td>128K</td>
+</tr>
+<tr>
+<td><strong>MiniMax-M1</strong></td>
+<td>4 阶段调度 + Lightning Attention 混合</td>
+<td>32K → 1M</td>
+</tr>
+<tr>
+<td><strong>Qwen3</strong></td>
+<td>~500B tokens 渐进扩展</td>
+<td>32K+</td>
+</tr>
+</table>
+<div class="danger-box">
+<strong>实践陷阱：</strong>纯长上下文训练会损伤短上下文性能。必须混合短数据（如 SmolLM2 长上下文阶段：40% 长文档 + 60% 普通 mix）。
+</div>
+</div>
+
+<!-- 理论基础 -->
+<div class="section" id="theory">
+<h2>07 &mdash; 理论基础</h2>
+
+<h3>7.1 Gradient Noise Scale (GNS)</h3>
+<div class="key-point">
+<strong>原理：</strong>高质量数据产生更大的梯度方差（更高 GNS）。更高的 GNS 帮助模型<strong>逃离 sharp minima</strong>，避免在低质量数据的平坦区过拟合。
+<br/><br/>
+<strong>实践含义：</strong>Mid-training 切换到高质量数据 → GNS 升高 → 模型跳出 pre-training 末期的低收益 plateau → 进入新的下降通道。
+</div>
+
+<h3>7.2 Information Bottleneck (IB)</h3>
+<div class="key-point">
+<strong>原理：</strong>表征学习本质是压缩——逐步减少对嘈杂/冗余特征的依赖。高质量监督提供<strong>更清晰的低熵指导</strong>，帮助模型：
+<ul>
+<li>识别语义上有意义的结构</li>
+<li>衰减虚假相关</li>
+<li>实现从记忆到抽象的转变</li>
+</ul>
+</div>
+
+<h3>7.3 Curriculum Learning</h3>
+<div class="key-point">
+<strong>原理：</strong>LR annealing 天然与课程学习原则对齐——从多样/嘈杂语料逐渐过渡到挑战性/信息量大的样本。
+<br/><br/>
+<strong>效果：</strong>强化了多步推理和代码生成等复杂技能。SmolLM2 五阶段递进（Web → +Code → +Math → +Synthetic → +Long）正是 curriculum 的体现。
+</div>
+</div>
+
+<!-- 灾难性遗忘 -->
+<div class="section" id="forgetting">
+<h2>08 &mdash; 灾难性遗忘缓解策略</h2>
+
+<table>
+<tr>
+<th>策略类别</th>
+<th>方法</th>
+<th>代表工作</th>
+<th>核心机制</th>
+</tr>
+<tr>
+<td><strong>数据重放</strong></td>
+<td>混合通用数据</td>
+<td>OpenCoder (84% 分布连续)</td>
+<td>保持与 pre-training 分布的重叠</td>
+</tr>
+<tr>
+<td><strong>低 LR</strong></td>
+<td>Peak 的 10%–30%</td>
+<td>通用实践</td>
+<td>减小参数更新幅度</td>
+</tr>
+<tr>
+<td><strong>架构扩展</strong></td>
+<td>选择性层复制</td>
+<td>ADEPT, LLaMA-Pro</td>
+<td>新容量吸收领域知识，原参数冻结</td>
+</tr>
+<tr>
+<td><strong>参数高效</strong></td>
+<td>LoRA / TaSL</td>
+<td>各种 PEFT 方法</td>
+<td>低秩适配，冻结主干</td>
+</tr>
+<tr>
+<td><strong>正则化</strong></td>
+<td>EWC / L2 约束</td>
+<td>经典 continual learning</td>
+<td>惩罚关键参数的偏移</td>
+</tr>
+<tr>
+<td><strong>动态混合</strong></td>
+<td>分阶段调整领域/通用比例</td>
+<td>SmolLM2 五阶段</td>
+<td>渐进式引入领域数据</td>
+</tr>
+</table>
+
+<div class="highlight-box">
+<strong>经验法则：</strong>保留 ≥80% 分布连续性（即 mid-training 数据中至少 80% 与 pre-training 分布重叠）是防止灾难性遗忘的安全线（OpenCoder 实证）。
+</div>
+</div>
+
+<!-- 工业案例 -->
+<div class="section" id="casestudy">
+<h2>09 &mdash; 工业系统 Mid-Training 配置汇总</h2>
+
+<table>
+<tr>
+<th>系统</th>
+<th>规模</th>
+<th>MT 阶段</th>
+<th>LR 策略</th>
+<th>数据特点</th>
+<th>长上下文</th>
+</tr>
+<tr>
+<td><strong>LLaMA 3</strong></td>
+<td>405B</td>
+<td>40B anneal + 800B long</td>
+<td>Cosine→1%→Linear→0</td>
+<td>50% 通用 + 25% 数学 + 17% 代码 + 8% 多语言</td>
+<td>6 阶段 4K→32K</td>
+</tr>
+<tr>
+<td><strong>DeepSeek-V3</strong></td>
+<td>671B MoE</td>
+<td>120B long-ctx</td>
+<td>Multi-step</td>
+<td>FIM 双向推理</td>
+<td>2 阶段 → 128K</td>
+</tr>
+<tr>
+<td><strong>Qwen3</strong></td>
+<td>全系列</td>
+<td>5T quality + 500B long</td>
+<td>Cosine + scaling laws</td>
+<td>STEM/Code/Reasoning 加权</td>
+<td>渐进 → 32K+</td>
+</tr>
+<tr>
+<td><strong>SmolLM2</strong></td>
+<td>小模型</td>
+<td>11T 五阶段</td>
+<td>多阶段递进</td>
+<td>Web→Code→Math→Synth→Long</td>
+<td>75B@40% long</td>
+</tr>
+<tr>
+<td><strong>Phi-4</strong></td>
+<td>14B</td>
+<td>250B mid-train</td>
+<td>—</td>
+<td>75B 长上下文 + 175B recall</td>
+<td>集成于 MT</td>
+</tr>
+<tr>
+<td><strong>MiniMax-M1</strong></td>
+<td>MoE</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>4 阶段 32K→1M</td>
+</tr>
+</table>
+</div>
+
+<!-- 开放问题 -->
+<div class="section" id="challenges">
+<h2>10 &mdash; 开放问题与研究前沿</h2>
+<div class="danger-box">
+<strong>尚未解决的关键问题：</strong>
+<ol>
+<li><strong>指令数据最佳时机：</strong>Mid-training 中引入指令数据（如 DeepSeek 5M 样本）的效果不稳定，最优放置位置未定论</li>
+<li><strong>Decay 策略理论缺失：</strong>Cosine vs Linear vs WSD 在不同系统中表现不一，缺乏统一理论解释</li>
+<li><strong>Warmup 持续时间：</strong>缺乏理论指导，跨模型规模 / 优化器差异大</li>
+<li><strong>Scheduler 敏感度矛盾：</strong>有证据表明"只要 LR 预算足够，形状不重要"，也有反例</li>
+<li><strong>Checkpoint 复用 vs 最终性能：</strong>WSD 等方便复用，但可能牺牲最终 loss</li>
+<li><strong>过度预训练 (Overtraining)：</strong>过多 pre-training 反而降低后续 fine-tuning 适应性</li>
+<li><strong>多领域顺序 Mid-training：</strong>如何在多个领域间顺序训练避免前域遗忘？</li>
+<li><strong>Mid-training 特有 Scaling Laws：</strong>不同于 Chinchilla，尚需专���研究</li>
+</ol>
+</div>
+</div>
+
+<!-- 对 ThothVL 的启发 -->
+<div class="section" id="takeaway">
+<h2>11 &mdash; 对 ThothVL Mid-Training 的启发</h2>
+
+<h3>数据策略</h3>
+<div class="success-box">
+<ul>
+<li><strong>分阶段递进混合：</strong>参考 SmolLM2 模式——先巩固通用，逐步引入视觉推理 / OCR / Chart 等专门数据</li>
+<li><strong>分布连续性 ≥80%：</strong>确保每阶段有足够比例的上一阶段数据重放</li>
+<li><strong>STEM 视觉数据优先：</strong>少量高质量 Math-Vision / Science-Diagram 数据可带来不成比例的增益</li>
+<li><strong>结合 2512.07783 发现：</strong>至少 1% 的 atomic-level 覆盖率，确保后续 RL 能泛化</li>
+</ul>
+</div>
+
+<h3>LR 策略</h3>
+<div class="key-point">
+<ul>
+<li><strong>WSD 值得考虑：</strong>支持 checkpoint 复用，适合多轮实验迭代</li>
+<li><strong>Peak LR = Pre-train 的 10%–20%：</strong>VLM mid-training 对 LR 更敏感（视觉编码器权重更脆弱）</li>
+<li><strong>Cosine + 短 warmup：</strong>如果不需要 checkpoint 复用，cosine 仍是安全选择</li>
+</ul>
+</div>
+
+<h3>长上下文</h3>
+<div class="purple-box">
+<ul>
+<li><strong>YaRN 或 NTK-by-Parts：</strong>保留短上下文视觉理解的同时扩展到长视频 / 多图场景</li>
+<li><strong>渐进式扩展：</strong>参考 LLaMA 3 六阶段方案，避免一步到位的性能损伤</li>
+<li><strong>必须混合短数据：</strong>短上下文视觉推理是核心能力，不能在长上下文训练中丢失</li>
+</ul>
+</div>
+
+<h3>与 2512.07783 的交叉洞察</h3>
+<div class="highlight-box">
+<strong>两篇论文的共振结论：</strong>
+<ul>
+<li>Mid-training 质量决定 RL 上界（Survey 的"桥梁论" + 2512.07783 的 Finding 3: mid-train + RL >> 纯 RL）</li>
+<li>数据广度 > 数据复杂度（Survey 的分布连续性 + 2512.07783 的 ≥1% 覆盖率阈值）</li>
+<li>渐进式 curriculum（Survey 的理���基础 + 2512.07783 的 self-paced RL curriculum）</li>
+</ul>
+</div>
+</div>
+
+<!-- Footer -->
+<div class="section" style="background: transparent; border: none;">
+<div class="footer-section">
+<p>Mid-Training of Large Language Models: A Survey (arXiv:2510.06826)</p>
+<p style="margin-top: 4px; font-size: 0.75rem;">Expanded reading notes &mdash; 2026-03-29</p>
+</div>
+</div>
+
+</div>
+</body>
+</html>

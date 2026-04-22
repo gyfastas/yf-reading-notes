@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moatless Tools · 精读笔记</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0a090e;
+  --s0:       #0f0e14;
+  --s1:       #15141c;
+  --s2:       #1c1a26;
+  --border:   #211e2e;
+  --border2:  #2e2a3e;
+  --text:     #c8c4d0;
+  --muted:    #6a5e80;
+  --muted2:   #4a4260;
+  --head:     #e0dae8;
+  --green:    #6dbb84;
+  --red:      #d9736a;
+  --amber:    #c8a04a;
+  --blue:     #5ea8c0;
+  --purple:   #8878b8;
+  --teal:     #4db8a4;
+  --teal2:    #38907e;
+  --accent:   #8878b8;
+  --accent2:  #6a5ca0;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; font-size:15px; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 300;
+  line-height: 1.8;
+}
+
+/* ─── layout ─── */
+.layout { display:flex; min-height:100vh; }
+
+aside {
+  position: fixed;
+  top: 0; left: 0;
+  width: 210px;
+  height: 100vh;
+  background: var(--s0);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  z-index: 200;
+}
+
+.aside-head {
+  padding: 26px 20px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.back-link {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+  transition: color .2s;
+}
+.back-link:hover { color: var(--accent); }
+.aside-title {
+  font-family: 'Lora', serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--head);
+  line-height: 1.4;
+}
+.aside-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  margin-top: 5px;
+  letter-spacing: .06em;
+}
+
+nav { padding: 14px 0; flex: 1; }
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 20px;
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color .2s, background .2s;
+  border-left: 2px solid transparent;
+}
+.nav-item:hover { color: var(--text); background: rgba(255,255,255,.02); }
+.nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(136,120,184,.05); }
+.nav-item .n {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted2);
+  min-width: 16px;
+}
+
+.aside-foot {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted2);
+  line-height: 1.8;
+}
+
+/* ─── main ─── */
+main {
+  margin-left: 210px;
+  flex: 1;
+  max-width: 820px;
+  padding: 52px 48px 100px;
+}
+
+/* ─── hero ─── */
+.hero { margin-bottom: 52px; }
+.hero-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 14px;
+}
+.hero h1 {
+  font-family: 'Lora', serif;
+  font-size: 36px;
+  font-weight: 500;
+  color: var(--head);
+  line-height: 1.2;
+  margin-bottom: 6px;
+  letter-spacing: -.02em;
+}
+.hero h1 em { font-style: italic; color: var(--accent); }
+.hero-sub {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 16px;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+.hero-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 3px;
+  text-decoration: none;
+  transition: opacity .15s;
+}
+.chip:hover { opacity: .75; }
+.chip-gh    { background:rgba(255,255,255,.04); color:var(--muted);  border:1px solid var(--border2); }
+.chip-venue { background:rgba(136,120,184,.10); color:var(--accent); border:1px solid rgba(136,120,184,.2); }
+.chip-docs  { background:rgba(94,168,192,.10);  color:var(--blue);   border:1px solid rgba(94,168,192,.2); }
+.chip-perf  { background:rgba(109,187,132,.10); color:var(--green);  border:1px solid rgba(109,187,132,.2); }
+
+.hero-abstract {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  padding: 16px 20px;
+  font-size: 13.5px;
+  color: #8a82a0;
+  line-height: 1.75;
+}
+.hero-abstract strong { color: var(--text); }
+
+/* ─── section ─── */
+.sec { margin-bottom: 56px; }
+.sec-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.sec-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted2);
+  letter-spacing: .08em;
+  min-width: 24px;
+}
+.sec-line { width: 3px; height: 20px; border-radius: 2px; flex-shrink: 0; }
+.sec-title {
+  font-family: 'Lora', serif;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--head);
+}
+
+/* ─── prose ─── */
+p { margin-bottom: 12px; font-size: 13.5px; }
+p:last-child { margin-bottom: 0; }
+strong { color: var(--head); font-weight: 500; }
+em { color: var(--amber); font-style: italic; }
+
+/* ─── arch diagram ─── */
+.arch-diagram {
+  background: var(--s0);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 24px;
+  margin: 16px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  line-height: 1.9;
+  color: #504868;
+  overflow-x: auto;
+}
+.arch-diagram .layer-label {
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted2);
+  margin-bottom: 4px;
+}
+.arch-box {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+.arch-box.state  { background:rgba(136,120,184,.14); color:var(--accent); border:1px solid rgba(136,120,184,.3); }
+.arch-box.ctrl   { background:rgba(94,168,192,.12);  color:var(--blue); border:1px solid rgba(94,168,192,.25); }
+.arch-box.llm    { background:rgba(200,160,74,.10);  color:var(--amber); border:1px solid rgba(200,160,74,.2); }
+.arch-box.rt     { background:rgba(109,187,132,.12); color:var(--green); border:1px solid rgba(109,187,132,.25); }
+.arch-box.term   { background:rgba(217,115,106,.10); color:var(--red); border:1px solid rgba(217,115,106,.2); }
+.arch-box.idx    { background:rgba(77,184,164,.12);  color:var(--teal); border:1px solid rgba(77,184,164,.25); }
+.arch-arrow { color: var(--muted2); }
+
+/* ─── component grid ─── */
+.comp-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 16px 0;
+}
+.comp-card {
+  background: var(--s1);
+  padding: 16px 18px;
+  transition: background .2s;
+}
+.comp-card:hover { background: var(--s2); }
+.comp-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+.comp-name {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--head);
+  margin-bottom: 7px;
+}
+.comp-body { font-size: 12.5px; color: var(--muted); line-height: 1.65; }
+.comp-body strong { color: var(--text); }
+.comp-body code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--accent); padding:1px 5px; border-radius:3px; }
+
+/* ─── action table ─── */
+.action-list { display:flex; flex-direction:column; gap:2px; margin:14px 0; }
+.action-item {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.action-item:hover { border-color: var(--border2); }
+.action-name {
+  padding: 10px 14px;
+  background: var(--s0);
+  border-right: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+}
+.action-desc {
+  padding: 10px 14px;
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.6;
+  display: flex;
+  align-items: center;
+}
+.action-desc strong { color: var(--text); }
+.action-desc code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--accent); padding:1px 5px; border-radius:3px; }
+
+/* ─── pipeline ─── */
+.pipeline { display: flex; flex-direction: column; gap: 2px; margin-bottom: 20px; }
+.pipeline-step {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.pipeline-step:hover { border-color: var(--border2); }
+.step-gutter {
+  background: var(--s0);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 16px 0 0;
+  border-right: 1px solid var(--border);
+}
+.step-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 500;
+  color: var(--accent);
+  letter-spacing: .06em;
+}
+.step-inner { padding: 14px 18px; }
+.step-h {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--head);
+  margin-bottom: 6px;
+}
+.step-p { font-size: 12.5px; color: var(--muted); line-height: 1.65; }
+.step-p code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--accent); padding:1px 5px; border-radius:3px; }
+.step-p strong { color: var(--text); }
+
+/* ─── codeblock ─── */
+.codeblock {
+  background: var(--s0);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 14px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  line-height: 1.75;
+}
+.codeblock-head {
+  background: var(--s1);
+  border-bottom: 1px solid var(--border);
+  padding: 7px 16px;
+  font-size: 9.5px;
+  color: var(--muted);
+  letter-spacing: .1em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.codeblock-head .dot { width:8px;height:8px;border-radius:50%; }
+.codeblock pre {
+  padding: 14px 18px;
+  white-space: pre;
+  overflow-x: auto;
+  color: #605878;
+}
+.tok-comment { color: #342e48; }
+.tok-key     { color: var(--accent); }
+.tok-str     { color: var(--amber); }
+.tok-num     { color: var(--teal); }
+.tok-cmd     { color: var(--blue); }
+.tok-role    { color: var(--green); }
+.tok-em      { color: var(--red); }
+
+/* ─── callout ─── */
+.callout {
+  border-radius: 7px;
+  padding: 13px 16px;
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 14px 0;
+  display: flex;
+  gap: 12px;
+}
+.callout-icon { font-size: 14px; flex-shrink: 0; padding-top: 1px; }
+.callout-body { flex: 1; }
+.callout-body strong { font-weight: 500; }
+.callout.warn  { background:rgba(200,160,74,.08);  border:1px solid rgba(200,160,74,.18);  color:#a89060; }
+.callout.info  { background:rgba(94,168,192,.08);  border:1px solid rgba(94,168,192,.18);  color:#6898a8; }
+.callout.good  { background:rgba(109,187,132,.08); border:1px solid rgba(109,187,132,.18); color:#5a9e8c; }
+.callout.key   { background:rgba(136,120,184,.08); border:1px solid rgba(136,120,184,.18); color:#8878b0; }
+
+/* ─── stat grid ─── */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 16px 0;
+}
+.stat-cell {
+  background: var(--s1);
+  padding: 16px 18px;
+}
+.stat-val {
+  font-family: 'Lora', serif;
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--head);
+  margin-bottom: 3px;
+  line-height: 1.1;
+}
+.stat-val .unit { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); font-weight:400; }
+.stat-label { font-size: 11.5px; color: var(--muted); }
+
+/* ─── bench table ─── */
+.bench-table { width:100%; border-collapse:collapse; font-size:13px; margin:16px 0; }
+.bench-table th {
+  font-family:'JetBrains Mono',monospace;
+  font-size:9.5px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--muted2);
+  padding:9px 14px;
+  text-align:left;
+  background:var(--s0);
+  border-bottom:1px solid var(--border);
+}
+.bench-table td {
+  padding:10px 14px;
+  border-bottom:1px solid var(--border);
+  color:var(--muted);
+  vertical-align:middle;
+}
+.bench-table tr:last-child td { border-bottom:none; }
+.bench-table td:first-child { color:var(--head); font-weight:500; }
+.bench-table .highlight { color:var(--accent); font-weight:500; font-family:'JetBrains Mono',monospace; }
+.bench-table .best { color:var(--green); }
+.bench-table .note { font-size:11px; color:var(--muted2); }
+.bench-table tr:hover td { background:rgba(255,255,255,.01); }
+
+/* ─── bar rows ─── */
+.bar-row { display:grid; grid-template-columns:160px 1fr 60px; align-items:center; gap:12px; margin:8px 0; font-size:12.5px; }
+.bar-track { background:var(--border); height:5px; border-radius:3px; overflow:hidden; }
+.bar-fill  { height:100%; border-radius:3px; background:var(--accent); }
+.bar-val   { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--accent); text-align:right; }
+
+/* ─── insight cards ─── */
+.insight-cards { display:flex; flex-direction:column; gap:10px; }
+.insight-card {
+  display: grid;
+  grid-template-columns: 3px 1fr;
+  gap: 14px;
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  overflow: hidden;
+  padding: 14px 16px;
+  transition: border-color .2s;
+}
+.insight-card:hover { border-color: var(--border2); }
+.insight-stripe { border-radius: 2px; }
+.insight-title { font-size: 13.5px; font-weight:500; color:var(--head); margin-bottom:5px; }
+.insight-body  { font-size: 12.5px; color:var(--muted); line-height:1.65; }
+.insight-body strong { color:var(--text); }
+.insight-body code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--accent); padding:1px 5px; border-radius:3px; }
+
+/* ─── tag row ─── */
+.tag-row { display:flex; flex-wrap:wrap; gap:6px; margin:10px 0; }
+.tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 2px 9px;
+  border-radius: 3px;
+  background: var(--s1);
+  border: 1px solid var(--border2);
+  color: var(--accent);
+}
+.tag.blue  { color:var(--blue);  background:rgba(94,168,192,.06);  border-color:rgba(94,168,192,.2); }
+.tag.amber { color:var(--amber); background:rgba(200,160,74,.06);  border-color:rgba(200,160,74,.2); }
+.tag.green { color:var(--green); background:rgba(109,187,132,.06); border-color:rgba(109,187,132,.2); }
+.tag.teal  { color:var(--teal);  background:rgba(77,184,164,.06);  border-color:rgba(77,184,164,.2); }
+
+/* ─── two-col compare ─── */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 14px 0;
+}
+.two-col-card {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 14px 16px;
+}
+.two-col-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted2);
+  margin-bottom: 8px;
+}
+.two-col-body { font-size: 12px; color: var(--muted); line-height: 1.7; }
+.two-col-body strong { color: var(--text); }
+.two-col-body code { font-family:'JetBrains Mono',monospace; font-size:10px; background:var(--bg); color:var(--accent); padding:1px 4px; border-radius:3px; }
+
+/* ─── FSM flow diagram ─── */
+.fsm-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 16px 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.fsm-row {
+  display: grid;
+  grid-template-columns: 36px 160px 1fr;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 11.5px;
+  transition: background .15s;
+}
+.fsm-row:last-child { border-bottom: none; }
+.fsm-row:hover { background: rgba(255,255,255,.015); }
+.fsm-row.head {
+  background: var(--s0);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted2);
+}
+.fsm-id {
+  padding: 9px 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  color: var(--muted2);
+  border-right: 1px solid var(--border);
+  text-align: center;
+  align-self: center;
+}
+.fsm-state {
+  padding: 9px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  border-right: 1px solid var(--border);
+  align-self: center;
+}
+.fsm-body {
+  padding: 9px 14px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+  align-self: center;
+}
+.fsm-body strong { color: var(--text); }
+.fsm-body code { font-family:'JetBrains Mono',monospace; font-size:10px; background:var(--bg); color:var(--accent); padding:1px 4px; border-radius:3px; }
+
+/* ─── scrollbar ─── */
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+/* ─── divider ─── */
+.divider { border:none; border-top:1px solid var(--border); margin:28px 0; }
+
+@media (max-width:700px) {
+  aside { display:none; }
+  main  { margin-left:0; padding:28px 18px 60px; }
+  .comp-grid { grid-template-columns:1fr; }
+  .stat-grid { grid-template-columns:1fr 1fr; }
+  .action-item { grid-template-columns:1fr; }
+  .action-name { border-right:none; border-bottom:1px solid var(--border); }
+  .two-col { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ─── Sidebar ─── -->
+<aside>
+  <div class="aside-head">
+    <a href="../../Reference.html" class="back-link">&larr; 返回 Reference</a>
+    <div class="aside-title">Moatless Tools</div>
+    <div class="aside-sub">精读笔记 · Albert Orwall</div>
+  </div>
+  <nav>
+    <a class="nav-item active" href="#overview"><span class="n">00</span>概览</a>
+    <a class="nav-item" href="#fsm"><span class="n">01</span>有限状态机架构</a>
+    <a class="nav-item" href="#codespans"><span class="n">02</span>Code Spans 概念</a>
+    <a class="nav-item" href="#indexing"><span class="n">03</span>代码索引</a>
+    <a class="nav-item" href="#agent"><span class="n">04</span>Agent 实现</a>
+    <a class="nav-item" href="#workspace"><span class="n">05</span>Workspace 系统</a>
+    <a class="nav-item" href="#trajectory"><span class="n">06</span>轨迹格式</a>
+    <a class="nav-item" href="#comparison"><span class="n">07</span>与其他 Scaffold 对比</a>
+    <a class="nav-item" href="#takeaways"><span class="n">08</span>对本研究的启发</a>
+  </nav>
+  <div class="aside-foot">
+    aorwall/moatless-tools<br>
+    Albert Orwall<br>
+    tree-sitter + FSM + MCTS<br>
+    70.8% SWE-bench Verified
+  </div>
+</aside>
+
+<!-- ─── Main ─── -->
+<main>
+
+<!-- ─── Hero ─── -->
+<div class="hero" id="overview">
+  <div class="hero-eyebrow">Framework Deep-Dive · Code Editing via FSM</div>
+  <h1>Moatless <em>Tools</em></h1>
+  <div class="hero-sub">Intelligent Code Editing for Large Codebases</div>
+  <div class="hero-chips">
+    <a href="https://github.com/aorwall/moatless-tools" target="_blank" class="chip chip-gh">&#8963; aorwall/moatless-tools</a>
+    <a href="https://github.com/aorwall/moatless-tree-search" target="_blank" class="chip chip-gh">&#8963; moatless-tree-search</a>
+    <span class="chip chip-venue">Albert Orwall</span>
+    <span class="chip chip-perf">70.8% SWE-bench Verified</span>
+  </div>
+  <div class="hero-abstract">
+    <strong>Moatless Tools</strong> 是一个基于 tree-sitter 代码理解的代码编辑框架，专为 SWE-bench 任务设计。其核心创新在于将代码编辑建模为<strong>有限状态机（FSM）</strong>，具有显式状态转换：Search &rarr; Identify &rarr; PlanToCode &rarr; EditCode。每个状态转换被完整记录，天然产出结构化轨迹数据。使用 Claude 4 Sonnet 在 SWE-bench Verified 上达到 <strong>70.8%</strong>，成本仅 <strong>$0.63/instance</strong>。同时也是 <strong>moatless-tree-search</strong>（MCTS for code editing）的基础框架，支持通过蒙特卡洛树搜索探索多条编辑路径，为训练数据生成提供了大规模多样性轨迹的可能。
+  </div>
+</div>
+
+<!-- ─── 00 Stats ─── -->
+<div class="stat-grid" style="margin-bottom:40px">
+  <div class="stat-cell">
+    <div class="stat-val">70.8<span class="unit">%</span></div>
+    <div class="stat-label">SWE-bench Verified (Claude 4 Sonnet)</div>
+  </div>
+  <div class="stat-cell">
+    <div class="stat-val">$0.63</div>
+    <div class="stat-label">平均成本 per instance</div>
+  </div>
+  <div class="stat-cell">
+    <div class="stat-val">75k</div>
+    <div class="stat-label">可用轨迹 (300 problems &times; 250)</div>
+  </div>
+</div>
+
+
+<!-- ─── 01 FSM Architecture ─── -->
+<section class="sec" id="fsm">
+  <div class="sec-header">
+    <span class="sec-num">01</span>
+    <div class="sec-line" style="background:var(--accent)"></div>
+    <h2 class="sec-title">有限状态机架构</h2>
+  </div>
+
+  <p>Moatless Tools 的核心设计是将代码修复任务分解为<strong>显式的状态转换序列</strong>。与 OpenHands 的自由 agent loop 或 SWE-agent 的命令行交互不同，Moatless 将整个过程建模为有限状态机，每个状态有明确的输入、输出和转换条件。</p>
+
+  <div class="arch-diagram">
+    <div class="layer-label">FSM 状态转换图</div>
+    <div style="line-height:2.4">
+      <span class="arch-box state">Search</span> <span style="color:var(--muted2)">&mdash;&mdash;</span> <span style="font-size:10px;color:var(--muted2)">找到相关代码？</span> <span style="color:var(--muted2)">&mdash;&rarr;</span> <span class="arch-box state">Identify</span>
+      <br><span style="color:var(--muted2)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&uarr; 不够 &larr;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&swarr;</span>
+      <br>
+      <br><span class="arch-box state">Identify</span> <span style="color:var(--muted2)">&mdash;&mdash;</span> <span style="font-size:10px;color:var(--muted2)">上下文充分？</span> <span style="color:var(--muted2)">&mdash;&rarr;</span> <span class="arch-box ctrl">PlanToCode</span>
+      <br>
+      <br><span class="arch-box ctrl">PlanToCode</span> <span style="color:var(--muted2)">&mdash;&rarr;</span> <span class="arch-box llm">EditCode</span> <span style="font-size:10px;color:var(--muted2)">（正常编辑）</span>
+      <br><span class="arch-box ctrl">PlanToCode</span> <span style="color:var(--muted2)">&mdash;&rarr;</span> <span class="arch-box rt">ClarifyChange</span> <span style="font-size:10px;color:var(--muted2)">（范围太大时收窄）</span>
+      <br>
+      <br><span class="arch-box llm">EditCode</span> <span style="color:var(--muted2)">&mdash;&rarr;</span> <span class="arch-box term">Finished</span> <span style="font-size:10px;color:var(--muted2)">/ </span><span class="arch-box term">Rejected</span> <span style="font-size:10px;color:var(--muted2)">（终态）</span>
+    </div>
+  </div>
+
+  <!-- State descriptions -->
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge" style="color:var(--accent)">S1</span></div>
+      <div class="step-inner">
+        <div class="step-h">Search &mdash; 代码搜索</div>
+        <div class="step-p">LLM 通过 function calling 搜索相关代码。可用搜索函数包括：<code>query</code>（语义搜索）、<code>class_name</code>（按类名定位）、<code>function_name</code>（按函数名定位）、<code>code_snippet</code>（按代码片段匹配）。LLM 决定使用哪种搜索以及搜索什么内容，系统返回匹配的 <strong>code spans</strong>。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge" style="color:var(--accent)">S2</span></div>
+      <div class="step-inner">
+        <div class="step-h">Identify &mdash; 判断上下文是否充分</div>
+        <div class="step-p">LLM 审视当前已收集到的 code spans，判断是否有足够的上下文来制定修改方案。<strong>如果不够</strong> &rarr; 返回 Search 继续搜索；<strong>如果足够</strong> &rarr; 进入 PlanToCode。这个"回退循环"确保 agent 在动手修改前确实理解了问题的完整上下文。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge" style="color:var(--blue)">S3</span></div>
+      <div class="step-inner">
+        <div class="step-h">PlanToCode &mdash; 规划具体修改</div>
+        <div class="step-p">将变更请求分解为<strong>更小的编辑单元</strong>，每个编辑精确定位到特定的 code span。输出结构化修改计划，包括目标文件、目标 span、修改内容描述。如果某个修改涉及的代码范围太大，自动转入 ClarifyChange。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge" style="color:var(--amber)">S3b</span></div>
+      <div class="step-inner">
+        <div class="step-h">ClarifyChange &mdash; 收窄修改范围</div>
+        <div class="step-p">当 PlanToCode 提出的修改涉及过大的代码区域时触发。要求 LLM 进一步明确：<strong>具体是哪个类/函数/代码块需要修改？</strong>收窄到精确的 code span 后返回 PlanToCode。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge" style="color:var(--green)">S4</span></div>
+      <div class="step-inner">
+        <div class="step-h">EditCode &mdash; 执行代码编辑</div>
+        <div class="step-p">使用 <strong>SEARCH/REPLACE block</strong> 格式（灵感来自 Aider）执行实际编辑。关键设计：<strong>SEARCH 部分由系统预填充</strong>（从已确定的 code span 中提取），LLM 只需要写 REPLACE 部分。这大幅降低了 LLM 的负担，避免了"搜索内容写错导致编辑失败"的常见问题。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge" style="color:var(--red)">T</span></div>
+      <div class="step-inner">
+        <div class="step-h">Finished / Rejected &mdash; 终态</div>
+        <div class="step-p"><strong>Finished</strong>：所有计划的编辑已完成，生成最终 git diff patch。<strong>Rejected</strong>：LLM 判断无法完成修复（例如问题超出代码修改范围，需要更多信息等），终止流程并说明原因。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout key">
+    <div class="callout-icon">&#9670;</div>
+    <div class="callout-body">
+      <strong>FSM 的关键优势</strong>：每个状态转换都被完整记录到 <code>trajectory.json</code>，天然形成结构化轨迹。相比自由 agent loop 产出的"扁平"action-observation 序列，FSM 轨迹自带<strong>阶段标注</strong>——每条记录不仅有"做了什么"，还有"处于什么阶段"。这为训练数据提供了更丰富的监督信号：可以分阶段训练（搜索能力、判断能力、编辑能力），而不只是端到端模仿。
+    </div>
+  </div>
+</section>
+
+
+<!-- ─── 02 Code Spans ─── -->
+<section class="sec" id="codespans">
+  <div class="sec-header">
+    <span class="sec-num">02</span>
+    <div class="sec-line" style="background:var(--teal)"></div>
+    <h2 class="sec-title">Code Spans 概念</h2>
+  </div>
+
+  <p><strong>Code Span</strong> 是 Moatless Tools 的核心抽象：代码库中与当前问题相关的特定部分。不是"文件"级别，也不是"行"级别，而是由 tree-sitter 解析得到的<strong>语义单元</strong>——类定义、函数体、方法签名等。</p>
+
+  <div class="comp-grid">
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--teal)">Core Concept</div>
+      <div class="comp-name">Code Span 定义</div>
+      <div class="comp-body">
+        一个 code span = <strong>(file_path, span_id)</strong>，其中 <code>span_id</code> 由 tree-sitter 解析确定，对应类边界、函数边界、方法边界等语法结构。code span 是 Moatless 中<strong>上下文管理和编辑定位的最小单元</strong>。
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--accent)">Tree-sitter</div>
+      <div class="comp-name">语义解析</div>
+      <div class="comp-body">
+        通过 tree-sitter 将源代码解析为 AST（抽象语法树），提取类边界、函数边界等结构化信息。相比基于行号的切割，<strong>code span 天然尊重代码的语义结构</strong>，不会在函数中间断开。
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--blue)">Context Mgmt</div>
+      <div class="comp-name">上下文追踪</div>
+      <div class="comp-body">
+        系统在整个 FSM 过程中维护一组"当前可见"的 code spans（<strong>File Context</strong>）。Search 阶段添加 spans，Identify 阶段确认 spans，PlanToCode/EditCode 阶段精确定位到特定 span 进行修改。<strong>始终知道 LLM 当前"看到"了什么代码。</strong>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--amber)">Edit Target</div>
+      <div class="comp-name">编辑定位</div>
+      <div class="comp-body">
+        在 EditCode 阶段，系统从目标 code span 中提取代码作为 SEARCH block 的内容，<strong>预填充给 LLM</strong>。LLM 只需要产出 REPLACE 部分。这意味着编辑精度不依赖 LLM 准确复述原始代码——code span 确保了定位的精确性。
+      </div>
+    </div>
+  </div>
+
+  <!-- EpicSplitter -->
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:28px 0 12px">EpicSplitter &middot; 层次化分块策略</div>
+
+  <p><strong>EpicSplitter</strong> 是 Moatless 的代码分块器，为 embedding 索引准备代码块。其设计在 tree-sitter 解析基础上加入了"层次化块合并"逻辑：</p>
+
+  <div class="stat-grid">
+    <div class="stat-cell">
+      <div class="stat-val">750<span class="unit"> tokens</span></div>
+      <div class="stat-label">目标 chunk 大小</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-val">100<span class="unit"> ~ </span>1500</div>
+      <div class="stat-label">最小 ~ 最大 tokens</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-val">6000<span class="unit"> max</span></div>
+      <div class="stat-label">硬上限（不可突破）</div>
+    </div>
+  </div>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:#d9736a"></span>
+      <span class="dot" style="background:#c8a04a"></span>
+      <span class="dot" style="background:#6dbb84"></span>
+      EpicSplitter &middot; 分块流程
+    </div>
+    <pre><span class="tok-comment"># 1. tree-sitter 解析 → CodeBlock 层次结构</span>
+code_blocks = CodeParser(language).parse(source_code)
+<span class="tok-comment">#    MODULE → CLASS → FUNCTION → nested blocks</span>
+
+<span class="tok-comment"># 2. 按 CodeBlock 边界初步切分</span>
+raw_chunks = split_by_blocks(code_blocks, target=<span class="tok-num">750</span>)
+
+<span class="tok-comment"># 3. 注释处理策略（三种模式）</span>
+<span class="tok-key">EXCLUDE</span>   <span class="tok-comment"># 注释不纳入 chunk</span>
+<span class="tok-key">INCLUDE</span>   <span class="tok-comment"># 注释纳入最近的 chunk</span>
+<span class="tok-key">ASSOCIATE</span> <span class="tok-comment"># 注释与其关联的代码块绑定（跟随函数/类声明）</span>
+
+<span class="tok-comment"># 4. Merge pass: 合并过小的 chunk</span>
+<span class="tok-key">for</span> chunk <span class="tok-key">in</span> raw_chunks:
+    <span class="tok-key">if</span> chunk.tokens < <span class="tok-num">100</span>:
+        merge_with_adjacent(chunk)  <span class="tok-comment"># 与相邻 chunk 合并</span></pre>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-icon">&#8505;</div>
+    <div class="callout-body">
+      <strong>与 Aider RepoMap 的区别</strong>：Aider 也使用 tree-sitter，但其 RepoMap 侧重于生成整个仓库的<em>骨架视图</em>（只展示类名、函数签名），用于帮助 LLM 定位。Moatless 的 code span 则是<strong>完整保留代码内容</strong>的精确切片，用于直接作为编辑上下文。两者互补：RepoMap 回答"代码库长什么样"，Code Span 回答"需要改的那段代码是什么"。
+    </div>
+  </div>
+</section>
+
+
+<!-- ─── 03 Code Indexing ─── -->
+<section class="sec" id="indexing">
+  <div class="sec-header">
+    <span class="sec-num">03</span>
+    <div class="sec-line" style="background:var(--green)"></div>
+    <h2 class="sec-title">代码索引</h2>
+  </div>
+
+  <p>代码索引是 Moatless Tools 搜索能力的基础。系统在处理代码库时构建多层索引，支持从语义搜索到精确定位的多种查询方式。</p>
+
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge" style="color:var(--green)">L1</span></div>
+      <div class="step-inner">
+        <div class="step-h">CodeParser &rarr; CodeBlock 层次结构</div>
+        <div class="step-p">tree-sitter 解析器将源代码转换为 <strong>CodeBlock 层次树</strong>。每个 CodeBlock 记录其类型（<code>MODULE</code>、<code>CLASS</code>、<code>FUNCTION</code>、<code>TEST_SUITE</code>）、起止行号、内容摘要。Python 有完整的 tree-sitter 支持，其他语言也在逐步添加。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge" style="color:var(--accent)">L2</span></div>
+      <div class="step-inner">
+        <div class="step-h">EpicSplitter &rarr; Embedding-ready Chunks</div>
+        <div class="step-p">将 CodeBlock 层次结构切分为<strong>适合 embedding 的代码块</strong>（750 token 目标），保持语义完整性。每个 chunk 关联其来源 CodeBlock 的元信息，支持从 embedding 搜索结果反向定位到 code span。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge" style="color:var(--blue)">L3</span></div>
+      <div class="step-inner">
+        <div class="step-h">Semantic Search &rarr; 初始代码发现</div>
+        <div class="step-p">通过向量 embedding 实现<strong>语义搜索</strong>，支持自然语言查询。LLM 在 Search 状态下使用 <code>query</code> 函数时，系统计算 query embedding，在代码块索引中做 cosine similarity 搜索，返回 top-k 匹配结果。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge" style="color:var(--amber)">L4</span></div>
+      <div class="step-inner">
+        <div class="step-h">File Context &rarr; 运行时 Span 追踪</div>
+        <div class="step-p"><strong>File Context</strong> 维护当前 session 中"可见"的 code spans 集合。每次 Search 返回新结果，相关 spans 被加入 File Context；每次 Identify 确认后，spans 被标记为"已确认"。整个过程中，系统始终知道 LLM 当前看到了哪些代码片段。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:#d9736a"></span>
+      <span class="dot" style="background:#c8a04a"></span>
+      <span class="dot" style="background:#6dbb84"></span>
+      CodeBlock 类型层次
+    </div>
+    <pre><span class="tok-key">class</span> CodeBlockType(Enum):
+    MODULE      = <span class="tok-str">"module"</span>       <span class="tok-comment"># 文件顶层</span>
+    CLASS       = <span class="tok-str">"class"</span>        <span class="tok-comment"># 类定义</span>
+    FUNCTION    = <span class="tok-str">"function"</span>     <span class="tok-comment"># 函数/方法定义</span>
+    TEST_SUITE  = <span class="tok-str">"test_suite"</span>   <span class="tok-comment"># 测试类/测试集</span>
+    TEST_CASE   = <span class="tok-str">"test_case"</span>    <span class="tok-comment"># 单个测试用例</span>
+    CONSTRUCTOR = <span class="tok-str">"constructor"</span>  <span class="tok-comment"># __init__ 等构造方法</span>
+    IMPORT      = <span class="tok-str">"import"</span>       <span class="tok-comment"># import 语句块</span>
+    COMMENT     = <span class="tok-str">"comment"</span>      <span class="tok-comment"># 注释/文档字符串</span>
+
+<span class="tok-comment"># 典型层次：</span>
+<span class="tok-comment"># MODULE</span>
+<span class="tok-comment">#   ├─ IMPORT</span>
+<span class="tok-comment">#   ├─ CLASS</span>
+<span class="tok-comment">#   │   ├─ CONSTRUCTOR</span>
+<span class="tok-comment">#   │   ├─ FUNCTION (method)</span>
+<span class="tok-comment">#   │   └─ FUNCTION (method)</span>
+<span class="tok-comment">#   └─ TEST_SUITE</span>
+<span class="tok-comment">#       ├─ TEST_CASE</span>
+<span class="tok-comment">#       └─ TEST_CASE</span></pre>
+  </div>
+
+  <div class="callout good">
+    <div class="callout-icon">&#10003;</div>
+    <div class="callout-body">
+      <strong>tree-sitter 是通用基础设施</strong>：Moatless、Aider、SWE-agent（v2 的 ACI 中）都使用 tree-sitter 进行代码理解。它的跨语言 AST 能力使得代码结构解析不依赖正则表达式或启发式规则。对于 agentic coding 训练数据生成，tree-sitter 级别的代码理解应被视为标配能力。
+    </div>
+  </div>
+</section>
+
+
+<!-- ─── 04 Agent Implementation ─── -->
+<section class="sec" id="agent">
+  <div class="sec-header">
+    <span class="sec-num">04</span>
+    <div class="sec-line" style="background:var(--amber)"></div>
+    <h2 class="sec-title">Agent 实现</h2>
+  </div>
+
+  <p>Moatless Tools 的 agent 层围绕 <strong>ActionAgent</strong> 构建，负责在 FSM 各状态中调用 LLM 生成并执行 actions。</p>
+
+  <!-- Actions -->
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 12px">4.1 &nbsp;Action 类型</div>
+
+  <div class="action-list">
+    <div class="action-item">
+      <div class="action-name">FindClass</div>
+      <div class="action-desc">在索引中按类名搜索，返回匹配类的 code spans。支持精确匹配和模糊匹配。</div>
+    </div>
+    <div class="action-item">
+      <div class="action-name">FindFunction</div>
+      <div class="action-desc">在索引中按函数名搜索，支持限定搜索范围（特定文件/类内）。</div>
+    </div>
+    <div class="action-item">
+      <div class="action-name">FindCodeSnippet</div>
+      <div class="action-desc">按代码片段内容搜索（字符串匹配），用于定位包含特定表达式的代码。</div>
+    </div>
+    <div class="action-item">
+      <div class="action-name">SemanticSearch</div>
+      <div class="action-desc">通过 embedding 向量执行<strong>语义搜索</strong>，支持自然语言 query。</div>
+    </div>
+    <div class="action-item">
+      <div class="action-name">ViewCode</div>
+      <div class="action-desc">查看指定文件的指定 code span 内容，将其加入当前 File Context。</div>
+    </div>
+    <div class="action-item">
+      <div class="action-name">StringReplace</div>
+      <div class="action-desc">核心编辑操作：<strong>SEARCH/REPLACE block</strong>。SEARCH 部分由系统从 code span 预填充，LLM 只输出 REPLACE 部分。</div>
+    </div>
+    <div class="action-item">
+      <div class="action-name">CreateFile</div>
+      <div class="action-desc">创建新文件并写入内容。用于需要添加新模块/测试文件的场景。</div>
+    </div>
+    <div class="action-item">
+      <div class="action-name">AppendString</div>
+      <div class="action-desc">向文件末尾追加内容，不需要指定 SEARCH block。用于添加新函数/类。</div>
+    </div>
+    <div class="action-item">
+      <div class="action-name">RunTests</div>
+      <div class="action-desc">执行测试用例验证修改正确性。支持指定测试文件/测试函数。</div>
+    </div>
+    <div class="action-item">
+      <div class="action-name">Finish</div>
+      <div class="action-desc">标记任务完成，生成最终 git diff patch。触发 FSM 进入 Finished 终态。</div>
+    </div>
+    <div class="action-item">
+      <div class="action-name">Reject</div>
+      <div class="action-desc">标记任务无法完成，附带拒绝原因。触发 FSM 进入 Rejected 终态。</div>
+    </div>
+  </div>
+
+  <!-- Completion patterns -->
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:24px 0 12px">4.2 &nbsp;完成模式</div>
+
+  <div class="two-col">
+    <div class="two-col-card" style="border-left:3px solid var(--accent)">
+      <div class="two-col-label" style="color:var(--accent)">tool_call 模式</div>
+      <div class="two-col-body">
+        LLM 以 <strong>function calling / tool_use</strong> 格式输出 action。每个 action 是一个结构化的 tool call（函数名 + JSON 参数）。适合 Claude、GPT 等原生支持 tool calling 的模型。
+      </div>
+    </div>
+    <div class="two-col-card" style="border-left:3px solid var(--amber)">
+      <div class="two-col-label" style="color:var(--amber)">ReAct 模式</div>
+      <div class="two-col-body">
+        LLM 以 <strong>Thought / Action / Observation</strong> 格式输出。Action 部分为文本描述，系统解析提取。适合不支持 tool calling 的开源模型。两种模式产出相同的 action 序列。
+      </div>
+    </div>
+  </div>
+
+  <!-- Memory -->
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:24px 0 12px">4.3 &nbsp;Memory &middot; 对话管理</div>
+
+  <p><strong>MessageHistoryGenerator</strong> 负责将 FSM 状态转换历史转换为 LLM 可消费的消息序列。它不仅记录 action-observation 对，还记录<strong>状态转换信息</strong>——LLM 在每步决策时，可以看到当前处于 FSM 的哪个状态，这是 Moatless 与自由 agent loop 的本质区别。</p>
+
+  <!-- MCTS -->
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:24px 0 12px">4.4 &nbsp;moatless-tree-search &middot; MCTS 探索</div>
+
+  <p><strong>moatless-tree-search</strong> 是构建在 Moatless Tools 之上的蒙特卡洛树搜索（MCTS）变体，用于探索多条代码编辑路径。</p>
+
+  <div class="comp-grid">
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--accent)">MCTS Core</div>
+      <div class="comp-name">搜索树结构</div>
+      <div class="comp-body">
+        FSM 的每个状态转换对应搜索树的一条边。在每个状态节点，MCTS 可以<strong>探索多种 action 选择</strong>（如不同的搜索策略、不同的编辑方案），而非只采纳一条路径。每条路径最终产出一个 patch，通过测试验证质量。
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--green)">Training Data</div>
+      <div class="comp-name">多样性轨迹</div>
+      <div class="comp-body">
+        <strong>核心价值</strong>：每个 SWE 问题可以生成<strong>数百条</strong>不同的解题轨迹。成功的路径提供正样本，失败的路径提供负样本。这是 rejection sampling 和 verifier 训练的理想数据源——SWE-Gym 就是基于 Moatless 轨迹训练 verifier。
+      </div>
+    </div>
+  </div>
+
+  <div class="callout key">
+    <div class="callout-icon">&#9670;</div>
+    <div class="callout-body">
+      <strong>MCTS + FSM 的协同效应</strong>：FSM 的显式状态结构使 MCTS 能够在<em>语义有意义的节点</em>上分支——而不是在任意 action 上分支。例如，可以固定 Search 阶段的结果，只在 EditCode 阶段探索多种编辑方案。这比在自由 agent loop 上做 MCTS 效率高得多，因为搜索空间通过 FSM 被结构化地限制了。
+    </div>
+  </div>
+</section>
+
+
+<!-- ─── 05 Workspace ─── -->
+<section class="sec" id="workspace">
+  <div class="sec-header">
+    <span class="sec-num">05</span>
+    <div class="sec-line" style="background:var(--blue)"></div>
+    <h2 class="sec-title">Workspace 系统</h2>
+  </div>
+
+  <p>Workspace 类是 Moatless Tools 的顶层编排器，协调 Repository、CodeIndex、RuntimeEnvironment 三个子系统的交互。</p>
+
+  <div class="comp-grid">
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--accent)">Core</div>
+      <div class="comp-name">Workspace 类</div>
+      <div class="comp-body">
+        统一管理 <strong>Repository</strong>（git 仓库操作：clone、checkout、diff）+ <strong>CodeIndex</strong>（代码索引和搜索）+ <strong>RuntimeEnvironment</strong>（测试执行环境）。三者通过 Workspace 协调，确保索引与仓库状态一致。
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--blue)">Artifacts</div>
+      <div class="comp-name">Artifact Handlers</div>
+      <div class="comp-body">
+        <strong>多态数据管理</strong>：不同类型的产出物（code patches、test results、trajectory logs）通过统一的 Artifact Handler 接口管理。支持序列化/反序列化，方便持久化和跨 session 复用。
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--teal)">Tracking</div>
+      <div class="comp-name">File Context 追踪</div>
+      <div class="comp-body">
+        维护编辑前/后的 code span 差异（<strong>pre/post edit diffing</strong>）。每次 EditCode 执行后，系统自动比对修改前后的 code spans，更新 File Context 中的 span 信息，确保后续编辑步骤基于最新的代码状态。
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--amber)">Persistence</div>
+      <div class="comp-name">trajectory.json</div>
+      <div class="comp-body">
+        每次运行产出完整的 <strong>trajectory.json</strong>，记录从 Search 到 Finished 的所有状态转换、actions、observations、模型元数据。这是评测和训练数据的主要来源，也是与 SWE-bench 评测框架对接的标准接口。
+      </div>
+    </div>
+  </div>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:#d9736a"></span>
+      <span class="dot" style="background:#c8a04a"></span>
+      <span class="dot" style="background:#6dbb84"></span>
+      Workspace &middot; 典型初始化流程
+    </div>
+    <pre><span class="tok-comment"># 1. 从 SWE-bench instance 初始化 workspace</span>
+workspace = Workspace.from_swe_instance(
+    instance_id=<span class="tok-str">"django__django-11099"</span>,
+    repo_base_dir=<span class="tok-str">"/repos"</span>,
+)
+
+<span class="tok-comment"># 2. Workspace 内部自动执行：</span>
+<span class="tok-comment">#    a) git clone + checkout 到指定 commit</span>
+<span class="tok-comment">#    b) tree-sitter 解析 → CodeBlock 层次</span>
+<span class="tok-comment">#    c) EpicSplitter → embedding chunks</span>
+<span class="tok-comment">#    d) 建立向量索引</span>
+
+<span class="tok-comment"># 3. 创建 FSM 并运行</span>
+trajectory = workspace.run(
+    problem_statement=instance[<span class="tok-str">"problem_statement"</span>],
+    model=<span class="tok-str">"claude-sonnet-4-20250514"</span>,
+    max_transitions=<span class="tok-num">25</span>,
+)
+
+<span class="tok-comment"># 4. 产出</span>
+trajectory.save(<span class="tok-str">"trajectory.json"</span>)
+patch = workspace.get_diff()  <span class="tok-comment"># git diff → SWE-bench submission</span></pre>
+  </div>
+</section>
+
+
+<!-- ─── 06 Trajectory Format ─── -->
+<section class="sec" id="trajectory">
+  <div class="sec-header">
+    <span class="sec-num">06</span>
+    <div class="sec-line" style="background:var(--red)"></div>
+    <h2 class="sec-title">轨迹格式</h2>
+  </div>
+
+  <p>Moatless Tools 的轨迹格式是其最重要的产出之一——不仅用于 SWE-bench 评测提交，更是下游训练数据的主要来源。</p>
+
+  <!-- Trajectory structure -->
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 12px">6.1 &nbsp;trajectory.json 结构</div>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:#d9736a"></span>
+      <span class="dot" style="background:#c8a04a"></span>
+      <span class="dot" style="background:#6dbb84"></span>
+      trajectory.json &middot; 顶层结构
+    </div>
+    <pre>{
+  <span class="tok-key">"instance_id"</span>: <span class="tok-str">"django__django-11099"</span>,
+  <span class="tok-key">"model_name_or_path"</span>: <span class="tok-str">"claude-sonnet-4-20250514"</span>,
+  <span class="tok-key">"model_patch"</span>: <span class="tok-str">"diff --git a/django/db/... (git diff)"</span>,
+
+  <span class="tok-key">"transitions"</span>: [
+    {
+      <span class="tok-key">"state"</span>: <span class="tok-str">"SearchCode"</span>,
+      <span class="tok-key">"actions"</span>: [
+        {
+          <span class="tok-key">"action_type"</span>: <span class="tok-str">"FindClass"</span>,
+          <span class="tok-key">"args"</span>: { <span class="tok-key">"class_name"</span>: <span class="tok-str">"QuerySet"</span> },
+          <span class="tok-key">"observation"</span>: { <span class="tok-comment">/* matched code spans */</span> }
+        }
+      ],
+      <span class="tok-key">"model_metadata"</span>: {
+        <span class="tok-key">"model"</span>: <span class="tok-str">"claude-sonnet-4-20250514"</span>,
+        <span class="tok-key">"tokens_input"</span>: <span class="tok-num">3842</span>,
+        <span class="tok-key">"tokens_output"</span>: <span class="tok-num">156</span>,
+        <span class="tok-key">"cost"</span>: <span class="tok-num">0.014</span>
+      },
+      <span class="tok-key">"next_state"</span>: <span class="tok-str">"IdentifyCode"</span>
+    },
+    {
+      <span class="tok-key">"state"</span>: <span class="tok-str">"IdentifyCode"</span>,
+      <span class="tok-comment">/* ... */</span>
+      <span class="tok-key">"next_state"</span>: <span class="tok-str">"PlanToCode"</span>
+    },
+    <span class="tok-comment">/* ... more transitions ... */</span>
+  ]
+}</pre>
+  </div>
+
+  <!-- SWE-bench integration -->
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:24px 0 12px">6.2 &nbsp;SWE-bench 评测对接</div>
+
+  <p>Moatless 的 trajectory.json 直接满足 SWE-bench 的提交格式要求：</p>
+
+  <div class="comp-grid">
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--accent)">必填字段</div>
+      <div class="comp-name">model_name_or_path</div>
+      <div class="comp-body">
+        模型标识符，如 <code>claude-sonnet-4-20250514</code>。用于 SWE-bench leaderboard 标识提交来源。
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--green)">必填字段</div>
+      <div class="comp-name">model_patch</div>
+      <div class="comp-body">
+        <strong>git diff 格式</strong>的代码修改。这是 SWE-bench 实际应用并运行测试验证的内容。由 Workspace 在 FSM 结束后自动生成。
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--blue)">必填字段</div>
+      <div class="comp-name">instance_id</div>
+      <div class="comp-body">
+        SWE-bench 实例标识符，如 <code>django__django-11099</code>。用于将 patch 与对应的问题对齐。
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--amber)">可选字段</div>
+      <div class="comp-name">transitions</div>
+      <div class="comp-body">
+        完整的 FSM 状态转换序列，包含每步的 actions、observations、model metadata。<strong>SWE-bench 评测不需要此字段</strong>，但它是训练数据采集的核心。
+      </div>
+    </div>
+  </div>
+
+  <!-- Training use cases -->
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:28px 0 12px">6.3 &nbsp;训练数据用途</div>
+
+  <p>Moatless 轨迹已在多个研究中被用作训练数据源：</p>
+
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge" style="color:var(--accent)">A</span></div>
+      <div class="step-inner">
+        <div class="step-h">SWE-Gym &mdash; Verifier 训练</div>
+        <div class="step-p">SWE-Gym 使用 Moatless 生成的大量轨迹（成功 + 失败）来训练 <strong>process reward model / outcome verifier</strong>。FSM 的结构化状态信息提供了比扁平 action 序列更丰富的监督信号——可以在每个状态转换点评估决策质量。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge" style="color:var(--green)">B</span></div>
+      <div class="step-inner">
+        <div class="step-h">Rejection Sampling &mdash; 高质量轨迹筛选</div>
+        <div class="step-p">通过 MCTS 为每个问题生成大量候选轨迹，按 reward threshold 过滤，<strong>正样本上限为 2 条/instance</strong>（防止过拟合某种解法）。筛选后的轨迹用于 SFT/DPO 训练。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge" style="color:var(--blue)">C</span></div>
+      <div class="step-inner">
+        <div class="step-h">规模：75,000 轨迹</div>
+        <div class="step-p">300 个 SWE 问题 &times; 每问题 250 条 MCTS 采样 = <strong>约 75,000 条轨迹</strong>。这个数据集足够训练中等规模的 policy model 或 verifier，且由于 MCTS 的多样性探索，轨迹之间的策略差异较大。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <div class="callout-icon">&#9888;</div>
+    <div class="callout-body">
+      <strong>轨迹多样性 vs 正确性</strong>：MCTS 生成的 75k 轨迹中只有部分通过了测试验证。使用时需注意区分<strong>正轨迹</strong>（通过测试）和<strong>负轨迹</strong>（未通过）。负轨迹对 verifier 训练有价值，但不应直接用于 SFT imitation learning。
+    </div>
+  </div>
+</section>
+
+
+<!-- ─── 07 Comparison ─── -->
+<section class="sec" id="comparison">
+  <div class="sec-header">
+    <span class="sec-num">07</span>
+    <div class="sec-line" style="background:var(--blue)"></div>
+    <h2 class="sec-title">与其他 Scaffold 的对比</h2>
+  </div>
+
+  <p>将 Moatless Tools 与其他主流 code agent scaffold 从架构、代码理解、编辑方式、上下文管理、搜索策略五个维度对比：</p>
+
+  <table class="bench-table">
+    <thead>
+      <tr>
+        <th></th>
+        <th style="color:var(--accent)">Moatless</th>
+        <th style="color:var(--blue)">SWE-agent</th>
+        <th style="color:var(--teal)">Agentless</th>
+        <th style="color:var(--amber)">Aider</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>架构</td>
+        <td><span class="highlight">FSM (状态机)</span></td>
+        <td style="color:var(--muted)">Agent loop</td>
+        <td style="color:var(--muted)">Pipeline</td>
+        <td style="color:var(--muted)">Chat loop</td>
+      </tr>
+      <tr>
+        <td>代码理解</td>
+        <td><span class="highlight">tree-sitter spans</span></td>
+        <td style="color:var(--muted)">ACI commands</td>
+        <td style="color:var(--muted)">Skeleton / structure</td>
+        <td style="color:var(--muted)">RepoMap (tree-sitter)</td>
+      </tr>
+      <tr>
+        <td>编辑方式</td>
+        <td><span class="highlight">预填充 SEARCH/REPLACE</span></td>
+        <td style="color:var(--muted)">Heredoc edit</td>
+        <td style="color:var(--muted)">Sample + vote</td>
+        <td style="color:var(--muted)">多种格式</td>
+      </tr>
+      <tr>
+        <td>上下文管理</td>
+        <td><span class="highlight">Code span tracking</span></td>
+        <td style="color:var(--muted)">HistoryProcessors</td>
+        <td style="color:var(--muted)">Single-pass</td>
+        <td style="color:var(--muted)">Token-budgeted map</td>
+      </tr>
+      <tr>
+        <td>搜索策略</td>
+        <td><span class="highlight">MCTS (tree-search)</span></td>
+        <td style="color:var(--muted)">Sequential</td>
+        <td style="color:var(--muted)">N/A</td>
+        <td style="color:var(--muted)">N/A</td>
+      </tr>
+      <tr>
+        <td>状态可见性</td>
+        <td><span class="highlight">FSM 阶段显式标注</span></td>
+        <td style="color:var(--muted)">隐式（在 prompt 中）</td>
+        <td style="color:var(--muted)">流水线阶段</td>
+        <td style="color:var(--muted)">无</td>
+      </tr>
+      <tr>
+        <td>轨迹结构</td>
+        <td><span class="highlight">状态转换序列</span></td>
+        <td style="color:var(--muted)">扁平 action-obs</td>
+        <td style="color:var(--muted)">分阶段产出</td>
+        <td style="color:var(--muted)">对话轮次</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Detailed comparisons -->
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:28px 0 12px">关键差异深度解析</div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.2rem 0">
+    <div style="background:var(--s1);border:1px solid var(--border2);border-top:2px solid var(--accent);border-radius:8px;padding:1rem 1.1rem">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--accent);letter-spacing:.1em;margin-bottom:.5rem">MOATLESS vs SWE-AGENT</div>
+      <div style="font-size:.85rem;color:var(--muted);line-height:1.7">
+        SWE-agent 让 LLM 在一个类似命令行的环境中自由操作，没有预定义的阶段划分。<strong>Moatless 的 FSM 强制了"先搜索再编辑"的纪律</strong>，避免 LLM 在没有足够上下文时就开始编辑。代价是灵活性较低——某些任务可能不需要经过完整的 Search &rarr; Identify 流程。
+      </div>
+    </div>
+    <div style="background:var(--s1);border:1px solid var(--border2);border-top:2px solid var(--amber);border-radius:8px;padding:1rem 1.1rem">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--amber);letter-spacing:.1em;margin-bottom:.5rem">MOATLESS vs AIDER</div>
+      <div style="font-size:.85rem;color:var(--muted);line-height:1.7">
+        Aider 和 Moatless 都使用 tree-sitter 和 SEARCH/REPLACE，但<strong>设计哲学相反</strong>：Aider 面向人类开发者（chat loop，人在环中），Moatless 面向全自动化（FSM，无需人类干预）。Aider 的 RepoMap 是全局鸟瞰，Moatless 的 code span 是局部精确切片。
+      </div>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-icon">&#8505;</div>
+    <div class="callout-body">
+      <strong>编辑方式的关键差异</strong>：Moatless 的<strong>预填充 SEARCH block</strong> 是独特设计。SWE-agent 用 heredoc 编辑（LLM 需要精确指定行号范围），Aider 让 LLM 自己写 SEARCH 和 REPLACE（容易写错 SEARCH 导致匹配失败）。Moatless 通过 code span 系统预先确定了修改位置，LLM 只需要关注"改成什么"而不是"改哪里"。
+    </div>
+  </div>
+</section>
+
+
+<!-- ─── 08 Takeaways ─── -->
+<section class="sec" id="takeaways">
+  <div class="sec-header">
+    <span class="sec-num">08</span>
+    <div class="sec-line" style="background:var(--amber)"></div>
+    <h2 class="sec-title">对本研究的启发</h2>
+  </div>
+
+  <div class="insight-cards">
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--accent)"></div>
+      <div>
+        <div class="insight-title">FSM 状态 &rarr; 结构化轨迹，分解"编码"为不同阶段</div>
+        <div class="insight-body">
+          Moatless 的 FSM 设计将一个笼统的"修复 bug"任务分解为 <strong>Search、Identify、Plan、Edit</strong> 四个清晰阶段。每个阶段对应不同的能力要求（信息检索、判断力、规划能力、代码生成）。对训练而言，这意味着可以<strong>按阶段提供不同的监督信号</strong>，而非端到端模仿一条长轨迹。阶段标注本身就是一种 process supervision。
+        </div>
+      </div>
+    </div>
+
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--green)"></div>
+      <div>
+        <div class="insight-title">预填充 SEARCH blocks：降低 LLM 负担，提升编辑精度</div>
+        <div class="insight-body">
+          Moatless 的 SEARCH block 预填充设计巧妙地将代码编辑分成两个子问题：<strong>"在哪改"（由 code span 系统确定）</strong>和<strong>"改成什么"（由 LLM 生成）</strong>。这对训练数据质量有直接影响——预填充减少了编辑失败率，意味着更多轨迹能走到最终状态，产出更多有效的正样本。
+        </div>
+      </div>
+    </div>
+
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--teal)"></div>
+      <div>
+        <div class="insight-title">tree-sitter 是跨 scaffold 的通用代码理解基础设施</div>
+        <div class="insight-body">
+          Moatless（code spans）、Aider（RepoMap）、SWE-agent（ACI）都依赖 tree-sitter 进行代码结构解析。<strong>tree-sitter 已经是 agentic coding 领域的事实标准</strong>。对本研究而言，无论最终采用哪个 scaffold 生成训练数据，tree-sitter 级别的代码理解都是基础能力。VLM 的 agentic 训练数据中应当包含结构化的代码表示（AST 级别），而不仅仅是纯文本。
+        </div>
+      </div>
+    </div>
+
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--amber)"></div>
+      <div>
+        <div class="insight-title">MCTS 探索：大规模多样性轨迹生成的可行路径</div>
+        <div class="insight-body">
+          moatless-tree-search 的 MCTS 方法证明了<strong>从少量问题中生成大量多样性轨迹</strong>的可行性（300 问题 &times; 250 样本 = 75k 轨迹）。对本研究的启示：不需要无限扩大问题集——在有限的高质量问题上通过 MCTS 做深度探索，可以获得足够规模且多样的训练数据。这与 rejection sampling + verifier training 的范式高度匹配。
+        </div>
+      </div>
+    </div>
+
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--blue)"></div>
+      <div>
+        <div class="insight-title">Code span 是比"文件"更干净的上下文和编辑单元</div>
+        <div class="insight-body">
+          传统 scaffold（如 SWE-agent）以<strong>文件</strong>为上下文单元，LLM 需要在整个文件中定位修改位置。Moatless 的 code span 将粒度降到<strong>函数/类/方法级别</strong>，大幅缩小了 LLM 需要处理的上下文范围。对训练数据而言，code span 级别的标注（"修改了哪个 span"）比文件级别的标注（"修改了哪个文件"）提供了更精确的监督。
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+
+<script>
+  // Active nav on scroll
+  const sections = document.querySelectorAll('section.sec[id], .hero[id]');
+  const navItems = document.querySelectorAll('nav .nav-item');
+
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const id = e.target.id;
+        navItems.forEach(a => {
+          a.classList.toggle('active', a.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -65% 0px' });
+
+  sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>

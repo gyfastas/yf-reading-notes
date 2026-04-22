@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgentGym 代码深度解析</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #1e40af;
+            --accent: #3b82f6;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --code: #f1f5f9;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        header p { opacity: 0.9; font-size: 1.1rem; }
+
+        nav {
+            background: var(--card);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        nav a {
+            color: var(--muted);
+            text-decoration: none;
+            margin-right: 1.5rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        nav a:hover { color: var(--primary); }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        section {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--primary);
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        h3 {
+            color: var(--text);
+            font-size: 1.4rem;
+            margin: 1.5rem 0 1rem;
+        }
+
+        h4 {
+            color: var(--muted);
+            font-size: 1.1rem;
+            margin: 1.2rem 0 0.8rem;
+        }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        code {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+        }
+
+        p code, li code {
+            background: var(--code);
+            color: #ef4444;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--code);
+            font-weight: 600;
+        }
+
+        tr:hover { background: var(--bg); }
+
+        .architecture {
+            background: var(--code);
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-family: monospace;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border-left: 4px solid var(--primary);
+            padding: 1.5rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.5rem 0;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--muted);
+            border-top: 1px solid var(--border);
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.8rem; }
+            .container { padding: 1rem; }
+            section { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>AgentGym 代码深度解析</h1>
+        <p>基于源码的全面架构分析</p>
+    </header>
+
+    <nav>
+        <a href="#overview">整体架构</a>
+        <a href="#server">环境服务器</a>
+        <a href="#client">环境客户端</a>
+        <a href="#trainer">训练层</a>
+        <a href="#files">关键文件</a>
+    </nav>
+
+    <div class="container">
+        <section id="overview">
+            <h2>1. 整体架构概览</h2>
+
+            <h3>1.1 三层架构设计</h3>
+            <div class="architecture">
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         AgentGym 架构分层                                │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │  Layer 3: 训练与评估层 (Trainer & Controller)                    │   │
+│  │  ├── BCTrainer: 行为克隆训练                                     │   │
+│  │  ├── AgentEvolTrainer: 进化训练                                  │   │
+│  │  └── DistributedEvaluator: 分布式评估                             │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+│                              ▲                                          │
+│                              │ HTTP/API                                  │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │  Layer 2: 环境客户端层 (EnvClient) - agentenv/agentenv/envs/     │   │
+│  │  ├── WebshopEnvClient, ALFWorldEnvClient, SciWorldEnvClient     │   │
+│  │  ├── WeatherEnvClient, MovieEnvClient, TODOEnvClient            │   │
+│  │  └── ... (14个环境的客户端实现)                                   │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+│                              ▲                                          │
+│                              │ HTTP (RESTful API)                        │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │  Layer 1: 环境服务器层 (EnvServer) - agentenv-*/                 │   │
+│  │  ├── WebShop Server (FastAPI) - Port 3001                        │   │
+│  │  ├── ALFWorld Server (FastAPI) - Port 3002                       │   │
+│  │  ├── SciWorld Server (FastAPI) - Port 3003                       │   │
+│  │  └── ... (每个环境独立进程/端口)                                  │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+            </div>
+
+            <h3>1.2 核心设计原则</h3>
+            <table>
+                <thead>
+                    <tr><th>设计原则</th><th>实现方式</th><th>优势</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>微服务架构</strong></td><td>每个EnvServer独立部署</td><td>环境隔离、独立扩展</td></tr>
+                    <tr><td><strong>统一接口</strong></td><td>标准HTTP RESTful API</td><td>降低接入成本</td></tr>
+                    <tr><td><strong>语言无关</strong></td><td>HTTP通信</td><td>EnvServer可用任意语言实现</td></tr>
+                    <tr><td><strong>客户端封装</strong></td><td>统一EnvClient基类</td><td>训练代码与环境解耦</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="server">
+            <h2>2. 环境服务器 (EnvServer) 实现深度分析</h2>
+
+            <h3>2.1 标准API接口规范</h3>
+            <table>
+                <thead>
+                    <tr><th>端点</th><th>方法</th><th>功能</th><th>参数</th><th>响应</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>/</code></td><td>GET</td><td>健康检查</td><td>-</td><td><code>"ok"</code></td></tr>
+                    <tr><td><code>/create</code></td><td>POST</td><td>创建环境实例</td><td>-</td><td><code>env_id: int</code></td></tr>
+                    <tr><td><code>/step</code></td><td>POST</td><td>执行动作</td><td><code>env_idx</code>, <code>action</code></td><td><code>observation</code>, <code>reward</code>, <code>done</code></td></tr>
+                    <tr><td><code>/reset</code></td><td>POST</td><td>重置环境</td><td><code>env_idx</code></td><td><code>observation</code></td></tr>
+                    <tr><td><code>/observation</code></td><td>GET</td><td>获取观察</td><td><code>env_idx</code></td><td><code>observation: str</code></td></tr>
+                    <tr><td><code>/list_envs</code></td><td>GET</td><td>列出所有环境</td><td>-</td><td><code>List[int]</code></td></tr>
+                </tbody>
+            </table>
+
+            <h3>2.2 三种服务器实现模式</h3>
+
+            <h4>模式A: FastAPI + 单例EnvServer (WebShop, SQLGym)</h4>
+            <pre><code># agentenv-webshop/agentenv_webshop/server.py
+from fastapi import FastAPI
+from .environment import webshop_env_server  # 单例
+
+app = FastAPI()
+
+@app.post("/create", response_model=int)
+async def create():
+    """创建新环境"""
+    env = webshop_env_server.create()  # 调用单例方法
+    return env
+
+@app.post("/step", response_model=StepResponse)
+def step(step_query: StepQuery):
+    state, reward, done, info = webshop_env_server.step(
+        step_query.env_idx, step_query.action
+    )
+    return StepResponse(state=state, reward=reward, done=done, info=info)</code></pre>
+
+            <h4>模式B: FastAPI + 配置驱动Wrapper (ALFWorld, SciWorld)</h4>
+            <pre><code># agentenv-alfworld/agentenv_alfworld/server.py
+from fastapi import FastAPI
+from .env_wrapper import server  # 预初始化的wrapper
+
+app = FastAPI()
+
+@app.post("/create")
+async def create():
+    return server.create()
+
+@app.post("/reset")
+async def reset(body: ResetRequestBody):
+    # 需要指定game和world_type
+    return server.reset(body.id, body.game, body.world_type)</code></pre>
+
+            <h4>模式C: Quart (Async Flask) + 异步处理 (WebArena)</h4>
+            <pre><code># agentenv-webarena/agentenv_webarena/server.py
+from quart import Quart, jsonify, request
+import asyncio
+
+app = Quart(__name__)
+_max_id = 0
+_max_id_lock = asyncio.Lock()
+
+@app.route("/create", methods=["POST"])
+async def create():
+    global _max_id
+    async with _max_id_lock:  # 异步锁保护
+        env_idx = _max_id
+        _max_id += 1
+
+    # 异步调用同步环境方法
+    env = await asyncio.to_thread(webarena_env_server.create, env_idx)
+    return jsonify({"env_idx": env})</code></pre>
+
+            <h3>2.3 环境实现对比分析</h3>
+            <table>
+                <thead>
+                    <tr><th>环境</th><th>服务器框架</th><th>原始环境</th><th>特殊处理</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>WebShop</strong></td><td>FastAPI</td><td><code>gym.make("WebAgentTextEnv-v0")</code></td><td>产品搜索、点击动作</td></tr>
+                    <tr><td><strong>ALFWorld</strong></td><td>FastAPI</td><td>TextWorld</td><td>任务类型映射、admissible commands</td></tr>
+                    <tr><td><strong>SciWorld</strong></td><td>FastAPI</td><td>ScienceWorld</td><td>视觉模式、对象树</td></tr>
+                    <tr><td><strong>WebArena</strong></td><td>Quart</td><td>Playwright + 真实网站</td><td>Cookie管理、自动登录</td></tr>
+                    <tr><td><strong>Weather</strong></td><td>FastAPI</td><td>工具调用环境</td><td>API调用解析、奖励计算</td></tr>
+                    <tr><td><strong>SQLGym</strong></td><td>FastAPI</td><td>BIRD-SQL</td><td>SQL执行验证</td></tr>
+                    <tr><td><strong>TextCraft</strong></td><td>FastAPI</td><td>TextCraft</td><td>Minecraft crafting逻辑</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="client">
+            <h2>3. 环境客户端 (EnvClient) 实现分析</h2>
+
+            <h3>3.1 核心抽象类</h3>
+            <pre><code># agentenv/agentenv/controller/env.py
+class BaseEnvClient(metaclass=ABCMeta):
+    def __init__(self, action_format: ActionFormat = "react") -> None:
+        self.action_format = ActionFormat(action_format)
+
+    @abstractmethod
+    def __len__(self) -> int:
+        """返回环境总大小"""
+
+    @abstractmethod
+    def observe(self) -> str:
+        """解析服务器响应，返回给LLM的文本"""
+
+    @abstractmethod
+    def step(self, action) -> StepOutput:
+        """解析模型输出，调用环境服务器"""
+
+    @abstractmethod
+    def reset(self, idx: int) -> None:
+        """重置环境"""</code></pre>
+
+            <h3>3.2 典型客户端实现 (WebShop)</h3>
+            <pre><code># agentenv/agentenv/envs/webshop.py
+class WebshopEnvClient(BaseEnvClient):
+    adapter_cls = WebshopAdapter
+
+    def __init__(self, env_server_base: str, data_len: int,
+                 *args, timeout: int = 300, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.env_server_base = env_server_base
+        self.timeout = timeout
+        self.data_len = data_len
+
+        # 创建环境实例
+        ok = requests.post(f"{self.env_server_base}/create",
+                          timeout=self.timeout)
+        self.env_id = ok.json()  # 保存环境ID
+
+    def _post(self, path: str, data: dict[str, Any]) -> dict[str, Any]:
+        """带重试的POST请求"""
+        data["env_idx"] = self.env_id
+        max_retries = 5
+        for attempt in range(max_retries):
+            res = requests.post(
+                f"{self.env_server_base}/{path}",
+                json=data,
+                timeout=self.timeout,
+            )
+            if res.status_code == 503:
+                time.sleep(0.1)  # 服务不可用，稍等重试
+            elif res.status_code == 200:
+                break
+        return res.json()
+
+    def step(self, action: str) -> StepOutput:
+        # 1. 使用Adapter解析模型输出
+        action = WebshopAdapter.action_parser(action, self.action_format)
+
+        # 2. 调用环境服务器
+        response = self._post("step", {"action": action})
+
+        return StepOutput(
+            state=response["state"],
+            reward=response["reward"],
+            done=response["done"],
+        )</code></pre>
+
+            <h3>3.3 Adapter模式解析</h3>
+            <p>AgentGym支持3种Action Format，通过Adapter统一转换：</p>
+            <pre><code>class ActionFormat(Enum):
+    REACT = "react"                    # Thought + Action
+    FUNCTION_CALLING = "function_calling"  # OpenAI函数调用格式
+    CODE_AS_ACTION = "code_as_action"      # Python代码格式</code></pre>
+        </section>
+
+        <section id="trainer">
+            <h2>4. 训练与评估层深度分析</h2>
+
+            <h3>4.1 任务执行循环</h3>
+            <pre><code># agentenv/agentenv/controller/task.py
+class BaseTask:
+    def _generate_experience_one(
+        self,
+        agent: Agent | APIAgent,
+        client: BaseEnvClient,
+        idx: int,
+        generation_config: Optional[GenerationConfig] = None,
+        max_rounds: Optional[int] = None,
+    ) -> ExperienceOutput:
+
+        # 1. 重置环境
+        client.reset(idx)
+        reward = 0.0
+        done = False
+        state = client.observe()
+
+        # 2. 构建初始对话
+        conversation = list(client.conversation_start)
+        conversation.append(ConversationMessage({
+            "from": "human", "loss": None, "value": state
+        }))
+
+        rounds = 0
+        while not done:
+            # 3. 生成动作
+            generated_tokens = agent.generate(
+                [conversation_tokenized["input_ids"]], generation_config
+            )[0]
+            generated_text = tokenizer.decode(generated_tokens)
+
+            # 4. 执行动作
+            step_output = client.step(generated_text)
+            state, reward, done = step_output.state, step_output.reward, step_output.done
+
+            # 5. 更新对话历史
+            conversation.append(ConversationMessage({
+                "from": "gpt", "loss": True, "value": generated_text
+            }))
+            conversation.append(ConversationMessage({
+                "from": "human", "loss": None, "value": state
+            }))
+
+            rounds += 1
+            if max_rounds is not None and rounds >= max_rounds:
+                break
+
+        return ExperienceOutput(
+            conversation=conversation,
+            reward=reward,
+            text=conversation_tokenized["text"],
+            seq_ids=conversation_tokenized["input_ids"],
+            action_mask=conversation_tokenized["action_mask"],
+        )</code></pre>
+        </section>
+
+        <section id="files">
+            <h2>5. 关键代码文件索引</h2>
+
+            <h3>5.1 核心框架代码</h3>
+            <table>
+                <thead>
+                    <tr><th>文件路径</th><th>功能说明</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>agentenv/agentenv/controller/env.py</code></td><td>BaseEnvClient抽象类定义</td></tr>
+                    <tr><td><code>agentenv/agentenv/controller/task.py</code></td><td>BaseTask任务执行逻辑</td></tr>
+                    <tr><td><code>agentenv/agentenv/controller/types.py</code></td><td>数据类型定义(ActionFormat, StepOutput等)</td></tr>
+                    <tr><td><code>agentenv/agentenv/trainer/bc_trainer.py</code></td><td>行为克隆训练器</td></tr>
+                    <tr><td><code>agentenv/agentenv/trainer/agentevol_trainer.py</code></td><td>AgentEvol进化训练器</td></tr>
+                </tbody>
+            </table>
+
+            <h3>5.2 环境服务器代码</h3>
+            <table>
+                <thead>
+                    <tr><th>环境</th><th>Server文件</th><th>Environment/Wrapper文件</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>WebShop</td><td><code>agentenv-webshop/agentenv_webshop/server.py</code></td><td><code>environment.py</code></td></tr>
+                    <tr><td>ALFWorld</td><td><code>agentenv-alfworld/agentenv_alfworld/server.py</code></td><td><code>env_wrapper.py</code></td></tr>
+                    <tr><td>SciWorld</td><td><code>agentenv-sciworld/agentenv_sciworld/server.py</code></td><td><code>environment.py</code></td></tr>
+                    <tr><td>WebArena</td><td><code>agentenv-webarena/agentenv_webarena/server.py</code></td><td><code>environment.py</code></td></tr>
+                    <tr><td>Weather</td><td><code>agentenv-tool/agentenv_weather/weather_server.py</code></td><td><code>weather_environment.py</code></td></tr>
+                    <tr><td>TODOList</td><td><code>agentenv-tool/agentenv_todo/todo_server.py</code></td><td><code>todo_environment.py</code></td></tr>
+                    <tr><td>SQLGym</td><td><code>agentenv-sqlgym/agentenv_sqlgym/server.py</code></td><td><code>environment.py</code></td></tr>
+                    <tr><td>TextCraft</td><td><code>agentenv-textcraft/agentenv_textcraft/server.py</code></td><td><code>env_wrapper.py</code></td></tr>
+                </tbody>
+            </table>
+
+            <h3>5.3 环境客户端代码</h3>
+            <table>
+                <thead>
+                    <tr><th>文件路径</th><th>说明</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>agentenv/agentenv/envs/webshop.py</code></td><td>WebShop客户端 + WebshopAdapter</td></tr>
+                    <tr><td><code>agentenv/agentenv/envs/alfworld.py</code></td><td>ALFWorld客户端 + ALFWorldAdapter</td></tr>
+                    <tr><td><code>agentenv/agentenv/envs/sciworld.py</code></td><td>SciWorld客户端 + SciWorldAdapter</td></tr>
+                    <tr><td><code>agentenv/agentenv/envs/weather.py</code></td><td>Weather客户端</td></tr>
+                    <tr><td><code>agentenv/agentenv/envs/babyai.py</code></td><td>BabyAI客户端</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2>6. 架构设计亮点</h2>
+
+            <div class="highlight-box">
+                <h4>微服务解耦</h4>
+                <ul>
+                    <li>环境独立部署 - 不同环境可有不同依赖</li>
+                    <li>独立扩展 - 高负载环境可单独扩容</li>
+                    <li>故障隔离 - 单个环境崩溃不影响其他环境</li>
+                    <li>语言无关 - EnvServer可用任何语言实现</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box">
+                <h4>统一接口设计</h4>
+                <p>所有环境共享相同API契约:</p>
+                <ul>
+                    <li><code>/create</code> → 返回 env_id</li>
+                    <li><code>/step</code> → 返回 (observation, reward, done)</li>
+                    <li><code>/reset</code> → 返回 observation</li>
+                    <li><code>/observation</code> → 返回当前观察</li>
+                </ul>
+                <p>这使得添加新环境只需实现这4个端点</p>
+            </div>
+
+            <div class="highlight-box">
+                <h4>Adapter模式的多格式支持</h4>
+                <p>同一环境支持多种Agent交互格式:</p>
+                <ul>
+                    <li>ReAct: Thought + Action (最常用)</li>
+                    <li>Function Calling: OpenAI风格函数调用</li>
+                    <li>Code as Action: Python代码执行</li>
+                </ul>
+                <p>通过Adapter统一转换为环境动作</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>7. 如何添加新环境</h2>
+
+            <h3>7.1 步骤概览</h3>
+            <ol>
+                <li><strong>创建EnvServer</strong> (FastAPI/Flask)
+                    <ul>
+                        <li>实现 /create, /step, /reset, /observation</li>
+                        <li>封装原始环境</li>
+                        <li>运行在不同端口</li>
+                    </ul>
+                </li>
+                <li><strong>创建EnvClient</strong>
+                    <ul>
+                        <li>继承 BaseEnvClient</li>
+                        <li>实现 HTTP调用</li>
+                        <li>实现 Adapter (可选)</li>
+                    </ul>
+                </li>
+                <li><strong>创建Task</strong>
+                    <ul>
+                        <li>继承 BaseTask</li>
+                        <li>指定 env_client_cls</li>
+                        <li>配置 client_args</li>
+                    </ul>
+                </li>
+                <li><strong>注册到配置文件</strong></li>
+            </ol>
+
+            <h3>7.2 最小EnvServer示例</h3>
+            <pre><code>from fastapi import FastAPI
+import gym
+
+app = FastAPI()
+envs = {}
+next_id = 0
+
+@app.post("/create")
+async def create():
+    global next_id
+    envs[next_id] = gym.make("MyEnv-v0")
+    envs[next_id].reset()
+    next_id += 1
+    return next_id - 1
+
+@app.post("/step")
+async def step(data: dict):
+    env_id = data["env_idx"]
+    action = data["action"]
+    obs, reward, done, info = envs[env_id].step(action)
+    return {"observation": obs, "reward": reward, "done": done}
+
+@app.get("/observation")
+async def observation(env_idx: int):
+    return envs[env_idx].get_obs()</code></pre>
+        </section>
+    </div>
+
+    <footer>
+        <p>分析日期: 2026-03-18 | 基于 AgentGym GitHub 仓库代码 (240个Python文件)</p>
+    </footer>
+</body>
+</html>

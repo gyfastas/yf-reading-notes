@@ -1,0 +1,1612 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>预训练数据规格对比 | 基于论文原文</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    :root {
+        --bg-deep: #0a0e17; --bg-card: #111827; --border: rgba(56,189,248,0.12);
+        --border-bright: rgba(56,189,248,0.3); --cyan: #22d3ee; --cyan-dim: rgba(34,211,238,0.15);
+        --blue: #38bdf8; --blue-dim: rgba(56,189,248,0.12); --purple: #a78bfa;
+        --purple-dim: rgba(167,139,250,0.12); --green: #34d399; --green-dim: rgba(52,211,153,0.12);
+        --amber: #fbbf24; --amber-dim: rgba(251,191,36,0.10); --red: #f87171;
+        --red-dim: rgba(248,113,113,0.10); --pink: #f472b6; --pink-dim: rgba(244,114,182,0.10);
+        --text: #e2e8f0; --text-dim: #94a3b8; --text-muted: #64748b;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-deep); color: var(--text); line-height: 1.75;
+        background-image: radial-gradient(ellipse 600px 200px at 10% 0%, rgba(34,211,238,0.04) 0%, transparent 100%),
+        radial-gradient(ellipse 400px 300px at 90% 100%, rgba(167,139,250,0.03) 0%, transparent 100%); }
+    .container { max-width: 1200px; margin: 0 auto; padding: 48px 24px; }
+    .paper-header { position: relative; background: linear-gradient(135deg, rgba(34,211,238,0.08) 0%, rgba(167,139,250,0.08) 100%);
+        border: 1px solid var(--border-bright); padding: 44px 40px; border-radius: 16px; margin-bottom: 32px; overflow: hidden; }
+    .paper-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+        background: linear-gradient(90deg, var(--cyan), var(--purple), var(--amber), var(--green), var(--cyan)); opacity: 0.8; }
+    .paper-header h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 14px; letter-spacing: -0.02em;
+        background: linear-gradient(135deg, #fff 30%, var(--cyan) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .paper-header .meta { font-size: 0.8rem; color: var(--text-dim); line-height: 1.6; }
+    .badge { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; margin-right: 6px; margin-bottom: 8px;
+        background: rgba(34,211,238,0.1); color: var(--cyan); border: 1px solid rgba(34,211,238,0.2); letter-spacing: 0.03em; text-transform: uppercase; }
+    .section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 32px; margin-bottom: 24px; transition: border-color 0.3s; }
+    .section:hover { border-color: var(--border-bright); }
+    .section h2 { font-size: 0.95rem; font-weight: 700; color: var(--cyan); margin-bottom: 20px; padding-bottom: 14px;
+        border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.06em; }
+    .section h3 { font-size: 1.02rem; font-weight: 600; color: var(--text); margin: 24px 0 12px; }
+    .section p, .section ul, .section ol { color: var(--text-dim); font-size: 0.9rem; }
+    .section ul, .section ol { padding-left: 20px; } .section li { margin-bottom: 6px; } .section li strong { color: var(--text); }
+    .highlight-box { background: var(--amber-dim); border-left: 3px solid var(--amber); padding: 18px 22px; margin: 18px 0; border-radius: 0 10px 10px 0; font-size: 0.9rem; color: var(--text-dim); }
+    .highlight-box strong { color: var(--amber); }
+    .key-point { background: var(--blue-dim); border-left: 3px solid var(--blue); padding: 18px 22px; margin: 18px 0; border-radius: 0 10px 10px 0; font-size: 0.9rem; color: var(--text-dim); }
+    .key-point strong { color: var(--blue); }
+    .success-box { background: var(--green-dim); border-left: 3px solid var(--green); padding: 18px 22px; margin: 18px 0; border-radius: 0 10px 10px 0; font-size: 0.9rem; color: var(--text-dim); }
+    .success-box strong { color: var(--green); }
+    .purple-box { background: var(--purple-dim); border-left: 3px solid var(--purple); padding: 18px 22px; margin: 18px 0; border-radius: 0 10px 10px 0; font-size: 0.9rem; color: var(--text-dim); }
+    .purple-box strong { color: var(--purple); }
+    .danger-box { background: var(--red-dim); border-left: 3px solid var(--red); padding: 18px 22px; margin: 18px 0; border-radius: 0 10px 10px 0; font-size: 0.9rem; color: var(--text-dim); }
+    .danger-box strong { color: var(--red); }
+
+    table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 18px 0; font-size: 0.8rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { background: rgba(34,211,238,0.06); font-weight: 600; color: var(--cyan); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; position: sticky; top: 0; }
+    td { color: var(--text-dim); } td strong { color: var(--text); }
+    tr:last-child td { border-bottom: none; } tr:hover td { background: rgba(56,189,248,0.04); }
+    .m { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--cyan); font-size: 0.8rem; }
+    .hi { color: var(--green) !important; font-weight: 600; }
+    .md { color: var(--amber) !important; font-weight: 600; }
+    .lo { color: var(--red) !important; }
+
+    code { font-family: 'JetBrains Mono', monospace; background: rgba(34,211,238,0.08); border: 1px solid rgba(34,211,238,0.15); padding: 2px 7px; border-radius: 5px; font-size: 0.78em; color: var(--cyan); }
+    .footer-section { text-align: center; color: var(--text-muted); font-size: 0.82rem; padding: 20px; border-top: 1px solid var(--border); margin-top: 8px; }
+
+    .tag { display: inline-block; padding: 2px 10px; border-radius: 6px; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.03em; white-space: nowrap; }
+    .t-qwen    { background: rgba(99,102,241,0.15); color: #818cf8; border: 1px solid rgba(99,102,241,0.25); }
+    .t-glm     { background: rgba(56,189,248,0.15); color: var(--blue); border: 1px solid rgba(56,189,248,0.25); }
+    .t-ds      { background: rgba(52,211,153,0.15); color: var(--green); border: 1px solid rgba(52,211,153,0.25); }
+    .t-kimi    { background: rgba(248,113,113,0.15); color: var(--red); border: 1px solid rgba(248,113,113,0.25); }
+    .t-intern  { background: rgba(45,212,191,0.15); color: #2dd4bf; border: 1px solid rgba(45,212,191,0.25); }
+    .t-step    { background: rgba(74,222,128,0.15); color: #4ade80; border: 1px solid rgba(74,222,128,0.25); }
+    .t-mm      { background: rgba(251,146,60,0.15); color: #fb923c; border: 1px solid rgba(251,146,60,0.25); }
+    .t-seed    { background: rgba(139,92,246,0.15); color: #a78bfa; border: 1px solid rgba(139,92,246,0.25); }\n    .t-dclm    { background: rgba(20,184,166,0.15); color: #14b8a6; border: 1px solid rgba(20,184,166,0.25); }
+
+    .overflow-x { overflow-x: auto; }
+    ::selection { background: rgba(34,211,238,0.25); color: #fff; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-track { background: var(--bg-deep); } ::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- Header -->
+<div class="paper-header">
+<span class="badge">基于论文原文</span>
+<span class="badge">预训练数据</span>
+<span class="badge">Data-Centric</span>
+<h1>预训练数据规格深度对比<br/>Pre-training Data Specifications</h1>
+<div class="meta">
+所有数据均来自论文原文 | 10 Models | 2025-2026<br/>
+Kimi-K2 | Kimi-K2.5 | Qwen3-VL | GLM-5 | Intern-S1-Pro | DeepSeek-V3 | Seed-VL | MiniMax-M2.5 | Step-3.5-Flash
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- 1. 数据规模总览 -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section">
+<h2>01 &mdash; 预训练数据规模总览</h2>
+<div class="overflow-x">
+<table>
+<tr>
+<th>模型</th>
+<th>总 Tokens</th>
+<th>序列长度</th>
+<th>训练阶段</th>
+<th>数据来源</th>
+</tr>
+<tr>
+<td><span class="tag t-qwen">Qwen3-VL</span></td>
+<td class="hi">~4T (S1-S3)</td>
+<td class="m">8K → 32K → 256K</td>
+<td>4阶段: Alignment(67B) → S1(1T) → S2(1T) → S3(100B)</td>
+<td>arXiv:2511.21631 Sec 3</td>
+</tr>
+<tr>
+<td><span class="tag t-kimi">Kimi-K2</span></td>
+<td class="md">15.5T</td>
+<td class="m">4K → 128K</td>
+<td>2阶段: 10T stable + 5.5T decay</td>
+<td>arXiv:2507.20534 Sec 3</td>
+</tr>
+<tr>
+<td><span class="tag t-kimi">Kimi-K2.5</span></td>
+<td class="md">~15T MM</td>
+<td class="m">4K → 256K</td>
+<td>3阶段: ViT → Joint PT(15T) → Mid-train</td>
+<td>arXiv:2602.02276 Sec 2.1</td>
+</tr>
+<tr>
+<td><span class="tag t-glm">GLM-5</span></td>
+<td class="hi">28.5T</td>
+<td class="m">32K → 128K → 200K</td>
+<td>Pre-train(27T) → Mid-train(1.5T)</td>
+<td>Tech Report Sec 2.2</td>
+</tr>
+<tr>
+<td><span class="tag t-intern">Intern-S1-Pro</span></td>
+<td class="lo">6T CPT</td>
+<td>—</td>
+<td>Continued PT on scientific data</td>
+<td>arXiv:2603.25040 Sec 3</td>
+</tr>
+<tr>
+<td><span class="tag t-dclm">DCLM</span></td>
+<td>arXiv:2406.11794</td>
+<td>Sec 4 (Deduplication), Sec 4.4 (Model-based filtering)</td>
+<td><code>paper_reading/llm_vlm/dclm/</code></td>
+</tr>
+<tr>
+<td><span class="tag t-seed">Seed-VL</span></td>
+<td class="md">Trillions (未公开确切数字)</td>
+<td class="m">—</td>
+<td>ViT pre-train → VLM pre-train</td>
+<td>arXiv:2505.07062 Sec 3</td>
+</tr>
+<tr>
+<td><span class="tag t-step">Step 3.5 Flash</span></td>
+<td class="hi">~18.35T</td>
+<td class="m">4K → 32K → 128K</td>
+<td>PT Stage 1(14.6T) → Stage 2(3T) → Mid(750B)</td>
+<td>arXiv:2602.10604v1 Sec 4.2</td>
+</tr>
+</table>
+</div>
+
+<div class="key-point">
+<strong>关键发现：</strong>
+<ul>
+<li><strong>数据规模分化严重：</strong>从 Intern-S1-Pro 的 6T 到 GLM-5 的 28.5T，差距达 4.75x</li>
+<li><strong>多模态模型数据量相对较小：</strong>Qwen3-VL 完整预训练仅 ~4T，远低于纯文本模型</li>
+<li><strong>Scientific CPT 模式：</strong>Intern-S1-Pro 采用 6T continued pre-training 而非从头训练</li>
+<li><strong>Seed-VL 数据规模不透明：</strong>仅提及 "trillions of multimodal tokens"，未给出精确数字</li>
+</ul>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- 2. 数据配比详情 -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section">
+<h2>02 &mdash; 数据配比 (Data Mixture)</h2>
+
+<h3>基于论文原文的精确配比</h3>
+<div class="overflow-x">
+<table>
+<tr>
+<th>模型</th>
+<th>网页/通用</th>
+<th>代码</th>
+<th>数学/科学</th>
+<th>多模态</th>
+<th>来源</th>
+</tr>
+<tr>
+<td><span class="tag t-kimi">Kimi-K2</span></td>
+<td>Web Text (主要)</td>
+<td>Code (显著比例)</td>
+<td>Mathematics (专门重写)</td>
+<td>Knowledge (重 phrase)</td>
+<td>arXiv:2507.20534 Sec 3.3</td>
+</tr>
+<tr>
+<td><span class="tag t-qwen">Qwen3-VL S1</span></td>
+<td>文本数据 (与VL混合)</td>
+<td>包含</td>
+<td>STEM数据</td>
+<td class="md">VL数据 + 交错图文</td>
+<td>arXiv:2511.21631 Sec 3</td>
+</tr>
+<tr>
+<td><span class="tag t-qwen">Qwen3-VL S2</span></td>
+<td class="hi">文本比例增加</td>
+<td>包含</td>
+<td>Agent-oriented数据</td>
+<td class="md">视频数据增加</td>
+<td>arXiv:2511.21631 Sec 3</td>
+</tr>
+<tr>
+<td><span class="tag t-glm">GLM-5</span></td>
+<td>Web (DCLM分类器精选)</td>
+<td class="md">+28%代码token</td>
+<td>高质量数学科学(人工评分)</td>
+<td>—</td>
+<td>Tech Report Sec 2.2</td>
+</tr>
+<tr>
+<td><span class="tag t-intern">Intern-S1-Pro</span></td>
+<td>通用数据(混合)</td>
+<td>—</td>
+<td class="hi">270B科学图文对</td>
+<td class="hi">科学图像为主</td>
+<td>arXiv:2603.25040 Sec 3</td>
+</tr>
+<tr>
+<td><span class="tag t-dclm">DCLM</span></td>
+<td>arXiv:2406.11794</td>
+<td>Sec 4 (Deduplication), Sec 4.4 (Model-based filtering)</td>
+<td><code>paper_reading/llm_vlm/dclm/</code></td>
+</tr>
+</table>
+</div>
+
+<div class="highlight-box">
+<strong>Kimi-K2 数据增强策略 (Data Rephrasing)：</strong><br/>
+论文明确描述了两种重phrase策略来提升 token utility：
+<ol>
+<li><strong>Knowledge Data Rephrasing：</strong>使用 LLM 以不同风格和视角重写文章，增加语言多样性同时保持事实完整性</li>
+<li><strong>Mathematics Data Rephrasing：</strong>将高质量数学文档改写成 "learning-note" 风格，并翻译多语言数学材料</li>
+</ol>
+这种 "合成数据增强" 策略是 Kimi-K2 在 15.5T 数据上实现高效率的关键。
+</div>
+
+<div class="purple-box">
+<strong>Intern-S1-Pro 科学数据专门化：</strong><br/>
+<ul>
+<li><strong>270B tokens 科学图文对：</strong>从 PDF 构建，覆盖生命科学、化学、地球科学、材料科学</li>
+<li><strong>数据冲突解决：</strong>使用 System Prompt Isolation 策略分离科学数据和通用数据，避免 "distribution shift"</li>
+<li><strong>结构化数据转换：</strong>将 PubChem 等数据库的表格信息通过 Template Construction 转换为叙述文本</li>
+</ul>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- 3. 数据管线对比 -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section">
+<!-- ════════════════════════════════════════════ -->
+<!-- 03. 数据管线详细展开 -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section">
+<h2>03 &mdash; 数据管线深度解析 (基于论文原文)</h2>
+
+<p>本节根据各模型论文原文，详细展开每个模型的数据管线设计与实现细节。</p>
+
+<!-- Kimi-K2 数据管线 -->
+<details style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; margin: 16px 0; overflow: hidden;">
+<summary style="padding: 16px 20px; cursor: pointer; font-weight: 600; color: var(--red); display: flex; align-items: center; justify-content: space-between;">
+<span>🔴 Kimi-K2: Data Rephrasing + Token Efficiency</span>
+<span style="font-size: 0.8rem; color: var(--text-muted);">点击展开</span>
+</summary>
+<div style="padding: 0 20px 20px;">
+
+<h4 style="color: var(--text); margin-top: 16px;">整体架构</h4>
+<p>Kimi-K2 的数据处理管线遵循 Kimi-K1.5 的方法论，但在数据增强方面引入了创新。核心目标是最大化 <strong>token efficiency</strong>（每 token 的性能提升）。</p>
+
+<div style="background: rgba(248,113,113,0.05); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin: 16px 0;">
+<strong>四域数据划分：</strong>
+<ul style="margin: 8px 0;">
+<li><strong>Web Text:</strong> 网页文本数据，主要知识来源</li>
+<li><strong>Code:</strong> 代码数据，用于编程能力</li>
+<li><strong>Mathematics:</strong> 数学文档，专门增强推理</li>
+<li><strong>Knowledge:</strong> 知识密集型文本</li>
+</ul>
+</div>
+
+<h4 style="color: var(--text); margin-top: 20px;">核心创新：Data Rephrasing Pipeline</h4>
+
+<div class="highlight-box">
+<strong>1. Knowledge Data Rephrasing</strong>
+<p>针对知识密集型文本的困境：</p>
+<ul>
+<li>单 epoch 不足以吸收知识</li>
+<li>多 epoch 重复导致过拟合和收益递减</li>
+</ul>
+<p><strong>解决方案：</strong></p>
+<ol>
+<li><strong>Style- and perspective-diverse prompting:</strong> 受 WRAP 启发，使用精心设计的 prompt 在保持事实完整性的同时增强语言多样性</li>
+<li><strong>Chunk-wise autoregressive generation:</strong>
+   <ul>
+   <li>将长文档分割为片段</li>
+   <li>逐个片段重 phrase</li>
+   <li>重新拼接成完整段落</li>
+   <li>避免 LLM 输出长度限制导致的信息丢失</li>
+   </ul>
+</li>
+</ol>
+</div>
+
+<div class="highlight-box">
+<strong>2. Mathematics Data Rephrasing</strong>
+<ul>
+<li>将高质量数学文档改写成 "learning-note" 风格（参考 SwallowMath）</li>
+<li>将其他语言的高质量数学材料翻译成英语</li>
+<li>增加数据多样性</li>
+</ul>
+</div>
+
+<h4 style="color: var(--text); margin-top: 20px;">质量验证</h4>
+<p>对每个领域执行：</p>
+<ul>
+<li><strong>Rigorous correctness validation:</strong> 正确性验证</li>
+<li><strong>Quality validation:</strong> 质量验证</li>
+<li><strong>Targeted data experiments:</strong> 针对性数据实验，确保高多样性和有效性</li>
+</ul>
+
+<div class="key-point">
+<strong>关键洞察：</strong>与简单重复不同，rephrasing 通过增加语言多样性而非重复来扩展高质量 token，避免过拟合。
+</div>
+
+</div>
+</details>
+
+<!-- Kimi-K2.5 数据管线 -->
+<details style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; margin: 16px 0; overflow: hidden;">
+<summary style="padding: 16px 20px; cursor: pointer; font-weight: 600; color: var(--red); display: flex; align-items: center; justify-content: space-between;">
+<span>🔴 Kimi-K2.5: Native Multimodal Joint Pre-training</span>
+<span style="font-size: 0.8rem; color: var(--text-muted);">点击展开</span>
+</summary>
+<div style="padding: 0 20px 20px;">
+
+<h4 style="color: var(--text); margin-top: 16px;">核心设计问题</h4>
+<p>给定固定的视觉-文本 token 预算，最优的视觉-文本联合训练策略是什么？</p>
+
+<div class="danger-box">
+<strong>挑战传统观点：</strong>
+<p>传统方法（如 LLaVA、Qwen-VL）建议在训练后期以高比例（如 50%+）引入视觉 token，将多模态能力作为语言能力的事后补充。</p>
+<p><strong>Kimi-K2.5 发现：</strong></p>
+<ul>
+<li>视觉比例对最终多模态性能影响很小</li>
+<li>早期融合 + 低视觉比例 &gt; 晚期融合 + 高视觉比例</li>
+</ul>
+</div>
+
+<h4 style="color: var(--text); margin-top: 20px;">三阶段预训练流程</h4>
+
+<div style="background: rgba(248,113,113,0.05); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin: 16px 0;">
+<table style="margin: 0;">
+<tr><th>阶段</th><th>数据</th><th>说明</th></tr>
+<tr>
+<td><strong>1. ViT Training</strong></td>
+<td>视觉数据</td>
+<td>训练 MoonViT-3D 视觉编码器</td>
+</tr>
+<tr>
+<td><strong>2. Joint PT</strong></td>
+<td>~15T MM tokens</td>
+<td>全程恒定比例混合文本和视觉 token</td>
+</tr>
+<tr>
+<td><strong>3. Mid-training</strong></td>
+<td>长文本数据</td>
+<td>YaKN 渐进扩展至 256K 上下文</td>
+</tr>
+</table>
+</div>
+
+<h4 style="color: var(--text); margin-top: 20px;">MoonViT-3D 设计</h4>
+<ul>
+<li><strong>初始化：</strong>SigLIP-SO-400M</li>
+<li><strong>NaViT packing：</strong>单图分块、展平、顺序拼接成 1D 序列，支持变分辨率</li>
+<li><strong>3D 扩展：</strong>最多 4 个连续帧视为时空体，2D patch 联合展平打包</li>
+<li><strong>时序池化：</strong>轻量级时序池化聚合每个时序块内的 patch，实现 4× 时序压缩</li>
+</ul>
+
+<div class="success-box">
+<strong>关键优势：</strong>
+<ul>
+<li>图像和视频编码器完全共享参数</li>
+<li>统一嵌入空间</li>
+<li>图像预训练知识完全迁移到视频</li>
+<li>无需专门的视频模块或架构分叉</li>
+</ul>
+</div>
+
+</div>
+</details>
+
+<!-- Qwen3-VL 数据管线 -->
+<details style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; margin: 16px 0; overflow: hidden;">
+<summary style="padding: 16px 20px; cursor: pointer; font-weight: 600; color: #818cf8; display: flex; align-items: center; justify-content: space-between;">
+<span>🔵 Qwen3-VL: 四阶段渐进式多模态训练</span>
+<span style="font-size: 0.8rem; color: var(--text-muted);">点击展开</span>
+</summary>
+<div style="padding: 0 20px 20px;">
+
+<h4 style="color: var(--text); margin-top: 16px;">数据升级策略</h4>
+<p>Qwen3-VL 在数据质量、多样性和结构方面进行全面升级：</p>
+<ul>
+<li>增强的 caption 监督</li>
+<li>扩展的全识别和 OCR 覆盖</li>
+<li>标准化的 grounding 与 3D/空间推理</li>
+<li>代码、长文档和时序视频的新语料库</li>
+<li>注入 chain-of-thought 推理数据</li>
+<li>高质量、多样化的 GUI-agent 交互数据</li>
+</ul>
+
+<h4 style="color: var(--text); margin-top: 20px;">四阶段预训练</h4>
+
+<div style="background: rgba(99,102,241,0.05); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin: 16px 0;">
+<table style="margin: 0; font-size: 0.85rem;">
+<tr><th>阶段</th><th>数据规模</th><th>序列长度</th><th>可训练参数</th><th>关键数据</th></tr>
+<tr>
+<td><strong>S0: Alignment</strong></td>
+<td class="m">67B</td>
+<td class="m">8,192</td>
+<td>仅 MLP merger</td>
+<td>高质量图文对、视觉知识、OCR</td>
+</tr>
+<tr>
+<td><strong>S1: Multimodal PT</strong></td>
+<td class="m">~1T</td>
+<td class="m">8,192</td>
+<td>全部</td>
+<td>交错图文、VQA、STEM、少量视频</td>
+</tr>
+<tr>
+<td><strong>S2: Long-Context</strong></td>
+<td class="m">~1T</td>
+<td class="m">32,768</td>
+<td>全部</td>
+<td>文本比例增加、视频和 agent 数据</td>
+</tr>
+<tr>
+<td><strong>S3: Ultra-Long</strong></td>
+<td class="m">100B</td>
+<td class="m">262,144</td>
+<td>全部</td>
+<td>长视频、长文档理解</td>
+</tr>
+</table>
+</div>
+
+<h4 style="color: var(--text); margin-top: 20px;">STEM 数据专门化</h4>
+
+<div class="purple-box">
+<strong>视觉感知数据生成流程：</strong>
+<ol>
+<li><strong>程序化渲染：</strong>通过代码渲染生成几何图</li>
+<li><strong>点定位样本：</strong>100 万个（交点、角、重心等）</li>
+<li><strong>感知 VQA：</strong>200 万个，针对图表细粒度理解</li>
+<li><strong>两阶段 caption：</strong>
+   <ul>
+   <li>初始生成阶段</li>
+   <li>模型验证阶段</li>
+   </ul>
+</li>
+</ol>
+</div>
+
+<h4 style="color: var(--text); margin-top: 20px;">损失函数设计</h4>
+<p><strong>Square-root-normalized per-token loss：</strong></p>
+<ul>
+<li>从 per-sample loss 演进而来</li>
+<li>更好地平衡文本和多模态数据在训练中的贡献</li>
+<li>避免多模态数据淹没文本信号</li>
+</ul>
+
+<h4 style="color: var(--text); margin-top: 20px;">多模态编码</h4>
+<ul>
+<li><strong>Vision Encoder:</strong> SigLIP-2 (SO-400M 或 Large 300M)</li>
+<li><strong>Dynamic Resolution:</strong> 2D-RoPE + 基于输入大小的绝对位置嵌入插值</li>
+<li><strong>Merger:</strong> 两层 MLP 将 2×2 视觉特征压缩为单个视觉 token</li>
+<li><strong>Video:</strong> 显式文本时间戳 token 标记帧组</li>
+</ul>
+
+</div>
+</details>
+
+<!-- GLM-5 数据管线 -->
+<details style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; margin: 16px 0; overflow: hidden;">
+<summary style="padding: 16px 20px; cursor: pointer; font-weight: 600; color: var(--blue); display: flex; align-items: center; justify-content: space-between;">
+<span>🔷 GLM-5: DCLM-based + 严格过滤</span>
+<span style="font-size: 0.8rem; color: var(--text-muted);">点击展开</span>
+</summary>
+<div style="padding: 0 20px 20px;">
+
+<h4 style="color: var(--text); margin-top: 16px;">整体规模</h4>
+<ul>
+<li><strong>Pre-training:</strong> 27T tokens</li>
+<li><strong>Mid-training:</strong> 1.5T tokens（含 160B 软件工程专用数据）</li>
+<li><strong>Total:</strong> 28.5T tokens</li>
+</ul>
+
+<h4 style="color: var(--text); margin-top: 20px;">Web 数据处理</h4>
+
+<div class="highlight-box">
+<strong>基于 GLM-4.5 数据管线的改进：</strong>
+<ol>
+<li><strong>DCLM 分类器：</strong>引入基于 sentence embeddings 的额外 DCLM 分类器</li>
+<li><strong>高质量数据识别：</strong>识别并聚合超出标准分类器的额外高质量数据</li>
+<li><strong>World Knowledge 分类器：</strong>
+   <ul>
+   <li>针对 Wikipedia 条目优化</li>
+   <li>使用 LLM 标注数据训练</li>
+   <li>从低到中等质量数据中蒸馏有价值信息</li>
+   </ul>
+</li>
+</ol>
+</div>
+
+<h4 style="color: var(--text); margin-top: 20px;">代码数据处理</h4>
+<ul>
+<li><strong>数据源更新：</strong>主要代码托管平台的最新快照</li>
+<li><strong>规模增长：</strong>模糊去重后获得 28% 的 token 增长</li>
+<li><strong>元数据修复：</strong>修复 Software Heritage 代码文件的元数据对齐问题</li>
+<li><strong>语言分类：</strong>采用更精确的语言分类管线</li>
+<li><strong>低资源语言：</strong>为 Scala、Swift、Lua 等训练专门分类器</li>
+<li><strong>采样策略：</strong>GLM-4.5 的质量感知采样策略</li>
+</ul>
+
+<h4 style="color: var(--text); margin-top: 20px;">数学与科学数据处理</h4>
+
+<div class="danger-box">
+<strong>严格的合成数据禁令：</strong>
+<p>过滤管线严格执行以下禁令：</p>
+<ul>
+<li>❌ 合成数据 (synthetic data)</li>
+<li>❌ AI 生成数据</li>
+<li>❌ 模板化数据</li>
+</ul>
+</div>
+
+<p><strong>处理方法：</strong></p>
+<ul>
+<li>从网页、书籍、论文收集高质量数学科学数据</li>
+<li>改进网页内容提取管线</li>
+<li>改进书籍和论文的 PDF 解析机制</li>
+<li>使用 LLM 评分候选文档，仅保留教育性最强的内容</li>
+<li><strong>长文档处理：</strong>开发 chunk-and-aggregate 评分算法提高评分准确性</li>
+</ul>
+
+<h4 style="color: var(--text); margin-top: 20px;">长文本扩展</h4>
+<p>三阶段渐进扩展：</p>
+<ul>
+<li><strong>32K:</strong> 1T tokens</li>
+<li><strong>128K:</strong> 500B tokens</li>
+<li><strong>200K:</strong> 50B tokens</li>
+</ul>
+
+<h4 style="color: var(--text); margin-top: 20px;">软件工程数据 (Mid-training)</h4>
+<ul>
+<li>保留仓库级代码文件拼接范式</li>
+<li>commit 历史、issue-PR 对话</li>
+<li>约 160B 唯一 tokens</li>
+</ul>
+
+</div>
+</details>
+
+<!-- Intern-S1-Pro 数据管线 -->
+<details style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; margin: 16px 0; overflow: hidden;">
+<summary style="padding: 16px 20px; cursor: pointer; font-weight: 600; color: #2dd4bf; display: flex; align-items: center; justify-content: space-between;">
+<span>🩵 Intern-S1-Pro: PDF-based Scientific Data Pipeline</span>
+<span style="font-size: 0.8rem; color: var(--text-muted);">点击展开</span>
+</summary>
+<div style="padding: 0 20px 20px;">
+
+<h4 style="color: var(--text); margin-top: 16px;">核心设计动机</h4>
+<p>科学图像与自然图像的分布显著不同，需要更高的内容理解精度和细节关注。网页来源的科学图像在规模和领域密度上都不足，且原始 caption 通常简短且缺乏对齐。</p>
+
+<div class="key-point">
+<strong>PDF 作为理想数据源：</strong>
+<ul>
+<li>包含高信息密度的图形（实验结果、统计图、结构图、公式推导）</li>
+<li>系统化、领域密集的专业视觉内容</li>
+<li>自然的跨模态对齐数据来源</li>
+</ul>
+</div>
+
+<h4 style="color: var(--text); margin-top: 20px;">Caption Pipeline 全流程</h4>
+
+<div style="background: rgba(45,212,191,0.05); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin: 16px 0; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;">
+PDF → MinerU 2.5 提取 → pHash 去重 → 分类路由 → Caption 生成 → 0.5B 质量过滤 → 270B 输出
+</div>
+
+<h4 style="color: var(--text); margin-top: 20px;">详细步骤</h4>
+
+<ol>
+<li><strong>PDF 提取 (MinerU 2.5)</strong>
+   <ul>
+   <li>布局分析与结构识别</li>
+   <li>检测并定位图表、公式、表格</li>
+   <li>裁剪为标准化的子图像样本</li>
+   </ul>
+</li>
+
+<li><strong>内容去重 (pHash)</strong>
+   <ul>
+   <li>感知哈希 (perceptual hashing)</li>
+   <li>消除大规模冗余视觉内容</li>
+   <li>处理科学文献中常见的重复图表</li>
+   </ul>
+</li>
+
+<li><strong>主题分类与模型路由</strong>
+   <table style="margin-top: 12px;">
+   <tr><th>数据类型</th><th>Caption 模型</th><th>特点</th></tr>
+   <tr><td>科学图像</td><td>InternVL3.5-241B</td><td>专业领域特定描述</td></tr>
+   <tr><td>非科学图像</td><td>CapRL-32B</td><td>通用密集 caption</td></tr>
+   </table>
+</li>
+
+<li><strong>Caption 生成</strong>
+   <ul>
+   <li><strong>CapRL (Captioning Reinforcement Learning):</strong> 基于 Qwen 2.5 VL 32B</li>
+   <li>使用 RLVR (Reinforcement Learning with Verifiable Rewards)</li>
+   <li>刺激密集图像 caption 能力</li>
+   <li>多模板随机提示策略增强语言多样性</li>
+   </ul>
+</li>
+
+<li><strong>质量过滤 (0.5B 文本质量判别器)</strong>
+   <ul>
+   <li>过滤乱码文本</li>
+   <li>过滤重复表达</li>
+   <li>过滤低信息密度内容</li>
+   </ul>
+</li>
+</ol>
+
+<h4 style="color: var(--text); margin-top: 20px;">数据规模与覆盖</h4>
+<ul>
+<li><strong>总输出:</strong> 约 270B tokens 高质量科学图文 caption 数据</li>
+<li><strong>覆盖领域:</strong> 生命科学、化学、地球科学、材料科学</li>
+<li><strong>CPT 总量:</strong> 6T tokens（含科学和通用数据）</li>
+</ul>
+
+<h4 style="color: var(--text); margin-top: 20px;">科学数据冲突解决</h4>
+
+<div class="purple-box">
+<strong>三大策略：</strong>
+<ol>
+<li><strong>结构化科学数据转换：</strong>
+   <ul>
+   <li>Template Construction: 异构输入-输出对转换为语法正确的叙述文本</li>
+   <li>Task Form Transformation: 数值符号映射到有科学意义的描述</li>
+   </ul>
+</li>
+<li><strong>科学数据多样化：</strong>
+   <ul>
+   <li>Prompt Diversification: 同一概念提供数十种不同指令</li>
+   <li>Rollout Mechanism: 生成完整推理链，将知识回忆转化为逻辑推理</li>
+   </ul>
+</li>
+<li><strong>System Prompt Isolation：</strong>
+   <ul>
+   <li>科学数据和通用数据注入互斥的系统级前缀</li>
+   <li>创建独立的上下文处理环境</li>
+   </ul>
+</li>
+</ol>
+</div>
+
+</div>
+</details>
+
+<!-- Seed-VL 数据管线 -->
+<details style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; margin: 16px 0; overflow: hidden;">
+<summary style="padding: 16px 20px; cursor: pointer; font-weight: 600; color: #a78bfa; display: flex; align-items: center; justify-content: space-between;">
+<span>🟣 Seed-VL: Three-Stage ViT Pre-training</span>
+<span style="font-size: 0.8rem; color: var(--text-muted);">点击展开</span>
+</summary>
+<div style="padding: 0 20px 20px;">
+
+<h4 style="color: var(--text); margin-top: 16px;">ViT 预训练三阶段</h4>
+
+<div style="background: rgba(167,139,250,0.05); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin: 16px 0;">
+<table style="margin: 0;">
+<tr><th>阶段</th><th>方法</th><th>训练样本</th><th>Token 比例</th><th>目标</th></tr>
+<tr>
+<td><strong>1. MIM</strong></td>
+<td>Masked Image Modeling + 2D RoPE</td>
+<td>2.2B</td><td>4.0%</td><td>增强视觉几何和结构感知</td>
+</tr>
+<tr>
+<td><strong>2. Contrastive</strong></td>
+<td>Native-Resolution Contrastive Learning</td>
+<td>4.8B</td><td>91.2%</td><td>图文对齐</td>
+</tr>
+<tr>
+<td><strong>3. Omni-modal</strong></td>
+<td>MiCo Framework</td><td>-</td><td>-</td><td>视频-音频-文本统一对齐</td>
+</tr>
+</table>
+</div>
+
+<h4 style="color: var(--text); margin-top: 20px;">阶段 1: MIM with 2D RoPE</h4>
+<ul>
+<li><strong>教师模型:</strong> EVA02-CLIP-E</li>
+<li><strong>学生模型:</strong> 随机初始化，使用 2D RoPE</li>
+<li><strong>掩码比例:</strong> 75% 图像 patch 和对应 RoPE 嵌入</li>
+<li><strong>目标:</strong> CLIP 特征</li>
+<li><strong>损失:</strong> 余弦相似度损失</li>
+<li><strong>关键发现:</strong> 2D RoPE 使学生具备强大的原生动态分辨率识别能力</li>
+</ul>
+
+<h4 style="color: var(--text); margin-top: 20px;">阶段 2: Native-Resolution Contrastive Learning</h4>
+<ul>
+<li><strong>视觉编码器:</strong> MIM 训练的学生模型初始化</li>
+<li><strong>文本编码器:</strong> EVA-02-CLIP-E 的文本编码器初始化</li>
+<li><strong>特征聚合:</strong> attention pooling 聚合 patch 特征为 1280 维图像嵌入</li>
+<li><strong>损失:</strong> SigLIP loss + SuperClass loss</li>
+</ul>
+
+<h4 style="color: var(--text); margin-top: 20px;">阶段 3: Omni-modal Pre-training</h4>
+<ul>
+<li><strong>框架:</strong> MiCo</li>
+<li><strong>数据:</strong> 视频帧、音频、视觉 caption、音频 caption 的对齐元组</li>
+<li><strong>处理:</strong> ViT 编码视频帧和音频，独立文本编码器处理 caption</li>
+<li><strong>目标:</strong> 嵌入对齐</li>
+</ul>
+
+<h4 style="color: var(--text); margin-top: 20px;">多模态预训练数据类别</h4>
+<ol>
+<li><strong>Generic Image-Text Pairs & Knowledge:</strong> 通用图文对和知识数据</li>
+<li><strong>OCR:</strong> 光学字符识别数据</li>
+<li><strong>Visual Grounding & Counting:</strong> 视觉定位和计数</li>
+<li><strong>3D Spatial Understanding:</strong> 3D 空间理解</li>
+<li><strong>Video:</strong> 视频理解</li>
+<li><strong>STEM:</strong> 科学、技术、工程、数学</li>
+<li><strong>GUI:</strong> 图形用户界面</li>
+</ol>
+
+<div class="success-box">
+<strong>设计原则：</strong>
+<ul>
+<li>更好的训练效率：专门的 ViT 预训练避免联合训练的不稳定性</li>
+<li>全面的数据利用：充分利用所有模态数据</li>
+<li>架构一致性：ViT 预训练和 VLM 阶段架构保持一致</li>
+</ul>
+</div>
+
+</div>
+</details>
+
+<!-- 对比总结 -->
+<div class="key-point" style="margin-top: 24px;">
+<strong>各模型数据管线核心差异总结：</strong>
+<table style="margin-top: 12px;">
+<tr><th>模型</th><th>核心特色</th><th>关键创新</th></tr>
+<tr><td>Kimi-K2</td><td>Data Rephrasing</td><td>Chunk-wise 重 phrase，避免重复过拟合</td></tr>
+<tr><td>Kimi-K2.5</td><td>Native Multimodal</td><td>早期融合 + 恒定比例混合</td></tr>
+<tr><td>Qwen3-VL</td><td>四阶段渐进</td><td>Alignment → Full PT → Long → Ultra-long</td></tr>
+<tr><td>GLM-5</td><td>DCLM-based + 严格过滤</td><td>严格禁止合成数据</td></tr>
+<tr><td>Intern-S1-Pro</td><td>PDF-based Scientific</td><td>CapRL + pHash + System Prompt Isolation</td></tr>
+<tr><td>Seed-VL</td><td>Three-stage ViT</td><td>MIM → Contrastive → Omni-modal</td></tr>
+</table>
+</div>
+
+</div>
+
+<div class="success-box">
+<strong>GLM-5 数据管线亮点：</strong>
+<ul>
+<li><strong>Web数据：</strong>使用基于 sentence embeddings 的 DCLM 分类器识别高质量数据</li>
+<li><strong>长尾知识：</strong>World Knowledge 分类器通过 Wikipedia 条目和 LLM 标注数据优化</li>
+<li><strong>代码数据：</strong>修复 Software Heritage 元数据对齐问题，采用更精确的语言分类管线</li>
+<li><strong>低资源语言：</strong>为 Scala, Swift, Lua 等训练专门分类器</li>
+<li><strong>数学科学：</strong>使用 chunk-and-aggregate 评分算法提高长文档评分准确性</li>
+<li><strong>严格过滤：</strong>避免使用合成、AI生成或基于模板的数据</li>
+</ul>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- 4. 训练阶段与上下文扩展 -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section">
+<h2>04 &mdash; 训练阶段与上下文扩展策略</h2>
+
+<div class="overflow-x">
+<table>
+<tr>
+<th>模型</th>
+<th>阶段1</th>
+<th>阶段2</th>
+<th>阶段3</th>
+<th>阶段4</th>
+</tr>
+<tr>
+<td><span class="tag t-qwen">Qwen3-VL</span></td>
+<td>S0: Alignment (67B, 8K)<br/>MLP merger only</td>
+<td>S1: Full PT (1T, 8K)<br/>全参数训练</td>
+<td>S2: Long-context (1T, 32K)<br/>视频+agent数据</td>
+<td>S3: Ultra-long (100B, 256K)<br/>长视频+文档</td>
+</tr>
+<tr>
+<td><span class="tag t-kimi">Kimi-K2</span></td>
+<td>Stable phase (10T)<br/>4K context</td>
+<td>Decay phase (5.5T)<br/>LR decay</td>
+<td>Long-context adaptation<br/>YaKN to 128K</td>
+<td>—</td>
+</tr>
+<tr>
+<td><span class="tag t-glm">GLM-5</span></td>
+<td>PT (27T)<br/>基础预训练</td>
+<td>32K扩展 (1T)</td>
+<td>128K扩展 (500B)</td>
+<td>200K扩展 (50B)</td>
+</tr>
+<tr>
+<td><span class="tag t-intern">Intern-S1-Pro</span></td>
+<td>CPT (6T)<br/>科学数据</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td><span class="tag t-dclm">DCLM</span></td>
+<td>arXiv:2406.11794</td>
+<td>Sec 4 (Deduplication), Sec 4.4 (Model-based filtering)</td>
+<td><code>paper_reading/llm_vlm/dclm/</code></td>
+</tr>
+</table>
+</div>
+
+<!-- Step 3.5 Flash Data Mixture -->
+<details style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; margin: 16px 0; overflow: hidden;">
+<summary style="padding: 16px 20px; cursor: pointer; font-weight: 600; color: var(--green);">
+<span>🟢 Step 3.5 Flash: Agent-oriented Data Pipeline (Appendix C)</span>
+</summary>
+<div style="padding: 0 20px 20px;">
+<p><strong>预训练规模：</strong>总计 ~18.35T tokens</p>
+<ul>
+<li>Pre-training Stage 1 (开放域): <strong>14.6T tokens</strong>, 4K context</li>
+<li>Pre-training Stage 2 (退火+长上下文初始化): <strong>3T tokens</strong>, 4K→32K context</li>
+<li>Mid-training Stage 1 (32K特化): <strong>386B tokens</strong> (含81B replay)</li>
+<li>Mid-training Stage 2 (128K长上下文): <strong>364B tokens</strong> (含10.5B replay)</li>
+</ul>
+
+<p><strong>数据类别与来源 (Section 4.2.1 / Appendix C):</strong></p>
+<table style="margin: 12px 0;">
+<tr><th>数据类型</th><th>来源与处理</th><th>规模/占比</th></tr>
+<tr>
+<td><strong>General Knowledge</strong></td>
+<td>StepCrawl (内部抓取系统) - 网页HTML + 文档(ePub/PDF)<br/>WebOrganizer-style 站点选择模型过滤SEO/低质量页面<br/>每日处理 ~1B 页面</td>
+<td>Trillions of tokens</td>
+</tr>
+<tr>
+<td><strong>Code Data</strong></td>
+<td>修改版 OpenCoder 过滤管线<br/>Relax 策略: 允许 0-6 启发式违规/文档 (原为零容忍)<br/>退火和中训练阶段上采样</td>
+<td>显著比例 (Agent基础)</td>
+</tr>
+<tr>
+<td><strong>PR/Issue/Commit</strong></td>
+<td>GitHub 10+ stars 仓库, 经 git diff 验证<br/>(1) Base Data (20+主流语言)<br/>(2) PR-Dialogue Data (90B tokens): Agentless风格模板<br/>(3) Rewritten Reasoning Data (12B tokens): 重构问题解决过程<br/>(4) Environment-based Seed Data: 可执行环境</td>
+<td>~100B+ tokens</td>
+</tr>
+<tr>
+<td><strong>Mathematics & STEM</strong></td>
+<td>MegaMath + FineMath 过滤管线<br/>内部 StepCrawl 抓取的数学相关数据<br/>1亿样本教育数据集 (K-12到职业考试)</td>
+<td>Hundreds of billions</td>
+</tr>
+<tr>
+<td><strong>Tool-Use & Reasoning</strong></td>
+<td>合成/半合成数据: math/code/science/general<br/>搜索Agent、SWE Agent、工具执行专用样本<br/>长上下文样本 (自然长文档 + 长形式合成任务)</td>
+<td>Mid-training 引入</td>
+</tr>
+</table>
+
+<p><strong>质量分层策略 (Appendix C.1.2):</strong></p>
+<ul>
+<li><strong>Nemotron-CC 风格分层:</strong> 6个轻量级打分器/分类器集成，分为 High/Medium-High/Medium/Medium-Low/Low</li>
+<li><strong>保留策略:</strong> 仅保留 High/Medium-High/Medium；书籍和论文在退火阶段仅保留 High/Medium-High</li>
+<li><strong>Embedding-based 聚类再平衡:</strong> 中英语料嵌入 → K-means (100k+ clusters) → 对过度代表的聚类下采样</li>
+<li><strong>知识密集挖掘:</strong> 两阶段流水线 - (1) 高价值实体检索知识密集文档 (2) 受控改写和QA合成提升可学习性</li>
+</ul>
+
+<p><strong>训练课程进展:</strong></p>
+<ol>
+<li><strong>Stage 1:</strong> 4K上下文开放域预训练，最大化覆盖和基础能力</li>
+<li><strong>Stage 2 (Annealing):</strong> 数据混合向代码和PR/Issue/Commit中心来源退火，增加高质量知识和推理密集样本比例</li>
+<li><strong>Mid-training Stage 1:</strong> 32K特化，21%预训练数据replay防止分布偏移</li>
+<li><strong>Mid-training Stage 2:</strong> 128K长上下文特化，合成长视野推理 + 自然长文档</li>
+</ol>
+
+<p style="font-size: 0.85rem; color: var(--text-dim);"><strong>来源:</strong> arXiv:2602.10604v1, Section 4.2.1 & Appendix C</p>
+</div>
+</details>
+
+<div class="danger-box">
+<strong>关键洞察：</strong>
+<ul>
+<li><strong>Qwen3-VL 采用4阶段渐进：</strong>从仅训练merger(67B)到全参数(1T)再到长上下文(256K)，每个阶段数据配比不同</li>
+<li><strong>GLM-5 三阶段长文本：</strong>32K(1T) → 128K(500B) → 200K(50B)，呈指数递减</li>
+<li><strong>Intern-S1-Pro 仅CPT：</strong>没有从头预训练，而是在基座模型上做6T continued pre-training</li>
+<li><strong>Step 3.5 Flash Agent导向：</strong>PR/Issue/Commit数据(100B+) + 工具使用合成数据，支持软件工程Agent工作流</li>
+</ul>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- 5. 多模态数据策略 -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section">
+<h2>05 &mdash; 多模态数据策略对比</h2>
+
+<h3>Vision-Language 预训练方法</h3>
+<div class="overflow-x">
+<table>
+<tr>
+<th>模型</th>
+<th>Vision Encoder</th>
+<th>预训练策略</th>
+<th>视频处理</th>
+<th>数据来源</th>
+</tr>
+<tr>
+<td><span class="tag t-qwen">Qwen3-VL</span></td>
+<td>SigLIP-2 (SO-400M)</td>
+<td>4阶段渐进，square-root reweighting平衡文本/多模态</td>
+<td>动态FPS采样 + 文本timestamp tokens</td>
+<td>arXiv:2511.21631 Sec 2.1</td>
+</tr>
+<tr>
+<td><span class="tag t-kimi">Kimi-K2.5</span></td>
+<td>MoonViT-3D (native)</td>
+<td>Native multimodal: 全程恒定比例混合文本和视觉token</td>
+<td>4帧压缩表示</td>
+<td>arXiv:2602.02276 Sec 2.1</td>
+</tr>
+<tr>
+<td><span class="tag t-seed">Seed-VL</span></td>
+<td>Seed-ViT (532M)</td>
+<td>ViT三阶段预训练(MIM→CLIP→Multi-task)后再与LLM联合</td>
+<td>视频帧 + 音频 + 文本交错</td>
+<td>arXiv:2505.07062 Sec 2.1</td>
+</tr>
+<tr>
+<td><span class="tag t-intern">Intern-S1-Pro</span></td>
+<td>Native ViT</td>
+<td>Scientific multimodal: PDF解析生成高质量caption</td>
+<td>—</td>
+<td>arXiv:2603.25040 Sec 3</td>
+</tr>
+<tr>
+<td><span class="tag t-dclm">DCLM</span></td>
+<td>arXiv:2406.11794</td>
+<td>Sec 4 (Deduplication), Sec 4.4 (Model-based filtering)</td>
+<td><code>paper_reading/llm_vlm/dclm/</code></td>
+</tr>
+</table>
+</div>
+
+<div class="key-point">
+<strong>Kimi-K2.5 "Native Multimodal" 发现：</strong><br/>
+论文明确挑战了传统观点："给定固定的视觉-文本token预算，早期融合低视觉比例比晚期高比例融合效果更好"<br/><br/>
+实验发现：
+<ul>
+<li>视觉比例对最终多模态性能影响很小</li>
+<li>早期融合 + 低视觉比例 > 晚期融合 + 高视觉比例</li>
+<li>这启发了K2.5的native multimodal策略：全程恒定比例混合，而非后期追加</li>
+</ul>
+</div>
+
+<div class="highlight-box">
+<strong>Qwen3-VL "Square-Root Reweighting"：</strong><br/>
+为平衡文本-only和多模态目标，采用平方根重加权：<br/>
+<code>loss_weight = sqrt(token_count_ratio)</code><br/><br/>
+这提升了多模态性能同时不损害文本能力，避免了简单按token数量加权导致的文本能力退化。
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- 6. 关键洞察与趋势 -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section">
+<!-- ════════════════════════════════════════════ -->
+<!-- 5.5 DCLM 与数据筛选原理 -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section">
+<h2>05.5 &mdash; DCLM 与数据筛选原理详解</h2>
+
+<h3>DCLM (DataComp-LM) 简介</h3>
+<p>DCLM 是一个用于语言模型训练数据集控制的测试平台，目标是系统性地改进语言模型训练数据。它提供了一个标准化的 240T tokens 语料库（从 Common Crawl 提取），基于 OpenLM 框架的有效预训练配方，以及 53 个下游评估任务。</p>
+
+<div class="key-point">
+<strong>DCLM-7B 基准结果：</strong>
+<ul>
+<li>使用 DCLM-BASELINE (2.6T tokens) 训练 7B 参数模型</li>
+<li>MMLU 5-shot 准确率达到 <strong>64%</strong></li>
+<li>相比 MAP-Neo（之前的开源数据 SOTA）提升 <strong>6.6个百分点</strong></li>
+<li>相比 Llama 3 8B 使用 <strong>6.6× 更少计算量</strong> 达到相近性能</li>
+</ul>
+</div>
+
+<h3>DCLM 数据管理流程</h3>
+<div class="overflow-x">
+<table>
+<tr>
+<th>阶段</th>
+<th>方法</th>
+<th>说明</th>
+</tr>
+<tr>
+<td><strong>文本提取</strong></td>
+<td>Resiliparse + Trafilatura</td>
+<td>从 Common Crawl WARC 文件提取干净文本</td>
+</tr>
+<tr>
+<td><strong>启发式清洗</strong></td>
+<td>RefinedWeb 过滤器</td>
+<td>语言分类、长度过滤、URL 过滤等</td>
+</tr>
+<tr>
+<td><strong>去重</strong></td>
+<td>Bloom Filter / MinHash</td>
+<td>移除精确或近似重复内容</td>
+</tr>
+<tr>
+<td><strong>质量筛选</strong></td>
+<td>Model-based filtering</td>
+<td>使用 fastText bigram 分类器进行质量评分</td>
+</tr>
+</table>
+</div>
+
+<h3>核心发现：Model-based Filtering 是关键</h3>
+<div class="highlight-box">
+<strong>关键实验结果 (arXiv:2406.11794 Sec 4.4)：</strong>
+<p>DCLM 对比了多种模型筛选方法：</p>
+<ol>
+<li><strong>PageRank</strong> - 基于文档链接关系</li>
+<li><strong>SemDedup</strong> - 语义去重，基于模型表示</li>
+<li><strong>BGE 嵌入线性分类器</strong> - 基于预训练 BGE 文本嵌入</li>
+<li><strong>AskLLM</strong> - 提示 LM 判断文档是否有帮助</li>
+<li><strong>Perplexity filtering</strong> - 保留低困惑度序列 (CCNet 风格)</li>
+<li><strong>Top-k average logits</strong> - 平均 top-k 模型 logits</li>
+</ol>
+<p><strong>胜出者：</strong>简单的 <strong>fastText bigram classifier</strong> 配合精心选择的正负样本，在所有分类器中表现最佳。</p>
+<p><strong>意外发现：</strong>人工质量判断在识别高质量训练数据方面价值有限。</p>
+</div>
+
+<h3>Fuzzy Deduplication 原理详解</h3>
+<p>网页爬取数据集通常包含大量重复或近似重复的数据字符串。去重有双重作用：(1) 通过减少记忆化提升性能；(2) 增加数据多样性。</p>
+
+<!-- 可展开卡片：MinHash -->
+<details style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; margin: 16px 0; overflow: hidden;">
+<summary style="padding: 16px 20px; cursor: pointer; font-weight: 600; color: var(--cyan); display: flex; align-items: center; justify-content: space-between;">
+<span>📐 MinHash (局部敏感哈希)</span>
+<span style="font-size: 0.8rem; color: var(--text-muted);">点击展开</span>
+</summary>
+<div style="padding: 0 20px 20px;">
+<p><strong>原理：</strong>MinHash 是一种局部敏感哈希 (Locality-Sensitive Hashing, LSH) 技术，用于基于 Jaccard 相似度对集合进行分组。</p>
+
+<div class="purple-box">
+<strong>数学基础：</strong>
+<ul>
+<li>Jaccard 相似度：$J(A,B) = \frac{|A \cap B|}{|A \cup B|}$</li>
+<li>MinHash 估计：$P[h_{min}(A) = h_{min}(B)] \approx J(A,B)$</li>
+<li>通过多组哈希函数的碰撞概率估计文档相似度</li>
+</ul>
+</div>
+
+<p><strong>DCLM 实现细节：</strong></p>
+<ul>
+<li><strong>n-gram 大小：</strong>5 tokens</li>
+<li><strong>目标 Jaccard 相似度：</strong>0.8</li>
+<li><strong>哈希排列数：</strong>1,395 个（分为 93 个 bucket，每 bucket 15 个 hash）</li>
+<li><strong>优化：</strong>相比 Lee et al. 的 9,000 排列，DCLM 使用更高效的参数设置</li>
+</ul>
+
+<p><strong>Suffix Array 集成：</strong></p>
+<p>MinHash 与后缀数组结合使用，后缀数组首先识别和移除大型语料库中的子字符串重复，然后 MinHash 进行文档级去重。</p>
+
+<p><strong>优缺点：</strong></p>
+<table style="margin-top: 12px;">
+<tr><th>优点</th><th>缺点</th></tr>
+<tr><td>可处理大规模数据集</td><td>计算成本高（大量排列）</td></tr>
+<tr><td>理论保证 (Jaccard)</td><td>超大规模时扩展性受限</td></tr>
+<tr><td>成熟的开源实现</td><td>内存需求大</td></tr>
+</table>
+</div>
+</details>
+
+<!-- 可展开卡片：Bloom Filter -->
+<details style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; margin: 16px 0; overflow: hidden;">
+<summary style="padding: 16px 20px; cursor: pointer; font-weight: 600; color: var(--cyan); display: flex; align-items: center; justify-content: space-between;">
+<span>🔮 Bloom Filter (布隆过滤器)</span>
+<span style="font-size: 0.8rem; color: var(--text-muted);">点击展开</span>
+</summary>
+<div style="padding: 0 20px 20px;">
+<p><strong>原理：</strong>Bloom filter 是一种空间高效的概率性数据结构，支持集合成员查询。</p>
+
+<div class="success-box">
+<strong>核心特性：</strong>
+<ul>
+<li><strong>无假阴性：</strong>如果元素在集合中，查询永远不会返回 False</li>
+<li><strong>有假阳性：</strong>如果元素不在集合中，查询可能错误地返回 True</li>
+<li><strong>空间复杂度：</strong>亚线性空间 $O(n)$，远低于存储所有元素</li>
+</ul>
+</div>
+
+<p><strong>数学公式：</strong></p>
+<ul>
+<li><strong>最优哈希函数数：</strong>$k = -\frac{\ln \epsilon}{\ln 2}$，其中 $\epsilon$ 是期望的假阳性率</li>
+<li><strong>最优位数组大小：</strong>通过求解 $\epsilon = (1 - e^{-kn/m})^k$ 得到 $m$</li>
+</ul>
+
+<p><strong>DCLM-Baseline 使用的方法：BFF (Big Friendly Filter)</strong></p>
+<p>基于 Soldaini et al. 的精确去重扩展，支持：</p>
+<ul>
+<li><strong>文档级去重：</strong>整篇文档 vs 语料库</li>
+<li><strong>段落级去重：</strong>检测文档内的重复段落</li>
+<li><strong>同时处理：</strong>文档和段落去重同时进行</li>
+</ul>
+
+<div class="highlight-box">
+<strong>BFF 工作流程：</strong>
+<ol>
+<li>初始化：估计语料库 token 数量和期望假阳性率</li>
+<li>计算最优哈希函数数 $k$ 和位数组大小 $m$</li>
+<li>遍历每个文档的每个段落：
+   <ul>
+   <li>计算哈希值</li>
+   <li>查询 Bloom filter（如果存在则标记为重复）</li>
+   <li>插入 Bloom filter</li>
+   </ul>
+</li>
+<li>移除被标记为重复的段落或文档</li>
+</ol>
+</div>
+
+<p><strong>优缺点：</strong></p>
+<table style="margin-top: 12px;">
+<tr><th>优点</th><th>缺点</th></tr>
+<tr><td>极高的空间效率</td><td>存在假阳性（可配置）</td></tr>
+<tr><td>扩展性好（>10TB）</td><td>无法删除元素（标准版）</td></tr>
+<tr><td>比 MinHash 快得多</td><td>只能判断存在性，不能计算相似度</td></tr>
+</table>
+
+<p><strong>DCLM 实验结果：</strong></p>
+<p>MinHash 和 Bloom Filter 在下游性能上表现相当（7B-2x 规模上 CORE 分数差距 < 0.2），但 Bloom Filter 在超过 10TB 数据集上扩展性更好。因此 DCLM-Baseline 使用 Bloom Filter，其他实验使用 MinHash。</p>
+</div>
+</details>
+
+<!-- 可展开卡片：对比与应用 -->
+<details style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; margin: 16px 0; overflow: hidden;">
+<summary style="padding: 16px 20px; cursor: pointer; font-weight: 600; color: var(--cyan); display: flex; align-items: center; justify-content: space-between;">
+<span>⚖️ MinHash vs Bloom Filter 对比与模型应用</span>
+<span style="font-size: 0.8rem; color: var(--text-muted);">点击展开</span>
+</summary>
+<div style="padding: 0 20px 20px;">
+
+<div class="overflow-x">
+<table>
+<tr>
+<th>维度</th>
+<th>MinHash + Suffix Array</th>
+<th>Bloom Filter (BFF)</th>
+</tr>
+<tr>
+<td><strong>去重级别</strong></td>
+<td>文档 vs 文档 (pairwise)</td>
+<td>文档 vs 语料库 (corpus-level)</td>
+</tr>
+<tr>
+<td><strong>相似度度量</strong></td>
+<td>Jaccard similarity (可配置阈值)</td>
+<td>存在性检测（0/1）</td>
+</tr>
+<tr>
+<td><strong>计算成本</strong></td>
+<td>高（需要大量哈希计算）</td>
+<td>低（几次哈希查找）</td>
+</tr>
+<tr>
+<td><strong>内存需求</strong></td>
+<td>高（存储签名）</td>
+<td>中等（位数组）</td>
+</tr>
+<tr>
+<td><strong>扩展性</strong></td>
+<td>中等（>10TB 时困难）</td>
+<td>优秀（轻松处理 >10TB）</td>
+</tr>
+<tr>
+<td><strong>适用场景</strong></td>
+<td>需要相似度分数的精细控制</td>
+<td>大规模快速去重</td>
+</tr>
+<tr>
+<td><strong>DCLM 使用</strong></td>
+<td>实验和消融研究</td>
+<td>DCLM-Baseline 生产版本</td>
+</tr>
+</table>
+</div>
+
+<h4 style="margin-top: 20px; color: var(--text);">在 GLM-5 中的应用</h4>
+<p>GLM-5 在其数据管线中使用了基于 DCLM 的改进策略：</p>
+<ul>
+<li><strong>DCLM 分类器：</strong>基于 sentence embeddings 的额外分类器层</li>
+<li><strong>Fuzzy dedup：</strong>代码数据扩展 28% 的同时保持质量</li>
+<li><strong>World Knowledge 分类器：</strong>专门针对 Wikipedia 优化的变体</li>
+</ul>
+
+<h4>在其他模型中的应用</h4>
+<ul>
+<li><strong>RefinedWeb：</strong>Bloom filter + 启发式过滤</li>
+<li><strong>RedPajama：</strong>MinHash + URL 去重</li>
+<li><strong>Dolma-V1：</strong>Suffix array + Bloom filter 组合</li>
+</ul>
+</div>
+</details>
+
+<div class="danger-box">
+<strong>GLM-5 数据管线中的 DCLM 实践：</strong>
+<ul>
+<li><strong>Web 数据：</strong>在 GLM-4.5 基础上引入基于 sentence embeddings 的 DCLM 分类器，识别并聚合超出标准分类器的高质量数据</li>
+<li><strong>长尾知识：</strong>使用针对 Wikipedia 条目和 LLM 标注数据优化的 World Knowledge 分类器</li>
+<li><strong>代码数据：</strong>修复 Software Heritage 元数据对齐问题，采用更精确的语言分类管线，模糊去重后获得 28% 的 token 增长</li>
+<li><strong>低资源语言：</strong>为 Scala、Swift、Lua 等训练专门分类器</li>
+<li><strong>数学科学：</strong>开发 chunk-and-aggregate 评分算法提高长文档评分准确性，严格避免使用合成/AI生成/模板数据</li>
+</ul>
+</div>
+
+</div>
+
+<!-- Intern-S1-Pro 科学数据 Pipeline 详解 -->
+<div class="section">
+<h2>05.6 — Intern-S1-Pro 科学数据 Pipeline 深度解析</h2>
+
+<h3>科学数据构造流程</h3>
+<p>Intern-S1-Pro 的核心创新在于专门面向科学图像的 caption pipeline，构建了约 <strong>270B tokens</strong> 的高质量科学图文对。</p>
+
+<!-- 可展开卡片：完整 Pipeline -->
+<details style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; margin: 16px 0; overflow: hidden;">
+<summary style="padding: 16px 20px; cursor: pointer; font-weight: 600; color: var(--cyan); display: flex; align-items: center; justify-content: space-between;">
+<span>🔬 Intern-S1-Pro 科学数据 Pipeline 全流程</span>
+<span style="font-size: 0.8rem; color: var(--text-muted);">点击展开</span>
+</summary>
+<div style="padding: 0 20px 20px;">
+
+<div style="background: rgba(34,211,238,0.05); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin: 16px 0; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;">
+PDF 输入 → MinerU 2.5 提取 → pHash 去重 → 分类路由 → Caption 生成 → 质量过滤 → 270B 输出
+</div>
+
+<h4 style="color: var(--text); margin-top: 20px;">步骤详解</h4>
+
+<ol style="padding-left: 20px;">
+<li><strong>PDF 提取 (MinerU 2.5)</strong>
+   <ul>
+   <li>布局分析与结构识别</li>
+   <li>检测并定位图表、公式、表格</li>
+   <li>裁剪为标准化的子图像样本</li>
+   </ul>
+</li>
+<li><strong>内容去重 (pHash - perceptual hashing)</strong>
+   <ul>
+   <li>感知哈希算法消除大规模冗余视觉内容</li>
+   <li>处理科学文献中常见的重复图表</li>
+   </ul>
+</li>
+<li><strong>主题分类与模型路由</strong>
+   <table style="margin-top: 12px;">
+   <tr><th>数据类型</th><th>Caption 模型</th><th>特点</th></tr>
+   <tr><td>科学图像</td><td>InternVL3.5-241B</td><td>专业领域特定描述</td></tr>
+   <tr><td>非科学图像</td><td>CapRL-32B</td><td>通用密集 caption</td></tr>
+   </table>
+</li>
+<li><strong>Caption 生成</strong>
+   <ul>
+   <li><strong>CapRL (Captioning Reinforcement Learning):</strong> 基于 Qwen 2.5 VL 32B 训练</li>
+   <li>使用 RLVR (Reinforcement Learning with Verifiable Rewards) 刺激密集图像 caption 能力</li>
+   <li>多模板随机提示策略增强语言多样性</li>
+   </ul>
+</li>
+<li><strong>质量过滤 (0.5B 文本质量判别器)</strong>
+   <ul>
+   <li>过滤乱码文本</li>
+   <li>过滤重复表达</li>
+   <li>过滤低信息密度内容</li>
+   </ul>
+</li>
+</ol>
+
+<h4 style="color: var(--text); margin-top: 20px;">数据规模</h4>
+<ul>
+<li><strong>总输出:</strong> 约 270B tokens 高质量科学图文 caption 数据</li>
+<li><strong>覆盖领域:</strong> 生命科学、化学、地球科学、材料科学</li>
+<li><strong>应用:</strong> 大规模部署于 PDF 语料库</li>
+</ul>
+
+</div>
+</details>
+
+<!-- 可展开卡片：与其他模型对比 -->
+<details style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; margin: 16px 0; overflow: hidden;">
+<summary style="padding: 16px 20px; cursor: pointer; font-weight: 600; color: var(--cyan); display: flex; align-items: center; justify-content: space-between;">
+<span>⚖️ 各模型 STEM Pipeline 对比</span>
+<span style="font-size: 0.8rem; color: var(--text-muted);">点击展开</span>
+</summary>
+<div style="padding: 0 20px 20px;">
+
+<div class="overflow-x">
+<table>
+<tr>
+<th style="width: 18%;">模型</th>
+<th style="width: 20%;">数据来源</th>
+<th style="width: 25%;">处理方法</th>
+<th style="width: 20%;">质量评估</th>
+<th style="width: 17%;">规模/特点</th>
+</tr>
+<tr>
+<td><span class="tag t-intern">Intern-S1-Pro</span></td>
+<td>PDF 科学文献<br/>(实验结果、统计图、结构图、公式)</td>
+<td>MinerU 2.5 提取 → pHash 去重 → InternVL3.5/CapRL 生成 caption → 0.5B 质量过滤</td>
+<td>专用 0.5B 判别器 + 多模板提示</td>
+<td>270B tokens<br/>专门面向科学</td>
+</tr>
+<tr>
+<td><span class="tag t-dclm">DCLM</span></td>
+<td>arXiv:2406.11794</td>
+<td>Sec 4 (Deduplication), Sec 4.4 (Model-based filtering)</td>
+<td><code>paper_reading/llm_vlm/dclm/</code></td>
+</tr>
+<tr>
+<td><span class="tag t-kimi">Kimi-K2</span></td>
+<td>数学文档<br/>(多语言材料)</td>
+<td>SwallowMath 风格重写为 "learning-note" 格式 + 多语言翻译</td>
+<td>基于困惑度的质量模型</td>
+<td>重 phrase 而非简单重复<br/>避免过拟合</td>
+</tr>
+<tr>
+<td><span class="tag t-qwen">Qwen3-VL</span></td>
+<td>网页、书籍、论文<br/>+ 合成数据</td>
+<td>程序化渲染几何图 → 1M 点定位 + 2M VQA → 两阶段 caption (生成+验证)</td>
+<td>模型基于验证</td>
+<td>1M 点定位样本<br/>2M 感知 VQA</td>
+</tr>
+<tr>
+<td><span class="tag t-glm">GLM-5</span></td>
+<td>网页、书籍、论文</td>
+<td>改进的 PDF 解析 + LLM 评分保留教育性内容 + chunk-and-aggregate 长文档评分</td>
+<td>LLM 评分教育性<br/>严格过滤</td>
+<td>严格避免合成/<br/>AI生成/模板数据</td>
+</tr>
+</table>
+</div>
+
+<h4 style="color: var(--text); margin-top: 24px;">关键差异分析</h4>
+
+<div class="highlight-box">
+<strong>1. 数据源头差异</strong>
+<ul>
+<li><strong>Intern-S1-Pro:</strong> 专门从 PDF 科学文献提取，包含实验结果、统计图、结构图、公式推导</li>
+<li><strong>Kimi-K2:</strong> 数学文档为主，强调多语言翻译和 learning-note 风格重写</li>
+<li><strong>Qwen3-VL:</strong> 合成数据为主（程序化渲染几何图），强调细粒度视觉感知</li>
+<li><strong>GLM-5:</strong> 通用网页/书籍/论文，强调人工教育性价值判断</li>
+</ul>
+</div>
+
+<div class="purple-box">
+<strong>2. Caption/标注策略差异</strong>
+<ul>
+<li><strong>Intern-S1-Pro:</strong>
+   <ul>
+   <li>路由机制：科学图像 → InternVL3.5-241B；非科学 → CapRL-32B</li>
+   <li>CapRL 使用 RLVR 训练，鼓励密集描述</li>
+   <li>多模板随机提示</li>
+   </ul>
+</li>
+<li><strong>Qwen3-VL:</strong> 两阶段框架：生成 → 模型验证</li>
+<li><strong>Kimi-K2 & GLM-5:</strong> 文档级处理，不专门针对图像 caption</li>
+</ul>
+</div>
+
+<div class="success-box">
+<strong>3. 去重策略差异</strong>
+<ul>
+<li><strong>Intern-S1-Pro:</strong> pHash (perceptual hashing) 感知哈希，专门针对视觉内容</li>
+<li><strong>其他模型:</strong> 主要使用 MinHash/Bloom filter 针对文本</li>
+</ul>
+</div>
+
+<div class="danger-box">
+<strong>4. 对合成数据的态度</strong>
+<ul>
+<li><strong>Qwen3-VL:</strong> 积极使用程序化生成的合成数据</li>
+<li><strong>GLM-5:</strong> "严格避免使用合成、AI生成或模板数据"</li>
+<li><strong>Kimi-K2:</strong> 使用合成数据作为重 phrase 策略，但认为是 "active area of investigation"</li>
+<li><strong>Intern-S1-Pro:</strong> 主要使用真实 PDF 文献，合成仅用于 CapRL 训练的 RL 部分</li>
+</ul>
+</div>
+
+</div>
+</details>
+
+<!-- 可展开卡片：科学数据冲突解决 -->
+<details style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; margin: 16px 0; overflow: hidden;">
+<summary style="padding: 16px 20px; cursor: pointer; font-weight: 600; color: var(--cyan); display: flex; align-items: center; justify-content: space-between;">
+<span>🧬 Intern-S1-Pro 科学数据冲突解决机制</span>
+<span style="font-size: 0.8rem; color: var(--text-muted);">点击展开</span>
+</summary>
+<div style="padding: 0 20px 20px;">
+
+<p>科学数据（实验观测、化学公式、结构化文献）与通用数据（新闻、社交媒体）直接混合会导致 "distribution shift" 和 "negative transfer"。Intern-S1-Pro 采用三大策略解决：</p>
+
+<h4 style="color: var(--text); margin-top: 16px;">1. 结构化科学数据转换</h4>
+<ul>
+<li><strong>Template Construction:</strong> 将异构输入-输出对转换为语法正确的叙述文本</li>
+<li><strong>Task Form Transformation:</strong> 对列表、矩阵等抽象输出，结合领域科学先验将数值符号映射到有科学意义的描述性答案</li>
+</ul>
+
+<h4 style="color: var(--text); margin-top: 16px;">2. 科学数据多样化</h4>
+<ul>
+<li><strong>Prompt Diversification:</strong> 对同一概念提供数十种不同指令，扩展模型泛化边界</li>
+<li><strong>Rollout Mechanism:</strong> 结合科学先验知识，利用强基座模型辅助生成完整推理链，将知识回忆转化为逻辑推理</li>
+</ul>
+
+<h4 style="color: var(--text); margin-top: 16px;">3. System Prompt Isolation</h4>
+<div class="key-point">
+在训练周期中注入互斥的系统级前缀：
+<ul>
+<li>科学数据：特定系统提示</li>
+<li>通用数据：不同系统提示</li>
+</ul>
+为模型创建独立的上下文处理环境，有效减少数据冲突，提高训练稳定性和效果。
+</div>
+
+</div>
+</details>
+
+<div class="success-box">
+<strong>核心洞察：为什么 Intern-S1-Pro 的 Pipeline 是独特的？</strong>
+<ol>
+<li><strong>PDF-first 策略：</strong>与从网页抓取不同，直接从 PDF 文献提取保证专业性和信息密度</li>
+<li><strong>视觉感知去重：</strong>pHash 专门针对科学图像的视觉相似性，而非文本相似性</li>
+<li><strong>模型路由：</strong>根据内容类型动态选择不同 caption 模型，而非单一模型处理所有数据</li>
+<li><strong>领域专门化：</strong>270B 全部面向科学，而非通用数据中包含少量科学内容</li>
+<li><strong>系统隔离：</strong>独特的 System Prompt Isolation 解决数据冲突问题</li>
+</ol>
+</div>
+
+</div>
+<h2>08 &mdash; 关键洞察与趋势</h2>
+
+<h3>基于论文原文的发现</h3>
+
+<div class="success-box">
+<strong>1. Token Efficiency 成为新焦点</strong>
+<ul>
+<li><strong>Kimi-K2:</strong> 明确将 "token efficiency" 定义为 "per-token performance improvement"，提出 "token utility" 概念</li>
+<li><strong>策略：</strong>Data rephrasing 而非简单重复，避免多epoch过拟合</li>
+<li><strong>结果：</strong>15.5T tokens 实现与更大规模模型相当的性能</li>
+</ul>
+</div>
+
+<div class="purple-box">
+<strong>2. 科学数据的专门化处理</strong>
+<ul>
+<li><strong>Intern-S1-Pro:</strong> 270B 科学图文对，专门的 PDF caption pipeline</li>
+<li><strong>GLM-5:</strong> 严格避免合成/AI生成/模板数据在数学科学领域</li>
+<li><strong>挑战：</strong>科学数据与通用数据的 "distribution shift" 和 "negative transfer"</li>
+<li><strong>解决：</strong>System Prompt Isolation (Intern-S1), Template Construction, Task Form Transformation</li>
+</ul>
+</div>
+
+<div class="highlight-box">
+<strong>3. 数据质量评估的进化</strong>
+<table>
+<tr><th>模型</th><th>质量评估方法</th></tr>
+<tr><td>GLM-5</td><td>LLM评分教育性内容 + chunk-and-aggregate长文档评分</td></tr>
+<tr><td>Kimi-K2</td><td>基于困惑度的质量模型</td></tr>
+<tr><td>Intern-S1-Pro</td><td>科学先验知识 + Rollout生成完整推理链</td></tr>
+<tr><td>Qwen3-VL</td><td>DNN评分 + SigLIP-2动态分辨率</td></tr>
+</table>
+</div>
+
+<div class="danger-box">
+<strong>4. 关于 "幻觉" 的澄清</strong>
+<ul>
+<li>原 comparison.html 提到 "GLM-5用mindspore" — 经核查论文原文，<strong>GLM-5技术报告未提及MindSpore</strong>，此为错误信息</li>
+<li>GLM-5 实际使用：<strong>DeepSeek Sparse Attention (DSA)</strong>，通过 continued pre-training 从 dense base 转换而来</li>
+<li>训练框架：论文提到 "训练时在昇腾芯片上"，但未明确说使用 MindSpore</li>
+</ul>
+</div>
+
+<div class="key-point">
+<strong>5. 多模态预训练的范式分化</strong>
+<table>
+<tr><th>范式</th><th>代表模型</th><th>特点</th></tr>
+<tr><td>渐进式</td><td>Qwen3-VL, Seed-VL</td><td>ViT预训练 → Alignment → Joint PT</td></tr>
+<tr><td>原生式</td><td>Kimi-K2.5</td><td>全程恒定比例混合，早期融合</td></tr>
+<tr><td>科学专门化</td><td>Intern-S1-Pro</td><td>PDF解析 + 领域特定caption</td></tr>
+</table>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- 7. 数据来源索引 -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section">
+<h2>09 &mdash; 数据来源与引用</h2>
+
+<div class="overflow-x">
+<table>
+<tr><th>模型</th><th>论文/报告</th><th>关键章节</th><th>本地路径</th></tr>
+<tr>
+<td><span class="tag t-kimi">Kimi-K2</span></td>
+<td>arXiv:2507.20534</td>
+<td>Sec 3 (Pre-training), Sec 3.3 (Data)</td>
+<td><code>paper_reading/llm_vlm/kimi-k2/</code></td>
+</tr>
+<tr>
+<td><span class="tag t-kimi">Kimi-K2.5</span></td>
+<td>arXiv:2602.02276</td>
+<td>Sec 2.1 (Native Multimodal PT)</td>
+<td><code>paper_reading/llm_vlm/kimi-k2.5-paper/</code></td>
+</tr>
+<tr>
+<td><span class="tag t-qwen">Qwen3-VL</span></td>
+<td>arXiv:2511.21631</td>
+<td>Sec 2 (Architecture), Sec 3 (Pre-training)</td>
+<td><code>paper_reading/llm_vlm/qwen3-vl-paper/</code></td>
+</tr>
+<tr>
+<td><span class="tag t-glm">GLM-5</span></td>
+<td>GLM-5 Technical Report</td>
+<td>Sec 2.2 (Pre-training Data)</td>
+<td><code>paper_reading/llm_vlm/GLM-5/</code></td>
+</tr>
+<tr>
+<td><span class="tag t-intern">Intern-S1-Pro</span></td>
+<td>arXiv:2603.25040</td>
+<td>Sec 3 (Pre-training)</td>
+<td><code>paper_reading/llm_vlm/intern-s1/</code></td>
+</tr>
+<tr>
+<td><span class="tag t-dclm">DCLM</span></td>
+<td>arXiv:2406.11794</td>
+<td>Sec 4 (Deduplication), Sec 4.4 (Model-based filtering)</td>
+<td><code>paper_reading/llm_vlm/dclm/</code></td>
+</tr>
+<tr>
+<td><span class="tag t-seed">Seed-VL</span></td>
+<td>arXiv:2505.07062</td>
+<td>Sec 2.1 (ViT Pre-training), Sec 3 (Pre-training)</td>
+<td><code>paper_reading/llm_vlm/seed-vl/</code></td>
+</tr>
+<tr>
+<td><span class="tag t-ds">DeepSeek-V3</span></td>
+<td>arXiv:2412.19437</td>
+<td>Sec 3.1 (Data Construction)</td>
+<td><code>paper_reading/llm_vlm/deepseek-v3/</code></td>
+</tr>
+<tr>
+<td><span class="tag t-mm">MiniMax-M2.5</span></td>
+<td>Hugging Face Blog</td>
+<td>Forge RL Framework (PT数据未公开)</td>
+<td><code>—</code></td>
+</tr>
+<tr>
+<td><span class="tag t-step">Step-3.5-Flash</span></td>
+<td>技术报告</td>
+<td>— (PT数据未公开)</td>
+<td><code>—</code></td>
+</tr>
+</table>
+</div>
+
+<div class="purple-box">
+<strong>重要说明：</strong>
+<ul>
+<li>MiniMax-M2.5 的 Hugging Face blog 仅描述 <strong>RL post-training</strong>，未披露预训练数据细节</li>
+<li>DeepSeek-V3 的完整论文在本地不可用，仅能从原有笔记中间接引述</li>
+<li>所有标注 "基于论文原文" 的信息均来自直接 PDF 文本提取</li>
+</ul>
+</div>
+</div>
+
+<!-- Footer -->
+<div class="section" style="background: transparent; border: none;">
+<div class="footer-section">
+<p>Pre-training Data Specifications | 基于论文原文 | Data-Centric Analysis</p>
+<p style="margin-top: 4px; font-size: 0.75rem;">Last updated: 2026-04-11 | 所有数据均来自论文原文提取</p>
+</div>
+</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coding Agent Benchmarks 使用指南</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --accent-color: #3b82f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --code-bg: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        /* Navigation */
+        .nav {
+            background: var(--card-bg);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        .nav-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: nowrap;
+        }
+
+        .nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            white-space: nowrap;
+            transition: color 0.2s;
+        }
+
+        .nav a:hover {
+            color: var(--primary-color);
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .section {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .section h2 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .section h3 {
+            color: var(--text-primary);
+            font-size: 1.4rem;
+            margin: 1.5rem 0 1rem;
+        }
+
+        .section h4 {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin: 1.2rem 0 0.8rem;
+        }
+
+        /* Pyramid Diagram */
+        .pyramid {
+            background: var(--code-bg);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            text-align: center;
+            overflow-x: auto;
+        }
+
+        .pyramid pre {
+            margin: 0;
+            color: var(--text-primary);
+            line-height: 1.8;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--code-bg);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        tr:hover {
+            background: var(--bg-color);
+        }
+
+        /* Code Blocks */
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        p code, li code {
+            background: var(--code-bg);
+            color: var(--danger-color);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        /* Info Cards */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .info-card {
+            background: var(--bg-color);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .info-card h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        /* Links */
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+
+        li {
+            margin: 0.5rem 0;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-primary {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        /* Difficulty Stars */
+        .difficulty {
+            color: #fbbf24;
+        }
+
+        /* Highlight Box */
+        .highlight-box {
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border-left: 4px solid var(--primary-color);
+            padding: 1.5rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.5rem 0;
+        }
+
+        .highlight-box h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border-color);
+            margin-top: 3rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .nav {
+                padding: 0.75rem 1rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .section {
+                padding: 1.5rem;
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+
+            th, td {
+                padding: 0.5rem;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-color);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+
+        /* Section anchor offset for fixed header */
+        .section {
+            scroll-margin-top: 80px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Coding Agent Benchmarks 使用指南</h1>
+        <p>复杂代码生成与软件工程Agent评测基准大全</p>
+    </header>
+
+    <nav class="nav">
+        <div class="nav-content">
+            <a href="#overview">概述</a>
+            <a href="#swe-bench">SWE-bench</a>
+            <a href="#humaneval">HumanEval+</a>
+            <a href="#agentcoder">AgentCoder</a>
+            <a href="#codefuse">CodeFuse-Eval</a>
+            <a href="#others">其他Benchmarks</a>
+            <a href="#guide">快速选择</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Section 1: Overview -->
+        <section class="section" id="overview">
+            <h2>1. 概述</h2>
+
+            <h3>1.1 Benchmark复杂度金字塔</h3>
+            <div class="pyramid">
+                <pre>
+                    ┌─────────────────┐
+                    │   SWE-bench     │  ← 最复杂：真实GitHub Issue
+                    │  (真实软件工程)  │     多文件修改、测试验证
+                    └────────┬────────┘
+                             │
+                    ┌────────▼────────┐
+                    │  AgentCoder/    │  ← 中等复杂：多轮交互
+                    │  InterCode      │     代码执行反馈
+                    └────────┬────────┘
+                             │
+            ┌────────────────▼────────────────┐
+            │      HumanEval+ / MBPP+         │  ← 基础：单函数生成
+            │   (代码生成 + 增强测试覆盖)       │
+            └────────────────┬────────────────┘
+                             │
+        ┌────────────────────▼────────────────────┐
+        │           DS-1000 / CoderEval           │  ← 入门级：数据科学
+        │                                          │     简单代码补全
+        └─────────────────────────────────────────┘</pre>
+            </div>
+
+            <h3>1.2 对比总览</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Benchmark</th>
+                        <th>类型</th>
+                        <th>实例数</th>
+                        <th>难度</th>
+                        <th>公开状态</th>
+                        <th>核心特点</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>SWE-bench</strong></td>
+                        <td>软件工程</td>
+                        <td>2,294</td>
+                        <td class="difficulty">⭐⭐⭐⭐⭐</td>
+                        <td><span class="badge badge-success">完全公开</span></td>
+                        <td>真实GitHub Issue</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SWE-bench Lite</strong></td>
+                        <td>软件工程</td>
+                        <td>300</td>
+                        <td class="difficulty">⭐⭐⭐⭐</td>
+                        <td><span class="badge badge-success">完全公开</span></td>
+                        <td>SWE-bench子集</td>
+                    </tr>
+                    <tr>
+                        <td><strong>HumanEval+</strong></td>
+                        <td>代码生成</td>
+                        <td>164</td>
+                        <td class="difficulty">⭐⭐</td>
+                        <td><span class="badge badge-success">完全公开</span></td>
+                        <td>增强测试覆盖</td>
+                    </tr>
+                    <tr>
+                        <td><strong>MBPP+</strong></td>
+                        <td>代码生成</td>
+                        <td>427</td>
+                        <td class="difficulty">⭐⭐</td>
+                        <td><span class="badge badge-success">完全公开</span></td>
+                        <td>更多测试用例</td>
+                    </tr>
+                    <tr>
+                        <td><strong>AgentCoder</strong></td>
+                        <td>交互式编码</td>
+                        <td>数千</td>
+                        <td class="difficulty">⭐⭐⭐⭐</td>
+                        <td><span class="badge badge-success">完全公开</span></td>
+                        <td>多轮代码生成</td>
+                    </tr>
+                    <tr>
+                        <td><strong>InterCode</strong></td>
+                        <td>交互式编码</td>
+                        <td>500+</td>
+                        <td class="difficulty">⭐⭐⭐</td>
+                        <td><span class="badge badge-success">完全公开</span></td>
+                        <td>真实执行环境</td>
+                    </tr>
+                    <tr>
+                        <td><strong>CodeFuse-Eval</strong></td>
+                        <td>综合评测</td>
+                        <td>多任务</td>
+                        <td class="difficulty">⭐⭐⭐</td>
+                        <td><span class="badge badge-success">完全公开</span></td>
+                        <td>中文支持</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DS-1000</strong></td>
+                        <td>数据科学</td>
+                        <td>1,000</td>
+                        <td class="difficulty">⭐⭐⭐</td>
+                        <td><span class="badge badge-success">完全公开</span></td>
+                        <td>数据科学代码</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Section 2: SWE-bench -->
+        <section class="section" id="swe-bench">
+            <h2>2. SWE-bench 使用指南</h2>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>官方网站</h4>
+                    <a href="https://www.swebench.com/" target="_blank">swebench.com</a>
+                </div>
+                <div class="info-card">
+                    <h4>GitHub</h4>
+                    <a href="https://github.com/princeton-nlp/SWE-bench" target="_blank">princeton-nlp/SWE-bench</a>
+                </div>
+                <div class="info-card">
+                    <h4>论文</h4>
+                    <a href="https://arxiv.org/abs/2310.06770" target="_blank">arXiv:2310.06770</a>
+                </div>
+                <div class="info-card">
+                    <h4>数据集</h4>
+                    <code>princeton-nlp/SWE-bench</code>
+                </div>
+            </div>
+
+            <h3>2.1 安装</h3>
+            <pre><code># 克隆仓库
+git clone https://github.com/princeton-nlp/SWE-bench.git
+cd SWE-bench
+
+# 安装依赖
+pip install -e .
+
+# 或使用pip安装
+pip install swebench</code></pre>
+
+            <h3>2.2 数据集加载</h3>
+            <pre><code>from datasets import load_dataset
+
+# 加载完整数据集
+swebench = load_dataset("princeton-nlp/SWE-bench", "default")
+
+# 加载Lite版本（推荐入门使用）
+swebench_lite = load_dataset("princeton-nlp/SWE-bench", "lite")
+
+# 查看数据格式
+example = swebench['test'][0]
+print(f"Instance ID: {example['instance_id']}")
+print(f"Repo: {example['repo']}")
+print(f"Issue: {example['problem_statement'][:200]}...")</code></pre>
+
+            <h4>数据格式说明</h4>
+            <pre><code>{
+    "instance_id": "django__django-11011",  # 唯一标识
+    "repo": "django/django",                # 仓库名
+    "problem_statement": "...",             # Issue描述
+    "hint_text": "...",                     # 可选提示
+    "created_at": "2023-01-01T00:00:00Z",   # 创建时间
+    "version": "4.0",                       # 受影响版本
+    "base_commit": "abc123",                # 基线commit
+    "patch": "...",                         # 正确修复patch
+    "test_patch": "..."                     # 测试代码patch
+}</code></pre>
+
+            <h3>2.3 运行评估</h3>
+            <h4>方式1: 使用官方CLI工具</h4>
+            <pre><code># 准备预测结果文件 (predictions.jsonl)
+# 格式: {"instance_id": "...", "model_patch": "...", "model_name_or_path": "..."}
+
+# 运行评估
+python -m swebench.harness.run_evaluation \
+    --dataset_name princeton-nlp/SWE-bench \
+    --predictions_path predictions.jsonl \
+    --max_workers 4 \
+    --cache_dir /path/to/cache</code></pre>
+
+            <h4>方式2: 使用Docker（推荐）</h4>
+            <pre><code># 1. 构建评估镜像
+cd swebench/harness/docker
+docker build -t swebench-eval .
+
+# 2. 准备预测文件 predictions.jsonl
+
+# 3. 运行评估容器
+docker run -v $(pwd)/predictions.jsonl:/predictions.jsonl \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    swebench-eval \
+    --predictions_path /predictions.jsonl \
+    --max_workers 4</code></pre>
+
+            <h4>方式3: Python API</h4>
+            <pre><code>from swebench.harness.run_evaluation import run_evaluation
+
+# 准备预测结果
+predictions = [
+    {
+        "instance_id": "django__django-11011",
+        "model_patch": "diff --git a/file.py b/file.py...",
+        "model_name_or_path": "my-agent"
+    },
+    # ...
+]
+
+# 保存预测
+import json
+with open("predictions.jsonl", "w") as f:
+    for p in predictions:
+        f.write(json.dumps(p) + "\n")
+
+# 运行评估
+run_evaluation(
+    dataset_name="princeton-nlp/SWE-bench",
+    predictions_path="predictions.jsonl",
+    max_workers=4,
+    cache_dir="./cache"
+)</code></pre>
+
+            <h3>2.4 生成预测结果</h3>
+            <pre><code>import json
+from datasets import load_dataset
+
+# 加载数据集
+swebench = load_dataset("princeton-nlp/SWE-bench", "lite", split="test")
+
+# 你的Agent推理逻辑
+def solve_issue(instance):
+    """你的Agent解决issue的逻辑"""
+    issue_description = instance['problem_statement']
+    # ... 你的Agent代码 ...
+    patch = generate_patch(issue_description)
+    return patch
+
+# 生成预测
+predictions = []
+for instance in swebench:
+    patch = solve_issue(instance)
+    predictions.append({
+        "instance_id": instance["instance_id"],
+        "model_patch": patch,
+        "model_name_or_path": "my-agent"
+    })
+
+# 保存
+with open("predictions.jsonl", "w") as f:
+    for p in predictions:
+        f.write(json.dumps(p) + "\n")</code></pre>
+
+            <h3>2.5 评估指标解读</h3>
+            <pre><code># 评估结果会生成在指定目录
+# 主要指标:
+# - resolved: 是否成功修复（通过所有测试）
+# - test_results: 测试执行结果
+# - build_results: 环境构建结果
+
+{
+    "instance_id": "django__django-11011",
+    "resolved": True,  # 成功修复
+    "test_results": {
+        "passed": 5,
+        "failed": 0,
+        "skipped": 0
+    },
+    "build_success": True,
+    "elapsed_time": 120.5
+}</code></pre>
+        </section>
+
+        <!-- Section 3: HumanEval+ -->
+        <section class="section" id="humaneval">
+            <h2>3. HumanEval+ / EvalPlus 使用指南</h2>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>官方网站</h4>
+                    <a href="https://evalplus.github.io/" target="_blank">evalplus.github.io</a>
+                </div>
+                <div class="info-card">
+                    <h4>GitHub</h4>
+                    <a href="https://github.com/evalplus/evalplus" target="_blank">evalplus/evalplus</a>
+                </div>
+                <div class="info-card">
+                    <h4>论文</h4>
+                    <a href="https://arxiv.org/abs/2305.01210" target="_blank">arXiv:2305.01210</a>
+                </div>
+                <div class="info-card">
+                    <h4>特点</h4>
+                    80倍更多测试用例，防止overfitting
+                </div>
+            </div>
+
+            <h3>3.1 安装</h3>
+            <pre><code>pip install evalplus</code></pre>
+
+            <h3>3.2 快速开始</h3>
+            <h4>评估HumanEval+</h4>
+            <pre><code># 方式1: 使用CLI
+evalplus.evaluate \
+    --dataset humaneval \
+    --samples samples.jsonl \
+    --backend native  # 或 docker
+
+# 方式2: 带额外测试的严格模式
+evalplus.evaluate \
+    --dataset humaneval \
+    --samples samples.jsonl \
+    --base-only  # 仅使用原始测试
+    --test-details  # 显示详细测试结果</code></pre>
+
+            <h4>评估MBPP+</h4>
+            <pre><code>evalplus.evaluate \
+    --dataset mbpp \
+    --samples mbpp_samples.jsonl \
+    --backend native</code></pre>
+
+            <h3>3.3 Python API使用</h3>
+            <pre><code>from evalplus.evaluate import evaluate
+
+# 准备样本
+# samples.jsonl 格式:
+# {"task_id": "HumanEval/0", "solution": "def has_close_elements(...): ..."}
+
+results = evaluate(
+    dataset="humaneval",  # 或 "mbpp"
+    samples="samples.jsonl",
+    backend="native",     # "native" 或 "docker"
+    base_only=False,      # True=仅原始测试, False=使用增强测试
+    parallel=4,           # 并行数
+    test_details=True     # 返回详细结果
+)
+
+print(f"Pass@1: {results['pass@1']}")
+print(f"Pass@10: {results['pass@10']}")</code></pre>
+
+            <h3>3.4 生成代码样本</h3>
+            <pre><code>from evalplus.data import get_human_eval_plus, get_mbpp_plus
+
+# 加载数据集
+problems = get_human_eval_plus()
+# 或
+problems = get_mbpp_plus()
+
+# problems格式:
+# {
+#     "HumanEval/0": {
+#         "task_id": "HumanEval/0",
+#         "prompt": "def has_close_elements(numbers: List[float], threshold: float): ...",
+#         "entry_point": "has_close_elements",
+#         "canonical_solution": "...",
+#         "test": "...",
+#         "plus_test": "..."  # 额外的测试
+#     }
+# }
+
+# 你的代码生成模型
+def generate_code(prompt):
+    # ... 调用你的模型 ...
+    return generated_code
+
+# 生成样本
+import json
+
+samples = []
+for task_id, problem in problems.items():
+    code = generate_code(problem['prompt'])
+    samples.append({
+        "task_id": task_id,
+        "solution": code
+    })
+
+with open("samples.jsonl", "w") as f:
+    for s in samples:
+        f.write(json.dumps(s) + "\n")</code></pre>
+
+            <h3>3.5 查看增强测试</h3>
+            <pre><code>from evalplus.data import get_human_eval_plus
+
+problems = get_human_eval_plus()
+problem = problems["HumanEval/0"]
+
+# 原始测试
+print("原始测试数量:", len(problem['test']))
+
+# EvalPlus增强测试
+print("增强测试数量:", len(problem['plus_test']))
+
+# 增强测试的特点:
+# - 更多边界情况
+# - 更大输入规模
+# - 防止硬编码</code></pre>
+        </section>
+
+        <!-- Section 4: AgentCoder -->
+        <section class="section" id="agentcoder">
+            <h2>4. AgentCoder / InterCode 使用指南</h2>
+
+            <h3>4.1 InterCode</h3>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>GitHub</h4>
+                    <a href="https://github.com/princeton-nlp/intercode" target="_blank">princeton-nlp/intercode</a>
+                </div>
+                <div class="info-card">
+                    <h4>论文</h4>
+                    <a href="https://arxiv.org/abs/2306.14898" target="_blank">arXiv:2306.14898</a>
+                </div>
+                <div class="info-card">
+                    <h4>特点</h4>
+                    真实执行环境，多轮交互
+                </div>
+            </div>
+
+            <h4>安装</h4>
+            <pre><code>git clone https://github.com/princeton-nlp/intercode.git
+cd intercode
+pip install -e .</code></pre>
+
+            <h4>基本使用</h4>
+            <pre><code>from intercode.envs import BashEnv, PythonEnv, SQLExecEnv
+
+# Bash环境
+env = BashEnv(
+    image="intercode-bash",  # Docker镜像
+    traj_dir="./traj",       # 轨迹保存目录
+    verbose=True
+)
+
+# 重置环境
+observation = env.reset()
+print(observation)
+
+# 执行命令
+action = "ls -la"
+observation, reward, done, info = env.step(action)
+print(f"Observation: {observation}")
+print(f"Reward: {reward}")
+
+# 关闭环境
+env.close()</code></pre>
+
+            <h4>Python执行环境</h4>
+            <pre><code>from intercode.envs import PythonEnv
+
+env = PythonEnv(
+    image="intercode-python",
+    traj_dir="./traj"
+)
+
+observation = env.reset()
+
+# 执行Python代码
+action = """
+import numpy as np
+arr = np.array([1, 2, 3])
+print(arr.mean())
+"""
+observation, reward, done, info = env.step(action)</code></pre>
+
+            <h3>4.2 AgentCoder</h3>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>GitHub</h4>
+                    <a href="https://github.com/NL2Code/AgentCoder" target="_blank">NL2Code/AgentCoder</a>
+                </div>
+                <div class="info-card">
+                    <h4>论文</h4>
+                    <a href="https://arxiv.org/abs/2312.02033" target="_blank">arXiv:2312.02033</a>
+                </div>
+                <div class="info-card">
+                    <h4>特点</h4>
+                    多轮代码生成，测试反馈迭代
+                </div>
+            </div>
+
+            <h4>安装</h4>
+            <pre><code>git clone https://github.com/NL2Code/AgentCoder.git
+cd AgentCoder
+pip install -r requirements.txt</code></pre>
+
+            <h4>运行AgentCoder</h4>
+            <pre><code>from agentcoder import AgentCoder
+
+# 初始化
+agent = AgentCoder(
+    model="gpt-4",  # 或 "gpt-3.5-turbo", "claude-3"等
+    max_iterations=5,
+    temperature=0.7
+)
+
+# 问题描述
+problem = """
+Write a function to find the longest substring without repeating characters.
+Example:
+Input: "abcabcbb"
+Output: 3
+Explanation: The answer is "abc", with the length of 3.
+"""
+
+# 生成代码
+code, iterations = agent.solve(problem)
+
+print(f"Generated code:\n{code}")
+print(f"Iterations: {iterations}")</code></pre>
+
+            <h4>评估流程</h4>
+            <pre><code>from agentcoder.evaluation import evaluate_on_humaneval
+
+results = evaluate_on_humaneval(
+    agent=agent,
+    dataset_path="HumanEval.jsonl",
+    output_path="results.jsonl",
+    max_workers=4
+)
+
+print(f"Pass@1: {results['pass@1']}")</code></pre>
+        </section>
+
+        <!-- Section 5: CodeFuse-Eval -->
+        <section class="section" id="codefuse">
+            <h2>5. CodeFuse-Eval 使用指南</h2>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>GitHub</h4>
+                    <a href="https://github.com/codefuse-ai/codefuse-eval" target="_blank">codefuse-ai/codefuse-eval</a>
+                </div>
+                <div class="info-card">
+                    <h4>组织</h4>
+                    蚂蚁集团 CodeFuse
+                </div>
+                <div class="info-card">
+                    <h4>特点</h4>
+                    中文支持，多语言，多任务
+                </div>
+            </div>
+
+            <h3>5.1 安装</h3>
+            <pre><code>git clone https://github.com/codefuse-ai/codefuse-eval.git
+cd codefuse-eval
+pip install -e .</code></pre>
+
+            <h3>5.2 数据集</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>任务</th>
+                        <th>说明</th>
+                        <th>语言</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>代码补全</td>
+                        <td>Line/Block级别补全</td>
+                        <td>Python, Java, JS等</td>
+                    </tr>
+                    <tr>
+                        <td>代码生成</td>
+                        <td>自然语言到代码</td>
+                        <td>多语言</td>
+                    </tr>
+                    <tr>
+                        <td>代码翻译</td>
+                        <td>跨语言翻译</td>
+                        <td>多语言</td>
+                    </tr>
+                    <tr>
+                        <td>代码摘要</td>
+                        <td>生成文档字符串</td>
+                        <td>多语言</td>
+                    </tr>
+                    <tr>
+                        <td>测试生成</td>
+                        <td>生成单元测试</td>
+                        <td>多语言</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>5.3 使用示例</h3>
+            <pre><code>from codefuse_eval import load_dataset, evaluate
+
+# 加载数据集
+dataset = load_dataset("codefuse-ai/codefuse-eval", "code-completion")
+
+# 查看数据格式
+example = dataset['test'][0]
+print(f"Prefix: {example['prefix']}")
+print(f"Suffix: {example['suffix']}")
+print(f"Ground Truth: {example['ground_truth']}")
+
+# 你的模型推理
+def complete_code(prefix, suffix):
+    # ... 调用你的模型 ...
+    return generated_code
+
+# 生成预测
+predictions = []
+for example in dataset['test']:
+    pred = complete_code(example['prefix'], example['suffix'])
+    predictions.append({
+        "task_id": example['task_id'],
+        "prediction": pred
+    })
+
+# 评估
+results = evaluate(
+    dataset=dataset,
+    predictions=predictions,
+    metric="em"  # Exact Match 或 bleu等
+)
+
+print(f"Accuracy: {results['accuracy']}")</code></pre>
+
+            <h3>5.4 多语言支持</h3>
+            <pre><code>from codefuse_eval import MultiLanguageEvaluator
+
+evaluator = MultiLanguageEvaluator(languages=["python", "java", "javascript"])
+
+for lang in ["python", "java", "javascript"]:
+    dataset = load_dataset("codefuse-ai/codefuse-eval", f"code-generation-{lang}")
+    results = evaluator.evaluate(dataset, your_predictions)
+    print(f"{lang}: {results['pass@1']}")</code></pre>
+        </section>
+
+        <!-- Section 6: Others -->
+        <section class="section" id="others">
+            <h2>6. 其他Benchmarks</h2>
+
+            <h3>6.1 DS-1000 (数据科学代码)</h3>
+            <p><strong>项目</strong>: <a href="https://github.com/HKUNLP/DS-1000" target="_blank">https://github.com/HKUNLP/DS-1000</a></p>
+            <pre><code>pip install ds1000
+
+# 使用
+from ds1000 import DS1000Dataset
+ds1000 = DS1000Dataset()
+
+# 包含7个库: Numpy, Pandas, TensorFlow, PyTorch, SciPy, Scikit-learn, Matplotlib</code></pre>
+
+            <h3>6.2 CoderEval</h3>
+            <p><strong>项目</strong>: <a href="https://github.com/AMiner/CoderEval" target="_blank">https://github.com/AMiner/CoderEval</a></p>
+            <pre><code>git clone https://github.com/AMiner/CoderEval.git
+
+# 包含真实项目中的代码生成任务</code></pre>
+
+            <h3>6.3 MultiPL-E</h3>
+            <p><strong>项目</strong>: <a href="https://github.com/nuprl/MultiPL-E" target="_blank">https://github.com/nuprl/MultiPL-E</a></p>
+            <ul>
+                <li>支持18种编程语言的HumanEval翻译版本</li>
+            </ul>
+            <pre><code>pip install multipl-e
+
+# 评估多语言代码生成</code></pre>
+
+            <h3>6.4 LiveCodeBench</h3>
+            <p><strong>项目</strong>: <a href="https://livecodebench.github.io/" target="_blank">https://livecodebench.github.io/</a></p>
+            <ul>
+                <li>包含时间敏感的问题，防止数据污染</li>
+            </ul>
+            <pre><code>pip install livecodebench</code></pre>
+        </section>
+
+        <!-- Section 7: Quick Guide -->
+        <section class="section" id="guide">
+            <h2>7. 快速选择指南</h2>
+
+            <h3>7.1 根据研究目标选择</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>研究目标</th>
+                        <th>推荐Benchmark</th>
+                        <th>原因</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>软件工程Agent</strong></td>
+                        <td>SWE-bench Lite</td>
+                        <td>真实GitHub Issue，端到端评估</td>
+                    </tr>
+                    <tr>
+                        <td><strong>代码生成基础能力</strong></td>
+                        <td>HumanEval+ / MBPP+</td>
+                        <td>标准基准，测试覆盖强</td>
+                    </tr>
+                    <tr>
+                        <td><strong>多轮交互编程</strong></td>
+                        <td>AgentCoder / InterCode</td>
+                        <td>支持代码执行反馈</td>
+                    </tr>
+                    <tr>
+                        <td><strong>中文场景</strong></td>
+                        <td>CodeFuse-Eval</td>
+                        <td>中文支持，多任务</td>
+                    </tr>
+                    <tr>
+                        <td><strong>数据科学</strong></td>
+                        <td>DS-1000</td>
+                        <td>数据科学专用任务</td>
+                    </tr>
+                    <tr>
+                        <td><strong>多语言支持</strong></td>
+                        <td>MultiPL-E</td>
+                        <td>18种语言</td>
+                    </tr>
+                    <tr>
+                        <td><strong>防止数据污染</strong></td>
+                        <td>LiveCodeBench</td>
+                        <td>时间敏感问题</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>7.2 根据资源选择</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>资源情况</th>
+                        <th>推荐方案</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>计算资源充足</strong></td>
+                        <td>SWE-bench Full + HumanEval+ + AgentCoder</td>
+                    </tr>
+                    <tr>
+                        <td><strong>计算资源有限</strong></td>
+                        <td>SWE-bench Lite (300实例)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>快速验证</strong></td>
+                        <td>HumanEval+ (164实例)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>无Docker环境</strong></td>
+                        <td>HumanEval+ (native backend)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>7.3 完整评估Pipeline示例</h3>
+            <pre><code># 综合评估脚本示例
+import json
+from datasets import load_dataset
+from evalplus.evaluate import evaluate as evalplus_eval
+from swebench.harness.run_evaluation import run_evaluation
+
+class ComprehensiveCodeEvaluator:
+    def __init__(self):
+        self.results = {}
+
+    def evaluate_humaneval_plus(self, model):
+        """评估HumanEval+"""
+        # 生成代码
+        samples = self.generate_humaneval_samples(model)
+        with open("humaneval_samples.jsonl", "w") as f:
+            for s in samples:
+                f.write(json.dumps(s) + "\n")
+
+        # 评估
+        results = evalplus_eval(
+            dataset="humaneval",
+            samples="humaneval_samples.jsonl",
+            backend="native"
+        )
+        self.results['humaneval_plus'] = results
+        return results
+
+    def evaluate_swe_bench_lite(self, model):
+        """评估SWE-bench Lite"""
+        # 加载数据
+        swebench = load_dataset("princeton-nlp/SWE-bench", "lite", split="test")
+
+        # 生成修复
+        predictions = []
+        for instance in swebench:
+            patch = model.fix_issue(instance)
+            predictions.append({
+                "instance_id": instance["instance_id"],
+                "model_patch": patch,
+                "model_name_or_path": model.name
+            })
+
+        with open("swebench_predictions.jsonl", "w") as f:
+            for p in predictions:
+                f.write(json.dumps(p) + "\n")
+
+        # 评估（需要Docker）
+        run_evaluation(
+            dataset_name="princeton-nlp/SWE-bench",
+            predictions_path="swebench_predictions.jsonl",
+            max_workers=4
+        )
+
+    def generate_report(self):
+        """生成综合报告"""
+        report = f"""
+# Code Agent Evaluation Report
+
+## HumanEval+ Results
+- Pass@1: {self.results.get('humaneval_plus', {}).get('pass@1', 'N/A')}
+- Pass@10: {self.results.get('humaneval_plus', {}).get('pass@10', 'N/A')}
+
+## Summary
+- Overall Score: {self.compute_overall_score()}
+        """
+        return report
+
+# 使用示例
+evaluator = ComprehensiveCodeEvaluator()
+results = evaluator.evaluate_humaneval_plus(your_model)
+print(evaluator.generate_report())</code></pre>
+
+            <h3>7.4 资源链接汇总</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Benchmark</th>
+                        <th>GitHub</th>
+                        <th>文档</th>
+                        <th>HuggingFace</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>SWE-bench</td>
+                        <td><a href="https://github.com/princeton-nlp/SWE-bench" target="_blank">Link</a></td>
+                        <td><a href="https://www.swebench.com/" target="_blank">swebench.com</a></td>
+                        <td><code>princeton-nlp/SWE-bench</code></td>
+                    </tr>
+                    <tr>
+                        <td>EvalPlus</td>
+                        <td><a href="https://github.com/evalplus/evalplus" target="_blank">Link</a></td>
+                        <td><a href="https://evalplus.github.io/" target="_blank">evalplus.github.io</a></td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>InterCode</td>
+                        <td><a href="https://github.com/princeton-nlp/intercode" target="_blank">Link</a></td>
+                        <td>-</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>AgentCoder</td>
+                        <td><a href="https://github.com/NL2Code/AgentCoder" target="_blank">Link</a></td>
+                        <td>-</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>CodeFuse-Eval</td>
+                        <td><a href="https://github.com/codefuse-ai/codefuse-eval" target="_blank">Link</a></td>
+                        <td>-</td>
+                        <td><code>codefuse-ai/codefuse-eval</code></td>
+                    </tr>
+                    <tr>
+                        <td>DS-1000</td>
+                        <td><a href="https://github.com/HKUNLP/DS-1000" target="_blank">Link</a></td>
+                        <td>-</td>
+                        <td>-</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </div>
+
+    <footer class="footer">
+        <p>整理日期: 2026-03-18 | 基于各Benchmark官方文档</p>
+    </footer>
+
+    <script>
+        // Smooth scroll for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Highlight current section in navigation
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav a');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.style.color = '';
+                if (link.getAttribute('href') === '#' + current) {
+                    link.style.color = 'var(--primary-color)';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

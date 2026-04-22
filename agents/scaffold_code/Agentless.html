@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agentless · 精读笔记</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #090b0c;
+  --s0:       #0e1213;
+  --s1:       #141a1c;
+  --s2:       #1a2224;
+  --border:   #1e2829;
+  --border2:  #283538;
+  --text:     #c4cdd0;
+  --muted:    #587078;
+  --muted2:   #405258;
+  --head:     #d8e4ea;
+  --green:    #6dbb84;
+  --red:      #d9736a;
+  --amber:    #c8a04a;
+  --blue:     #5ea8c0;
+  --purple:   #8878b8;
+  --teal:     #4db8a4;
+  --teal2:    #38907e;
+  --accent:   #5ea8c0;
+  --accent2:  #4a90a8;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; font-size:15px; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 300;
+  line-height: 1.8;
+}
+
+/* --- layout --- */
+.layout { display:flex; min-height:100vh; }
+
+aside {
+  position: fixed;
+  top: 0; left: 0;
+  width: 210px;
+  height: 100vh;
+  background: var(--s0);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  z-index: 200;
+}
+
+.aside-head {
+  padding: 26px 20px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.back-link {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+  transition: color .2s;
+}
+.back-link:hover { color: var(--accent); }
+.aside-title {
+  font-family: 'Lora', serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--head);
+  line-height: 1.4;
+}
+.aside-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  margin-top: 5px;
+  letter-spacing: .06em;
+}
+
+nav { padding: 14px 0; flex: 1; }
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 20px;
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color .2s, background .2s;
+  border-left: 2px solid transparent;
+}
+.nav-item:hover { color: var(--text); background: rgba(255,255,255,.02); }
+.nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(94,168,192,.05); }
+.nav-item .n {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted2);
+  min-width: 16px;
+}
+
+.aside-foot {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted2);
+  line-height: 1.8;
+}
+
+/* --- main --- */
+main {
+  margin-left: 210px;
+  flex: 1;
+  max-width: 820px;
+  padding: 52px 48px 100px;
+}
+
+/* --- hero --- */
+.hero { margin-bottom: 52px; }
+.hero-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 14px;
+}
+.hero h1 {
+  font-family: 'Lora', serif;
+  font-size: 36px;
+  font-weight: 500;
+  color: var(--head);
+  line-height: 1.2;
+  margin-bottom: 6px;
+  letter-spacing: -.02em;
+}
+.hero h1 em { font-style: italic; color: var(--accent); }
+.hero-sub {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 16px;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+.hero-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 3px;
+  text-decoration: none;
+  transition: opacity .15s;
+}
+.chip:hover { opacity: .75; }
+.chip-arxiv { background:rgba(94,168,192,.12);  color:var(--blue);   border:1px solid rgba(94,168,192,.22); }
+.chip-gh    { background:rgba(255,255,255,.04); color:var(--muted);  border:1px solid var(--border2); }
+.chip-venue { background:rgba(94,168,192,.10);  color:var(--accent); border:1px solid rgba(94,168,192,.2); }
+
+.hero-abstract {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  padding: 16px 20px;
+  font-size: 13.5px;
+  color: #8a9ca4;
+  line-height: 1.75;
+}
+.hero-abstract strong { color: var(--text); }
+
+/* --- section --- */
+.sec { margin-bottom: 56px; }
+.sec-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.sec-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted2);
+  letter-spacing: .08em;
+  min-width: 24px;
+}
+.sec-line { width: 3px; height: 20px; border-radius: 2px; flex-shrink: 0; }
+.sec-title {
+  font-family: 'Lora', serif;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--head);
+}
+
+/* --- prose --- */
+p { margin-bottom: 12px; font-size: 13.5px; }
+p:last-child { margin-bottom: 0; }
+strong { color: var(--head); font-weight: 500; }
+em { color: var(--amber); font-style: italic; }
+
+/* --- arch diagram --- */
+.arch-diagram {
+  background: var(--s0);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 24px;
+  margin: 16px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  line-height: 1.9;
+  color: #4a6068;
+  overflow-x: auto;
+}
+.arch-diagram .layer-label {
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted2);
+  margin-bottom: 4px;
+}
+.arch-box {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+.arch-box.phase1 { background:rgba(94,168,192,.14); color:var(--blue); border:1px solid rgba(94,168,192,.3); }
+.arch-box.phase2 { background:rgba(200,160,74,.10);  color:var(--amber); border:1px solid rgba(200,160,74,.2); }
+.arch-box.phase3 { background:rgba(109,187,132,.10); color:var(--green); border:1px solid rgba(109,187,132,.2); }
+.arch-box.ctrl   { background:rgba(136,120,184,.12); color:var(--purple); border:1px solid rgba(136,120,184,.25); }
+.arch-arrow { color: var(--muted2); }
+
+/* --- component grid --- */
+.comp-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 16px 0;
+}
+.comp-card {
+  background: var(--s1);
+  padding: 16px 18px;
+  transition: background .2s;
+}
+.comp-card:hover { background: var(--s2); }
+.comp-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+.comp-name {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--head);
+  margin-bottom: 7px;
+}
+.comp-body { font-size: 12.5px; color: var(--muted); line-height: 1.65; }
+.comp-body strong { color: var(--text); }
+.comp-body code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--purple); padding:1px 5px; border-radius:3px; }
+
+/* --- action table --- */
+.action-list { display:flex; flex-direction:column; gap:2px; margin:14px 0; }
+.action-item {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.action-item:hover { border-color: var(--border2); }
+.action-name {
+  padding: 10px 14px;
+  background: var(--s0);
+  border-right: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  color: var(--purple);
+  display: flex;
+  align-items: center;
+}
+.action-desc {
+  padding: 10px 14px;
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.6;
+  display: flex;
+  align-items: center;
+}
+.action-desc strong { color: var(--text); }
+.action-desc code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--purple); padding:1px 5px; border-radius:3px; }
+
+/* --- pipeline --- */
+.pipeline { display: flex; flex-direction: column; gap: 2px; margin-bottom: 20px; }
+.pipeline-step {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.pipeline-step:hover { border-color: var(--border2); }
+.step-gutter {
+  background: var(--s0);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 16px 0 0;
+  border-right: 1px solid var(--border);
+}
+.step-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 500;
+  color: var(--accent);
+  letter-spacing: .06em;
+}
+.step-inner { padding: 14px 18px; }
+.step-h {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--head);
+  margin-bottom: 6px;
+}
+.step-p { font-size: 12.5px; color: var(--muted); line-height: 1.65; }
+.step-p code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--purple); padding:1px 5px; border-radius:3px; }
+.step-p strong { color: var(--text); }
+
+/* --- codeblock --- */
+.codeblock {
+  background: var(--s0);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 14px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  line-height: 1.75;
+}
+.codeblock-head {
+  background: var(--s1);
+  border-bottom: 1px solid var(--border);
+  padding: 7px 16px;
+  font-size: 9.5px;
+  color: var(--muted);
+  letter-spacing: .1em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.codeblock-head .dot { width:8px;height:8px;border-radius:50%; }
+.codeblock pre {
+  padding: 14px 18px;
+  white-space: pre;
+  overflow-x: auto;
+  color: #607880;
+}
+.tok-comment { color: #2e3d40; }
+.tok-key     { color: var(--purple); }
+.tok-str     { color: var(--amber); }
+.tok-num     { color: var(--accent); }
+.tok-cmd     { color: var(--blue); }
+.tok-role    { color: var(--green); }
+.tok-em      { color: var(--red); }
+
+/* --- callout --- */
+.callout {
+  border-radius: 7px;
+  padding: 13px 16px;
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 14px 0;
+  display: flex;
+  gap: 12px;
+}
+.callout-icon { font-size: 14px; flex-shrink: 0; padding-top: 1px; }
+.callout-body { flex: 1; }
+.callout-body strong { font-weight: 500; }
+.callout.warn  { background:rgba(200,160,74,.08);  border:1px solid rgba(200,160,74,.18);  color:#a89060; }
+.callout.info  { background:rgba(94,168,192,.08);  border:1px solid rgba(94,168,192,.18);  color:#6898a8; }
+.callout.good  { background:rgba(77,184,164,.08);  border:1px solid rgba(77,184,164,.18);  color:#5a9e8c; }
+.callout.key   { background:rgba(136,120,184,.08); border:1px solid rgba(136,120,184,.18); color:#8878b0; }
+
+/* --- stat grid --- */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 16px 0;
+}
+.stat-cell {
+  background: var(--s1);
+  padding: 16px 18px;
+}
+.stat-val {
+  font-family: 'Lora', serif;
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--head);
+  margin-bottom: 3px;
+  line-height: 1.1;
+}
+.stat-val .unit { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); font-weight:400; }
+.stat-label { font-size: 11.5px; color: var(--muted); }
+
+/* --- bench table --- */
+.bench-table { width:100%; border-collapse:collapse; font-size:13px; margin:16px 0; }
+.bench-table th {
+  font-family:'JetBrains Mono',monospace;
+  font-size:9.5px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--muted2);
+  padding:9px 14px;
+  text-align:left;
+  background:var(--s0);
+  border-bottom:1px solid var(--border);
+}
+.bench-table td {
+  padding:10px 14px;
+  border-bottom:1px solid var(--border);
+  color:var(--muted);
+  vertical-align:middle;
+}
+.bench-table tr:last-child td { border-bottom:none; }
+.bench-table td:first-child { color:var(--head); font-weight:500; }
+.bench-table .highlight { color:var(--accent); font-weight:500; font-family:'JetBrains Mono',monospace; }
+.bench-table .best { color:var(--green); }
+.bench-table .note { font-size:11px; color:var(--muted2); }
+.bench-table tr:hover td { background:rgba(255,255,255,.01); }
+
+/* --- insight cards --- */
+.insight-cards { display:flex; flex-direction:column; gap:10px; }
+.insight-card {
+  display: grid;
+  grid-template-columns: 3px 1fr;
+  gap: 14px;
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  overflow: hidden;
+  padding: 14px 16px;
+  transition: border-color .2s;
+}
+.insight-card:hover { border-color: var(--border2); }
+.insight-stripe { border-radius: 2px; }
+.insight-title { font-size: 13.5px; font-weight:500; color:var(--head); margin-bottom:5px; }
+.insight-body  { font-size: 12.5px; color:var(--muted); line-height:1.65; }
+.insight-body strong { color:var(--text); }
+.insight-body code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--purple); padding:1px 5px; border-radius:3px; }
+
+/* --- tag row --- */
+.tag-row { display:flex; flex-wrap:wrap; gap:6px; margin:10px 0; }
+.tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 2px 9px;
+  border-radius: 3px;
+  background: var(--s1);
+  border: 1px solid var(--border2);
+  color: var(--accent);
+}
+.tag.blue  { color:var(--blue);  background:rgba(94,168,192,.06);  border-color:rgba(94,168,192,.2); }
+.tag.amber { color:var(--amber); background:rgba(200,160,74,.06);  border-color:rgba(200,160,74,.2); }
+.tag.purple{ color:var(--purple);background:rgba(136,120,184,.06); border-color:rgba(136,120,184,.2); }
+.tag.green { color:var(--green); background:rgba(109,187,132,.06); border-color:rgba(109,187,132,.2); }
+
+/* --- two-col compare --- */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 14px 0;
+}
+.two-col-card {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 14px 16px;
+}
+.two-col-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted2);
+  margin-bottom: 8px;
+}
+.two-col-body { font-size: 12px; color: var(--muted); line-height: 1.7; }
+.two-col-body strong { color: var(--text); }
+.two-col-body code { font-family:'JetBrains Mono',monospace; font-size:10px; background:var(--bg); color:var(--purple); padding:1px 4px; border-radius:3px; }
+
+/* --- scrollbar --- */
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+/* --- divider --- */
+.divider { border:none; border-top:1px solid var(--border); margin:28px 0; }
+
+/* --- sub-section label --- */
+.sub-label {
+  font-family:'JetBrains Mono',monospace;
+  font-size:9.5px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin:24px 0 10px;
+}
+
+@media (max-width:700px) {
+  aside { display:none; }
+  main  { margin-left:0; padding:28px 18px 60px; }
+  .comp-grid { grid-template-columns:1fr; }
+  .stat-grid { grid-template-columns:1fr 1fr; }
+  .action-item { grid-template-columns:1fr; }
+  .action-name { border-right:none; border-bottom:1px solid var(--border); }
+  .two-col { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- --- Sidebar --- -->
+<aside>
+  <div class="aside-head">
+    <a href="../../Reference.html" class="back-link">&larr; 返回 Reference</a>
+    <div class="aside-title">Agentless</div>
+    <div class="aside-sub">精读笔记 &middot; ICSE 2025</div>
+  </div>
+  <nav>
+    <a class="nav-item active" href="#overview"><span class="n">00</span>概览</a>
+    <a class="nav-item" href="#pipeline"><span class="n">01</span>三阶段流水线</a>
+    <a class="nav-item" href="#codestructure"><span class="n">02</span>代码结构</a>
+    <a class="nav-item" href="#prompts"><span class="n">03</span>Prompt 设计</a>
+    <a class="nav-item" href="#dataformat"><span class="n">04</span>数据格式</a>
+    <a class="nav-item" href="#noagent"><span class="n">05</span>"无 Agent" 的深层含义</a>
+    <a class="nav-item" href="#comparison"><span class="n">06</span>与 Agent 方案的对比</a>
+    <a class="nav-item" href="#takeaways"><span class="n">07</span>对本研究的启发</a>
+  </nav>
+  <div class="aside-foot">
+    arXiv:2407.01489<br>
+    Xia et al. &middot; UIUC<br>
+    ICSE 2025<br>
+    github: OpenAutoCoder/Agentless
+  </div>
+</aside>
+
+<!-- --- Main --- -->
+<main>
+
+<!-- --- Hero --- -->
+<div class="hero" id="overview">
+  <div class="hero-eyebrow">Pipeline Deep-Dive &middot; arXiv:2407.01489</div>
+  <h1><em>Agentless</em></h1>
+  <div class="hero-sub">Demystifying LLM-based Software Engineering Agents</div>
+  <div class="hero-chips">
+    <a href="https://arxiv.org/abs/2407.01489" target="_blank" class="chip chip-arxiv">&nearr; arXiv:2407.01489</a>
+    <a href="https://github.com/OpenAutoCoder/Agentless" target="_blank" class="chip chip-gh">&cong; OpenAutoCoder/Agentless</a>
+    <span class="chip chip-venue">Xia et al. &middot; UIUC &middot; ICSE 2025</span>
+  </div>
+  <div class="hero-abstract">
+    <strong>Agentless</strong> 挑战了"复杂 agent 循环是自动化软件工程所必需"的假设。它不使用迭代式 agent 交互，而是提出一个简洁的<strong>三阶段流水线：Localization &rarr; Repair &rarr; Validation</strong>。没有 agent loop，执行期间没有环境交互。在 SWE-bench Lite 上达到 <strong>27.3%</strong>，与 agent 方案性能相当，但成本仅为其 <strong>1/6 ~ 1/10</strong>（约 $0.34/实例）。核心洞察：对于 bug fix 类任务，<strong>LLM 本身已具备足够的定位和修复能力</strong>，只需设计恰当的分步 prompting 策略，无需赋予 agent 自主探索环境的能力。这一发现对训练数据构建有深远影响——Agentless 轨迹可作为 agent 训练的 "skill prior"。
+  </div>
+</div>
+
+<!-- --- 00 Stats --- -->
+<div class="stat-grid" style="margin-top:-20px;margin-bottom:40px">
+  <div class="stat-cell">
+    <div class="stat-val">27.3<span class="unit">%</span></div>
+    <div class="stat-label">SWE-bench Lite 通过率</div>
+  </div>
+  <div class="stat-cell">
+    <div class="stat-val">$0.34</div>
+    <div class="stat-label">每实例平均成本</div>
+  </div>
+  <div class="stat-cell">
+    <div class="stat-val">0</div>
+    <div class="stat-label">Agent 循环次数</div>
+  </div>
+</div>
+
+
+<!-- --- 01 三阶段流水线 --- -->
+<section class="sec" id="pipeline">
+  <div class="sec-header">
+    <span class="sec-num">01</span>
+    <div class="sec-line" style="background:var(--accent)"></div>
+    <h2 class="sec-title">三阶段流水线</h2>
+  </div>
+
+  <p>Agentless 的核心设计是一个<strong>无循环的线性流水线</strong>。每个阶段只调用 LLM 进行推理，不与代码仓库运行环境交互（不执行命令、不读终端输出）。信息流严格单向：Localization 的输出喂给 Repair，Repair 的输出喂给 Validation。</p>
+
+  <div class="arch-diagram">
+    <div class="layer-label">三阶段线性流水线</div>
+    <div style="line-height:2.4">
+      <span class="arch-box phase1">Phase 1: Localization</span> <span style="color:var(--muted2);font-size:10px">（分层定位：File &rarr; Function &rarr; Line）</span>
+      <br><span style="color:var(--muted2)">        &darr; 定位结果（文件名 + 行号范围）</span>
+      <br><span class="arch-box phase2">Phase 2: Repair</span> <span style="color:var(--muted2);font-size:10px">（采样 N 个 patch：1 greedy + 19 temperature）</span>
+      <br><span style="color:var(--muted2)">        &darr; N 个候选 patch</span>
+      <br><span class="arch-box phase3">Phase 3: Validation</span> <span style="color:var(--muted2);font-size:10px">（回归测试 + AST 去重 + 多数投票）</span>
+      <br><span style="color:var(--muted2)">        &darr; 最终选定的 patch</span>
+      <br><span class="arch-box ctrl">Output: all_preds.jsonl</span> <span style="color:var(--muted2);font-size:10px">（每个 instance_id 一个 model_patch）</span>
+    </div>
+  </div>
+
+  <!-- Phase 1 -->
+  <div class="sub-label">Phase 1 &middot; Localization（分层缩窄）</div>
+
+  <p>Localization 是 Agentless 最精巧的部分。它通过<strong>三轮逐步缩窄</strong>的 LLM 调用，从整个仓库的文件结构逐步定位到具体的行号范围：</p>
+
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge" style="color:var(--blue)">1a</span></div>
+      <div class="step-inner">
+        <div class="step-h">File-level Localization</div>
+        <div class="step-p"><code>LLMFL</code> 类读取仓库的完整目录结构（所有 <code>.py</code> 文件的路径列表），与 issue 描述一起构造 prompt，要求 LLM <strong>"identify which files in the repo need to be edited"</strong>。返回 <strong>top-5</strong> 候选文件。Prompt 模板：<code>obtain_relevant_files_prompt</code>。若仓库文件过多，按路径排序后截断至 context window 限制。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge" style="color:var(--accent)">1b</span></div>
+      <div class="step-inner">
+        <div class="step-h">Function/Class-level Localization</div>
+        <div class="step-p">对 top-N 文件，调用 <code>get_skeleton()</code> 生成<strong>压缩骨架格式</strong>——只保留 class/function 签名和 docstring 首行，省略函数体。LLM 被要求输出 <strong>"class names, function names, or exact variable names"</strong> 需要修改的位置。Prompt 模板：<code>obtain_relevant_code_combine_top_n_prompt</code>。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge" style="color:var(--accent)">1c</span></div>
+      <div class="step-inner">
+        <div class="step-h">Line-level Localization</div>
+        <div class="step-p">函数 <code>localize_line_from_coarse_function_locs()</code> 把定位到的 function/class 展开为<strong>带行号的完整源码</strong>（可配置 context window，默认前后各 <strong>10 行</strong>上下文），要求 LLM 给出具体的 <code>(start_line, end_line)</code> 行号范围。这些行号范围将直接传给 Repair 阶段作为编辑上下文。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-icon">&#x2139;</div>
+    <div class="callout-body">
+      <strong>重试机制</strong>：每轮 LLM 调用最多重试 <code>MAX_RETRIES=5</code> 次。首次用 <code>temperature=0</code>（greedy），失败后温度逐步升至 <code>1.0</code>。失败的判定标准包括：LLM 输出无法解析、返回空列表、或超出 token 限制。重试时保留之前的 conversation history 以提供上下文。
+    </div>
+  </div>
+
+  <!-- Phase 2 -->
+  <div class="sub-label">Phase 2 &middot; Repair（采样多个 patch）</div>
+
+  <p>Repair 阶段的核心策略是<strong>多样性采样</strong>：生成大量候选 patch，再由 Validation 阶段筛选最佳。</p>
+
+  <div class="comp-grid">
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--amber)">Prompt Templates</div>
+      <div class="comp-name">三种 Prompt 变体</div>
+      <div class="comp-body">
+        提供三种修复 prompt：<strong>basic</strong>（直接给 patch）、<strong>chain-of-thought</strong>（先分析 bug 再修复，<code>repair_prompt_combine_topn_cot</code>）、<strong>diff variant</strong>（以 unified diff 格式输出）。CoT 变体性能最优，是默认选择。Prompt 指令：<em>"Please first localize the bug based on the issue statement, and then generate a patch."</em>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--blue)">Edit Formats</div>
+      <div class="comp-name">两种编辑格式</div>
+      <div class="comp-body">
+        <strong>edit_file format</strong>：<code>edit_file(filename, start, end, content)</code> 函数调用式，指定行号范围和替换内容。<strong>SEARCH/REPLACE</strong> 格式：<code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH ... ======= ... &gt;&gt;&gt;&gt;&gt;&gt;&gt; REPLACE</code>，类似 git merge conflict marker。两种格式由 <code>parse_edit()</code> / <code>parse_search_replace()</code> 分别解析。
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--green)">Sampling Strategy</div>
+      <div class="comp-name">采样策略</div>
+      <div class="comp-body">
+        默认生成 <strong>20 个</strong>候选 patch：<strong>1 个 greedy</strong>（temperature=0）+ <strong>19 个 temperature samples</strong>（temperature=0.8）。greedy sample 保证有一个确定性的高质量 baseline；temperature samples 提供多样性，覆盖 LLM 对 bug 不同理解的修复方案。
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--purple)">Context Construction</div>
+      <div class="comp-name">上下文构建</div>
+      <div class="comp-body">
+        <code>construct_topn_file_context()</code> 将 Localization 输出的 top-N 文件的相关代码段拼接成修复上下文，每段代码带<strong>行号前缀</strong>（sticky scroll 式）。Token 数通过 <code>num_tokens_from_messages()</code> 检查，超出 <code>MAX_CONTEXT_LENGTH=128000</code> 时截断最低优先级的文件。
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 3 -->
+  <div class="sub-label">Phase 3 &middot; Validation（重排和选择）</div>
+
+  <p>Validation 是 Agentless 区别于简单 LLM prompting 的关键环节——它用<strong>测试执行</strong>和<strong>统计方法</strong>从多个候选 patch 中选出最可能正确的一个。</p>
+
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge" style="color:var(--green)">3a</span></div>
+      <div class="step-inner">
+        <div class="step-h">回归测试过滤</div>
+        <div class="step-p">对每个候选 patch，运行仓库的<strong>现有测试套件</strong>（回归测试）。记录每个 patch 导致的测试失败数量，<strong>保留失败数最少的</strong> patch 子集。如果一个 patch 导致大量回归失败，说明它引入了新 bug，直接淘汰。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge" style="color:var(--green)">3b</span></div>
+      <div class="step-inner">
+        <div class="step-h">Reproduction 测试（可选）</div>
+        <div class="step-p">如果 issue 附带了<strong>可复现的测试用例</strong>（reproduction test），候选 patch 还必须通过该测试。这是更强的正确性约束——不仅不能引入新 bug，还必须修复原始 bug。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge" style="color:var(--green)">3c</span></div>
+      <div class="step-inner">
+        <div class="step-h">AST 归一化 + 去重</div>
+        <div class="step-p"><code>normalize_patch()</code> 对 patch 进行 <strong>AST 级别归一化</strong>——去除空行差异、注释差异、格式差异后比较语法树。语义等价的 patch 合并为一个候选，并累计其出现次数。这避免了"同一修复因格式不同被计为多个候选"的问题。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge" style="color:var(--green)">3d</span></div>
+      <div class="step-inner">
+        <div class="step-h">多数投票</div>
+        <div class="step-p">使用 Python <code>Counter</code> 对归一化后的 patch 进行<strong>多数投票</strong>。出现次数最多的 patch 胜出；平局时按<strong>首次出现顺序</strong>（即 greedy sample 优先）打破。最终结果写入 <code>all_preds.jsonl</code>，每个 <code>instance_id</code> 对应一个 <code>model_patch</code>（git diff 格式）。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout good">
+    <div class="callout-icon">&#x2713;</div>
+    <div class="callout-body">
+      <strong>多数投票的直觉</strong>：如果 LLM 在多次独立采样中倾向于给出相同的修复方案，那么该方案很可能是正确的。这与 self-consistency (Wang et al., 2022) 的思路一致，但 Agentless 额外引入了 AST 归一化来消除表面差异，使投票更加准确。
+    </div>
+  </div>
+</section>
+
+
+<!-- --- 02 代码结构 --- -->
+<section class="sec" id="codestructure">
+  <div class="sec-header">
+    <span class="sec-num">02</span>
+    <div class="sec-line" style="background:var(--purple)"></div>
+    <h2 class="sec-title">代码结构</h2>
+  </div>
+
+  <p>Agentless 的代码组织简洁清晰，与三阶段流水线直接对应。核心代码量约 3000 行 Python。</p>
+
+  <div class="action-list">
+    <div class="action-item">
+      <div class="action-name">agentless/fl/localize.py</div>
+      <div class="action-desc"><strong>Localization 主编排</strong>。实现 file &rarr; function &rarr; line 的三级定位流程。调用 <code>LLMFL</code> 类进行每级定位，管理重试逻辑、结果解析。输出 <code>loc_outputs.jsonl</code>。</div>
+    </div>
+    <div class="action-item">
+      <div class="action-name">agentless/fl/FL.py</div>
+      <div class="action-desc"><strong>LLMFL 类</strong>。封装 LLM-based fault localization 的核心逻辑：prompt 模板管理、<code>localize()</code> 方法（发送 LLM 请求并解析响应）、仓库结构读取、骨架生成 <code>get_skeleton()</code>、行号上下文展开。</div>
+    </div>
+    <div class="action-item">
+      <div class="action-name">agentless/repair/repair.py</div>
+      <div class="action-desc"><strong>Patch 生成</strong>。读取 localization 输出，构建修复上下文（<code>construct_topn_file_context()</code>），调用 LLM 生成 patch。管理采样策略（greedy + temperature）、edit 格式解析（<code>parse_edit()</code> / <code>parse_search_replace()</code>）。</div>
+    </div>
+    <div class="action-item">
+      <div class="action-name">agentless/repair/rerank.py</div>
+      <div class="action-desc"><strong>Patch 重排</strong>。回归测试执行、结果过滤、<code>normalize_patch()</code> AST 归一化、<code>Counter</code> 多数投票。输出最终的 <code>all_preds.jsonl</code>。</div>
+    </div>
+    <div class="action-item">
+      <div class="action-name">agentless/util/</div>
+      <div class="action-desc"><strong>工具模块</strong>。包括 API 后端抽象（OpenAI / Anthropic / 本地模型统一接口）、token 计数（<code>num_tokens_from_messages()</code>）、模型配置、仓库操作工具。</div>
+    </div>
+  </div>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:#d9736a"></span>
+      <span class="dot" style="background:#c8a04a"></span>
+      <span class="dot" style="background:#6dbb84"></span>
+      项目目录结构（简化）
+    </div>
+    <pre><span class="tok-comment"># Agentless 核心代码结构</span>
+agentless/
+├── fl/
+│   ├── FL.py              <span class="tok-comment"># LLMFL 类 + prompt 模板</span>
+│   ├── localize.py        <span class="tok-comment"># 三级定位主编排</span>
+│   └── __init__.py
+├── repair/
+│   ├── repair.py          <span class="tok-comment"># patch 生成 + 采样</span>
+│   ├── rerank.py          <span class="tok-comment"># 测试过滤 + 多数投票</span>
+│   └── __init__.py
+├── util/
+│   ├── api_requests.py    <span class="tok-comment"># LLM API 统一抽象</span>
+│   ├── model.py           <span class="tok-comment"># 模型配置管理</span>
+│   ├── utils.py           <span class="tok-comment"># token 计数、仓库工具</span>
+│   └── __init__.py
+├── results/               <span class="tok-comment"># 运行输出目录</span>
+│   ├── location/          <span class="tok-comment"># loc_outputs.jsonl</span>
+│   └── repair/            <span class="tok-comment"># output.jsonl + processed</span>
+└── all_preds.jsonl        <span class="tok-comment"># 最终预测</span></pre>
+  </div>
+
+  <div class="callout key">
+    <div class="callout-icon">&#x25C6;</div>
+    <div class="callout-body">
+      <strong>设计哲学</strong>：Agentless 有意保持代码简单。没有 event stream、没有 controller、没有 runtime sandbox——只有 Python 脚本按顺序调用 LLM API。这种简洁性正是它的优势：<strong>每个模块的输入输出都是 JSONL 文件</strong>，方便调试、可复现、也方便提取为训练数据。
+    </div>
+  </div>
+</section>
+
+
+<!-- --- 03 Prompt 设计 --- -->
+<section class="sec" id="prompts">
+  <div class="sec-header">
+    <span class="sec-num">03</span>
+    <div class="sec-line" style="background:var(--amber)"></div>
+    <h2 class="sec-title">Prompt 设计</h2>
+  </div>
+
+  <p>Agentless 的性能高度依赖 prompt engineering。每个阶段有精心设计的 prompt 模板，引导 LLM 按照预期格式输出。</p>
+
+  <!-- File-level prompt -->
+  <div class="sub-label">3.1 &middot; File-level Localization Prompt</div>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:#d9736a"></span>
+      <span class="dot" style="background:#c8a04a"></span>
+      <span class="dot" style="background:#6dbb84"></span>
+      obtain_relevant_files_prompt &middot; FL.py
+    </div>
+    <pre><span class="tok-comment"># 系统提示（简化）</span>
+<span class="tok-str">"""
+Please look through the following GitHub problem statement and
+repository structure and provide a list of files that one would
+need to edit to fix the problem.
+
+### GitHub Problem Statement ###
+{problem_statement}
+
+### Repository Structure ###
+{repo_structure}
+
+Please provide the complete list of files that need to be edited
+to fix the problem. Return the files as a JSON list:
+["file1.py", "file2.py", ...]
+"""</span>
+
+<span class="tok-comment"># repo_structure 格式：仓库中所有 .py 文件的路径列表</span>
+<span class="tok-comment"># 按目录结构排序，每行一个路径</span>
+<span class="tok-comment"># 若文件数过多，截断至 MAX_CONTEXT_LENGTH</span></pre>
+  </div>
+
+  <!-- Function-level prompt -->
+  <div class="sub-label">3.2 &middot; Function-level Localization Prompt</div>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:#d9736a"></span>
+      <span class="dot" style="background:#c8a04a"></span>
+      <span class="dot" style="background:#6dbb84"></span>
+      obtain_relevant_code_combine_top_n_prompt &middot; FL.py
+    </div>
+    <pre><span class="tok-str">"""
+Please look through the following GitHub problem statement and
+the skeleton of relevant files. Identify all locations that need
+to be edited to fix the problem.
+
+For each file, provide:
+- The class names that need to be modified
+- The function/method names that need to be modified
+- Any exact variable or attribute names if applicable
+
+### GitHub Problem Statement ###
+{problem_statement}
+
+### File: {filename_1} ###
+{skeleton_1}
+
+### File: {filename_2} ###
+{skeleton_2}
+...
+"""</span>
+
+<span class="tok-comment"># skeleton 格式（get_skeleton() 输出）：</span>
+<span class="tok-comment"># class MyClass:               ← 保留签名</span>
+<span class="tok-comment">#     """docstring first line"""  ← 保留 docstring 首行</span>
+<span class="tok-comment">#     def method(self, x):      ← 保留方法签名</span>
+<span class="tok-comment">#         ...                   ← 函数体替换为 ...</span></pre>
+  </div>
+
+  <!-- Repair CoT prompt -->
+  <div class="sub-label">3.3 &middot; Repair Prompt (Chain-of-Thought)</div>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:#d9736a"></span>
+      <span class="dot" style="background:#c8a04a"></span>
+      <span class="dot" style="background:#6dbb84"></span>
+      repair_prompt_combine_topn_cot &middot; repair.py
+    </div>
+    <pre><span class="tok-str">"""
+We are currently solving the following issue within our repository.
+
+### Issue ###
+{problem_statement}
+
+### Relevant Code ###
+{file_context_with_line_numbers}
+
+### Instructions ###
+Please first localize the bug based on the issue statement and
+the relevant code context, and then generate a patch to fix it.
+
+You can use the following edit format:
+edit_file(filename, start_line, end_line, new_content)
+
+OR the SEARCH/REPLACE format:
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH
+original code here
+=======
+replacement code here
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; REPLACE
+"""</span>
+
+<span class="tok-comment"># file_context_with_line_numbers 格式：</span>
+<span class="tok-comment"># --- File: src/auth.py ---</span>
+<span class="tok-comment"># 38: def authenticate(user, pwd):</span>
+<span class="tok-comment"># 39:     result = db.query(user)</span>
+<span class="tok-comment"># 40:     if result is None:</span>
+<span class="tok-comment"># 41:         return None   ← bug here</span>
+<span class="tok-comment"># 42:     ...</span></pre>
+  </div>
+
+  <!-- Context management -->
+  <div class="sub-label">3.4 &middot; Context 管理</div>
+
+  <div class="comp-grid">
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--blue)">Token Counting</div>
+      <div class="comp-name">num_tokens_from_messages()</div>
+      <div class="comp-body">
+        使用 <code>tiktoken</code> 精确计算每条 message 的 token 数。在构建 prompt 前检查总 token 数是否超出 <code>MAX_CONTEXT_LENGTH</code>（默认 <strong>128,000</strong>）。超限时从低优先级内容开始截断：先删除最后一个候选文件，再缩减上下文行数。
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--amber)">Conversation History</div>
+      <div class="comp-name">多轮对话累积</div>
+      <div class="comp-body">
+        Localization 的三轮定位不是独立调用——<strong>前一轮的 LLM 回复被保留在 conversation history 中</strong>。Function-level prompt 能看到 file-level 的输出，line-level 能看到 function-level 的输出。这种累积式上下文帮助 LLM 保持一致性。
+      </div>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <div class="callout-icon">&#x26A0;</div>
+    <div class="callout-body">
+      <strong>Prompt 的脆弱性</strong>：Agentless 的性能高度依赖 prompt 模板的措辞。作者在论文中提到，微小的 prompt 改动（如移除 "Please first localize the bug" 这句指令）可导致 SWE-bench Lite 通过率下降 2-3%。这说明<strong>当前 prompt engineering 的收益尚未被模型内化</strong>——这正是 SFT 训练可以解决的问题。
+    </div>
+  </div>
+</section>
+
+
+<!-- --- 04 数据格式 --- -->
+<section class="sec" id="dataformat">
+  <div class="sec-header">
+    <span class="sec-num">04</span>
+    <div class="sec-line" style="background:var(--green)"></div>
+    <h2 class="sec-title">数据格式</h2>
+  </div>
+
+  <p>Agentless 的所有中间结果和最终输出都是 <strong>JSONL 格式</strong>（每行一个 JSON 对象），方便 pipeline 串联和训练数据提取。</p>
+
+  <div class="action-list">
+    <div class="action-item" style="grid-template-columns:260px 1fr">
+      <div class="action-name" style="font-size:9.5px">results/location/<br>loc_outputs.jsonl</div>
+      <div class="action-desc">Localization 输出。每行包含：<code>instance_id</code>、定位到的文件列表、class/function 名称、行号范围、以及完整的 <code>edit_loc_traj</code>（LLM 对话轨迹，含每轮 prompt 和 response）。</div>
+    </div>
+    <div class="action-item" style="grid-template-columns:260px 1fr">
+      <div class="action-name" style="font-size:9.5px">results/repair/<br>output.jsonl</div>
+      <div class="action-desc">Repair 原始输出。包含所有采样的 patch（raw LLM response），每个 sample 一行。字段包括 <code>instance_id</code>、<code>raw_output</code>、<code>temperature</code>、<code>model_name_or_path</code>。</div>
+    </div>
+    <div class="action-item" style="grid-template-columns:260px 1fr">
+      <div class="action-name" style="font-size:9.5px">results/repair/<br>output_{i}_processed.jsonl</div>
+      <div class="action-desc">每个 sample 的解析后 patch。将 raw LLM 输出解析为结构化的 <code>edit_file()</code> 调用或 SEARCH/REPLACE 块后，应用到原始代码生成 git diff。解析失败的 sample 被丢弃。</div>
+    </div>
+    <div class="action-item" style="grid-template-columns:260px 1fr">
+      <div class="action-name" style="font-size:9.5px">all_preds.jsonl</div>
+      <div class="action-desc"><strong>最终预测文件</strong>。每行一个 <code>instance_id</code> + <code>model_patch</code>（标准 git diff 格式）。这是提交给 SWE-bench 评测的最终文件，也是下游训练使用的核心数据。</div>
+    </div>
+  </div>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:#d9736a"></span>
+      <span class="dot" style="background:#c8a04a"></span>
+      <span class="dot" style="background:#6dbb84"></span>
+      loc_outputs.jsonl &middot; 单条记录示例
+    </div>
+    <pre>{
+  <span class="tok-key">"instance_id"</span>: <span class="tok-str">"django__django-16527"</span>,
+  <span class="tok-key">"found_files"</span>: [<span class="tok-str">"django/db/models/query.py"</span>, <span class="tok-str">"django/db/models/sql/query.py"</span>],
+  <span class="tok-key">"found_related_locs"</span>: [
+    {<span class="tok-key">"file"</span>: <span class="tok-str">"django/db/models/query.py"</span>,
+     <span class="tok-key">"class"</span>: <span class="tok-str">"QuerySet"</span>,
+     <span class="tok-key">"func"</span>: <span class="tok-str">"_filter_or_exclude"</span>,
+     <span class="tok-key">"lines"</span>: [<span class="tok-num">1042</span>, <span class="tok-num">1068</span>]}
+  ],
+  <span class="tok-key">"edit_loc_traj"</span>: {
+    <span class="tok-key">"file_level"</span>: {<span class="tok-key">"prompt"</span>: <span class="tok-str">"..."</span>, <span class="tok-key">"response"</span>: <span class="tok-str">"..."</span>, <span class="tok-key">"tokens"</span>: <span class="tok-num">4523</span>},
+    <span class="tok-key">"func_level"</span>: {<span class="tok-key">"prompt"</span>: <span class="tok-str">"..."</span>, <span class="tok-key">"response"</span>: <span class="tok-str">"..."</span>, <span class="tok-key">"tokens"</span>: <span class="tok-num">8912</span>},
+    <span class="tok-key">"line_level"</span>: {<span class="tok-key">"prompt"</span>: <span class="tok-str">"..."</span>, <span class="tok-key">"response"</span>: <span class="tok-str">"..."</span>, <span class="tok-key">"tokens"</span>: <span class="tok-num">12340</span>}
+  }
+}</pre>
+  </div>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:#d9736a"></span>
+      <span class="dot" style="background:#c8a04a"></span>
+      <span class="dot" style="background:#6dbb84"></span>
+      all_preds.jsonl &middot; 最终预测示例
+    </div>
+    <pre>{
+  <span class="tok-key">"instance_id"</span>: <span class="tok-str">"django__django-16527"</span>,
+  <span class="tok-key">"model_name_or_path"</span>: <span class="tok-str">"gpt-4o-2024-05-13"</span>,
+  <span class="tok-key">"model_patch"</span>: <span class="tok-str">"diff --git a/django/db/models/query.py b/django/db/models/query.py\n--- ...\n+++ ...\n@@ -1042,7 +1042,7 @@\n..."</span>
+}</pre>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-icon">&#x2139;</div>
+    <div class="callout-body">
+      <strong>训练数据提取</strong>：<code>edit_loc_traj</code> 字段是训练数据的金矿——它包含了每轮定位的完整 prompt 和 response，可以直接拆分为 SFT 训练样本。Localization 的三轮对话可以作为 3 条独立的训练样本，也可以作为 1 条多轮对话样本。
+    </div>
+  </div>
+</section>
+
+
+<!-- --- 05 "无 Agent" 的深层含义 --- -->
+<section class="sec" id="noagent">
+  <div class="sec-header">
+    <span class="sec-num">05</span>
+    <div class="sec-line" style="background:var(--blue)"></div>
+    <h2 class="sec-title">"无 Agent" 的深层含义</h2>
+  </div>
+
+  <p>Agentless 的名字不只是一个标签——它代表了一种<strong>对 agent 范式的系统性反思</strong>。为什么"没有 agent loop"反而能工作得这么好？这背后有深层的成本、质量和方法论含义。</p>
+
+  <!-- Cost -->
+  <div class="sub-label">5.1 &middot; 成本效率</div>
+
+  <div class="stat-grid">
+    <div class="stat-cell">
+      <div class="stat-val" style="color:var(--accent)">~$0.34</div>
+      <div class="stat-label">Agentless / 实例</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-val" style="color:var(--amber)">~$1-3</div>
+      <div class="stat-label">SWE-agent / 实例</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-val" style="color:var(--red)">~$2-5</div>
+      <div class="stat-label">OpenHands / 实例</div>
+    </div>
+  </div>
+
+  <p>Agent 方案的高成本来自<strong>反复试错</strong>：agent 执行命令、观察结果、修改策略、再执行……每次"观察-思考-行动"循环都是一次 LLM 调用。一个 SWE-bench 实例平均需要 10-30 轮 agent 循环。而 Agentless 只需 3-5 次 LLM 调用（3 轮定位 + 1-2 轮修复）就完成整个流程。</p>
+
+  <!-- Determinism -->
+  <div class="sub-label">5.2 &middot; 确定性流水线</div>
+
+  <div class="two-col">
+    <div class="two-col-card" style="border-left:3px solid var(--accent)">
+      <div class="two-col-label" style="color:var(--accent)">Agentless &middot; 确定性</div>
+      <div class="two-col-body">
+        给定相同输入（issue + repo），greedy sample 的输出完全一致。<strong>可复现、可调试</strong>。每个中间步骤的输入输出都保存在 JSONL 中，可以回溯任何一步的 prompt 和 response。失败分析只需查看对应的 JSONL 记录。
+      </div>
+    </div>
+    <div class="two-col-card" style="border-left:3px solid var(--amber)">
+      <div class="two-col-label" style="color:var(--amber)">Agent Loop &middot; 非确定性</div>
+      <div class="two-col-body">
+        Agent 的行为依赖于环境反馈（命令输出、测试结果），不同运行可能走完全不同的路径。<strong>难以复现</strong>。调试需要回放完整的 event stream，分析在哪一步"走偏了"。失败模式分析复杂度高。
+      </div>
+    </div>
+  </div>
+
+  <!-- Training data quality -->
+  <div class="sub-label">5.3 &middot; 训练数据质量</div>
+
+  <p>这是 Agentless 对本研究最重要的启发：</p>
+
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge" style="color:var(--blue)">A</span></div>
+      <div class="step-inner">
+        <div class="step-h">每阶段输出可独立用于 SFT</div>
+        <div class="step-p">Localization 的（issue, file_list）对可以训练<strong>文件定位能力</strong>；（issue + skeleton, function_list）对可以训练<strong>代码理解能力</strong>；Repair 的（issue + context, patch）对可以训练<strong>代码生成能力</strong>。这些是<strong>干净的、可分解的技能训练样本</strong>，不需要完整的 agent 轨迹。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge" style="color:var(--accent)">B</span></div>
+      <div class="step-inner">
+        <div class="step-h">Kimi-Dev 的洞察："Agentless Training as Skill Prior"</div>
+        <div class="step-p"><strong>Kimi-Dev</strong>（ICML 2025）验证了这一思路：先用 Agentless 轨迹作为 SFT 数据训练模型的<strong>定位和修复 "skill prior"</strong>，再在 agent 框架上做 RL/rejection sampling fine-tuning。结果：Agentless pre-training 让 agent 的起点更高，收敛更快。这说明<strong>简单流水线的输出是 agent 训练的有效基础数据</strong>。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge" style="color:var(--accent)">C</span></div>
+      <div class="step-inner">
+        <div class="step-h">ReSAT：结构感知训练</div>
+        <div class="step-p"><strong>ReSAT</strong>（Repository Structure-Aware Training）直接使用 Agentless 风格的分层定位数据来训练模型理解仓库结构。模型学会"先看目录结构，再看函数骨架，再看具体代码"的渐进式理解策略——这正是 Agentless Localization 的工作方式。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout key">
+    <div class="callout-icon">&#x25C6;</div>
+    <div class="callout-body">
+      <strong>核心观点</strong>：Agent 轨迹固然丰富（包含工具使用、错误恢复、策略切换等行为），但也嘈杂（包含错误尝试、无效探索、冗余操作）。Agentless 轨迹虽然简单，但<strong>每一步都是高信噪比的、面向具体技能的训练信号</strong>。最佳训练策略可能是：先用 Agentless 数据教会模型基础技能（定位、修复），再用 Agent 数据教会模型如何在复杂环境中运用这些技能。
+    </div>
+  </div>
+</section>
+
+
+<!-- --- 06 与 Agent 方案的对比 --- -->
+<section class="sec" id="comparison">
+  <div class="sec-header">
+    <span class="sec-num">06</span>
+    <div class="sec-line" style="background:var(--red)"></div>
+    <h2 class="sec-title">与 Agent 方案的对比</h2>
+  </div>
+
+  <p>Agentless 与主流 agent 方案在架构、能力、成本等维度存在本质差异。理解这些差异有助于确定各自在训练数据构建中的角色。</p>
+
+  <table class="bench-table">
+    <thead>
+      <tr>
+        <th>维度</th>
+        <th style="color:var(--accent)">Agentless</th>
+        <th style="color:var(--amber)">SWE-agent</th>
+        <th style="color:var(--teal)">OpenHands</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>架构</td>
+        <td style="color:var(--accent)">Pipeline（无循环）</td>
+        <td style="color:var(--muted)">Agent loop</td>
+        <td style="color:var(--muted)">Agent loop</td>
+      </tr>
+      <tr>
+        <td>Localization</td>
+        <td style="color:var(--muted)">LLM + 仓库结构（纯文本推理）</td>
+        <td style="color:var(--muted)">ACI 命令（交互式探索）</td>
+        <td style="color:var(--muted)">CodeAct 探索（代码执行）</td>
+      </tr>
+      <tr>
+        <td>环境交互</td>
+        <td><span style="color:var(--red)">无</span>（仅 Validation 执行测试）</td>
+        <td style="color:var(--muted)">持续交互（bash + editor）</td>
+        <td style="color:var(--muted)">持续交互（bash + IPython + browser）</td>
+      </tr>
+      <tr>
+        <td>成本/实例</td>
+        <td><span class="highlight">~$0.34</span></td>
+        <td style="color:var(--muted)">~$1-3</td>
+        <td style="color:var(--muted)">~$2-5</td>
+      </tr>
+      <tr>
+        <td>LLM 调用次数</td>
+        <td style="color:var(--accent)">3-5 次</td>
+        <td style="color:var(--muted)">10-30 次</td>
+        <td style="color:var(--muted)">15-50 次</td>
+      </tr>
+      <tr>
+        <td>重试策略</td>
+        <td style="color:var(--muted)">采样 N 个 patch + 投票</td>
+        <td style="color:var(--muted)">错误反馈后重试</td>
+        <td style="color:var(--muted)">观察结果后重试</td>
+      </tr>
+      <tr>
+        <td>错误恢复</td>
+        <td><span style="color:var(--red)">不支持</span>（线性流水线）</td>
+        <td style="color:var(--muted)">Agent 自主决定恢复策略</td>
+        <td style="color:var(--muted)">Agent 自主决定恢复策略</td>
+      </tr>
+      <tr>
+        <td>训练数据特点</td>
+        <td style="color:var(--accent)">干净分阶段，易提取</td>
+        <td style="color:var(--muted)">富轨迹，含工具使用</td>
+        <td style="color:var(--muted)">富轨迹，含工具使用</td>
+      </tr>
+      <tr>
+        <td>SWE-bench Lite</td>
+        <td><span class="highlight">27.3%</span></td>
+        <td style="color:var(--muted)">23.0% <span class="note">(GPT-4o)</span></td>
+        <td style="color:var(--muted)">41.7% <span class="note">(Claude 3.5)</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout info">
+    <div class="callout-icon">&#x2139;</div>
+    <div class="callout-body">
+      <strong>公平比较说明</strong>：上表中的 SWE-bench Lite 数据使用了不同的 LLM 后端，并非严格的 apples-to-apples 对比。Agentless 的 27.3% 使用 GPT-4o，在<strong>相同模型</strong>条件下与 SWE-Agent 的 23.0% 对比更有意义。OpenHands 的 41.7% 使用了更强的 Claude 3.5 Sonnet。核心结论不变：<strong>简单流水线在同等模型下可以与 agent 方案竞争</strong>。
+    </div>
+  </div>
+
+  <!-- Architectural comparison diagram -->
+  <div class="sub-label">架构差异可视化</div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.2rem 0">
+    <div style="background:var(--s1);border:1px solid var(--border2);border-top:2px solid var(--accent);border-radius:8px;padding:1rem 1.1rem">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--accent);letter-spacing:.1em;margin-bottom:.5rem">AGENTLESS &middot; PIPELINE</div>
+      <pre style="font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);line-height:1.7;background:none;border:none;padding:0">Issue ──► Localize ──► Repair ──► Validate ──► Patch
+              │             │           │
+           LLM call      LLM call   Test exec
+           (3 rounds)    (20 samples)  + vote
+              │             │           │
+              ▼             ▼           ▼
+          .jsonl        .jsonl     all_preds.jsonl
+      (每步均有可复现的中间产物)</pre>
+    </div>
+
+    <div style="background:var(--s1);border:1px solid var(--border2);border-top:2px solid var(--amber);border-radius:8px;padding:1rem 1.1rem">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--amber);letter-spacing:.1em;margin-bottom:.5rem">AGENT &middot; LOOP</div>
+      <pre style="font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);line-height:1.7;background:none;border:none;padding:0">Issue ──► Agent ──────────────────► Patch
+             │
+             ├──► think ──► act ──► observe ─┐
+             │                               │
+             └───────────────────────────────┘
+                    (重复 10-50 次)
+
+      (中间状态存在 event stream 中)</pre>
+    </div>
+  </div>
+</section>
+
+
+<!-- --- 07 对本研究的启发 --- -->
+<section class="sec" id="takeaways">
+  <div class="sec-header">
+    <span class="sec-num">07</span>
+    <div class="sec-line" style="background:var(--amber)"></div>
+    <h2 class="sec-title">对本研究的启发</h2>
+  </div>
+
+  <div class="insight-cards">
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--accent)"></div>
+      <div>
+        <div class="insight-title">简单流水线可以匹配复杂 agent —— 关键问题是训练信号的丰富度</div>
+        <div class="insight-body">
+          Agentless 证明了 LLM 不需要 agent loop 就能完成 SWE 任务。但<strong>agent 轨迹是否提供更丰富的训练信号</strong>——包含错误恢复、策略切换、多步推理链——是本研究需要回答的核心问题。如果 Agentless 轨迹 + Agent 轨迹的混合训练优于单独使用任一种，就证明了两种数据源的互补性。
+        </div>
+      </div>
+    </div>
+
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--blue)"></div>
+      <div>
+        <div class="insight-title">Agentless 轨迹作为 "Skill Priors"（Kimi-Dev 路线）</div>
+        <div class="insight-body">
+          <strong>Kimi-Dev 的两阶段训练策略</strong>：Phase 1 用 Agentless 轨迹做 SFT（教会定位和修复的基础技能），Phase 2 用 agent 轨迹做 RL/RLHF（教会在复杂环境中运用技能）。这为本研究的 midtrain 数据配方提供了直接参考——可以在 midtrain 的早期阶段混入 Agentless 数据作为 "code understanding prior"。
+        </div>
+      </div>
+    </div>
+
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--purple)"></div>
+      <div>
+        <div class="insight-title">分层定位是可复用的模块</div>
+        <div class="insight-body">
+          Agentless 的 <strong>File &rarr; Function &rarr; Line</strong> 分层定位策略不依赖于 Agentless 框架本身，可以被任何 scaffold（OpenHands、SWE-Agent）借用。事实上，SWE-Agent 的 ACI 命令序列中隐含了类似的 "先 find 再 cat 再 edit" 模式。将分层定位<strong>显式化为独立训练目标</strong>，有助于模型学习结构化代码理解。
+        </div>
+      </div>
+    </div>
+
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--green)"></div>
+      <div>
+        <div class="insight-title">多数投票 + AST 归一化：实用的 patch 过滤方案</div>
+        <div class="insight-body">
+          Agentless 的 Validation 阶段提供了一套<strong>无需额外 LLM 调用的 patch 质量过滤方案</strong>：AST 归一化消除表面差异，多数投票利用统计一致性。这套方案可以直接用于 agent 轨迹的后处理——对 agent 生成的 patch 做 AST 去重和投票，作为训练数据的质量过滤器。
+        </div>
+      </div>
+    </div>
+
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--amber)"></div>
+      <div>
+        <div class="insight-title">成本约束下的数据构建策略</div>
+        <div class="insight-body">
+          以 Agentless 的 <strong>$0.34/实例</strong> 计算，生成 10,000 条高质量定位+修复训练样本仅需 ~$3,400。相比之下，用 OpenHands 生成同等数量的 agent 轨迹需要 ~$20,000-$50,000。这意味着<strong>Agentless 数据可以作为大规模、低成本的训练数据基础</strong>，agent 数据则作为高价值但稀缺的补充。两者按不同比例混合，可以在训练预算内最大化数据多样性。
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+
+<script>
+  // Active nav on scroll
+  const sections = document.querySelectorAll('section.sec[id], .hero[id]');
+  const navItems = document.querySelectorAll('nav .nav-item');
+
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const id = e.target.id;
+        navItems.forEach(a => {
+          a.classList.toggle('active', a.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -65% 0px' });
+
+  sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>

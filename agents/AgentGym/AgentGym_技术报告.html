@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgentGym 技术报告 - 通用LLM Agent开发与评估平台</title>
+    <style>
+        :root {
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --secondary: #3b82f6;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --code-bg: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.8;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 50px 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .header .links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            font-size: 0.9em;
+        }
+
+        .header .links a {
+            color: white;
+            text-decoration: none;
+            padding: 6px 12px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .header .links a:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        /* Section */
+        .section {
+            background: var(--card);
+            padding: 35px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .section h2 {
+            color: var(--primary-dark);
+            font-size: 1.6em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .section h3 {
+            color: var(--text);
+            font-size: 1.25em;
+            margin: 25px 0 15px;
+        }
+
+        .section h4 {
+            color: var(--text-light);
+            font-size: 1.05em;
+            margin: 20px 0 10px;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.95em;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--bg);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: var(--bg);
+        }
+
+        /* Code */
+        pre {
+            background: var(--code-bg);
+            padding: 18px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: "Fira Code", monospace;
+            font-size: 0.88em;
+        }
+
+        code {
+            background: var(--code-bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: "Fira Code", monospace;
+            font-size: 0.9em;
+        }
+
+        /* Diagram */
+        .diagram {
+            background: var(--code-bg);
+            padding: 20px;
+            border-radius: 8px;
+            font-family: "Fira Code", monospace;
+            white-space: pre;
+            overflow-x: auto;
+            margin: 20px 0;
+            line-height: 1.5;
+        }
+
+        /* Highlight boxes */
+        .box {
+            padding: 18px;
+            border-radius: 8px;
+            margin: 18px 0;
+        }
+
+        .box.info {
+            background: #eff6ff;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .box.success {
+            background: #ecfdf5;
+            border-left: 4px solid var(--primary);
+        }
+
+        .box.warning {
+            background: #fffbeb;
+            border-left: 4px solid #f59e0b;
+        }
+
+        /* Comparison */
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .comparison-item {
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .comparison-item.left {
+            background: #fef2f2;
+            border: 2px solid #fca5a5;
+        }
+
+        .comparison-item.right {
+            background: #eff6ff;
+            border: 2px solid #93c5fd;
+        }
+
+        /* Grid */
+        .env-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .env-card {
+            background: var(--bg);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .env-card h4 {
+            margin: 0 0 8px;
+            color: var(--primary-dark);
+        }
+
+        .env-card p {
+            font-size: 0.9em;
+            color: var(--text-light);
+            margin: 0;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-light);
+            font-size: 0.9em;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .comparison {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .section {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>AgentGym 技术报告</h1>
+            <div class="subtitle">通用LLM Agent开发与评估平台</div>
+            <div class="links">
+                <a href="https://github.com/WooooDyy/AgentGym" target="_blank">GitHub</a>
+                <a href="https://arxiv.org/abs/2406.04151" target="_blank">论文(ACL 2025)</a>
+                <a href="https://agentgym.github.io/" target="_blank">项目主页</a>
+                <a href="https://huggingface.co/AgentGym" target="_blank">Hugging Face</a>
+            </div>
+        </div>
+
+        <!-- Overview -->
+        <div class="section">
+            <h2>1. 项目概述</h2>
+
+            <div class="box success">
+                <strong>核心定位：</strong>AgentGym 是一个用于开发和评估<strong>基于大语言模型的通用智能体（General-Purpose LLM Agents）</strong>的开放平台。与针对特定任务设计的Agent框架不同，AgentGym 的目标是创建能够在多种环境中自我进化的通用智能体。
+            </div>
+
+            <h3>核心功能</h3>
+            <table>
+                <tr>
+                    <th>功能模块</th>
+                    <th>说明</th>
+                </tr>
+                <tr>
+                    <td><strong>14+ 环境支持</strong></td>
+                    <td>涵盖网页导航、文本游戏、家务任务、数字游戏、具身任务、工具使用、编程等领域</td>
+                </tr>
+                <tr>
+                    <td><strong>统一接口</strong></td>
+                    <td>采用 ReAct 格式实现统一的交互接口（Thought + Action）</td>
+                </tr>
+                <tr>
+                    <td><strong>高质量数据集</strong></td>
+                    <td>AgentTraj-L：大规模轨迹数据集用于训练</td>
+                </tr>
+                <tr>
+                    <td><strong>评估基准</strong></td>
+                    <td>AgentEval：全面的跨环境评估套件</td>
+                </tr>
+                <tr>
+                    <td><strong>RL训练支持</strong></td>
+                    <td>AgentGym-RL (2025.09新增)：支持多轮强化学习训练</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Comparison -->
+        <div class="section">
+            <h2>2. 与 verl-agent 的对比分析</h2>
+
+            <h3>2.1 核心差异对比表</h3>
+            <table>
+                <tr>
+                    <th>维度</th>
+                    <th>AgentGym</th>
+                    <th>verl-agent</th>
+                </tr>
+                <tr>
+                    <td><strong>核心目标</strong></td>
+                    <td>通用Agent开发+评估平台，支持多种环境</td>
+                    <td>专注于Agent的RL训练框架</td>
+                </tr>
+                <tr>
+                    <td><strong>环境数量</strong></td>
+                    <td>14+ 种异构环境</td>
+                    <td>主要支持特定任务环境</td>
+                </tr>
+                <tr>
+                    <td><strong>架构设计</strong></td>
+                    <td>微服务架构，HTTP API解耦</td>
+                    <td>基于veRL的单体架构</td>
+                </tr>
+                <tr>
+                    <td><strong>训练方法</strong></td>
+                    <td>行为克隆(BC) + 进化 + RL</td>
+                    <td>主要专注于RL训练</td>
+                </tr>
+                <tr>
+                    <td><strong>轨迹数据</strong></td>
+                    <td>提供大规模高质量轨迹数据集</td>
+                    <td>训练时在线生成</td>
+                </tr>
+                <tr>
+                    <td><strong>环境实现</strong></td>
+                    <td>模块化、可扩展的环境服务</td>
+                    <td>通常与训练代码紧耦合</td>
+                </tr>
+            </table>
+
+            <h3>2.2 架构设计差异</h3>
+            <div class="comparison">
+                <div class="comparison-item left">
+                    <h4>AgentGym (微服务)</h4>
+                    <ul>
+                        <li>每个环境独立部署</li>
+                        <li>通过HTTP API通信</li>
+                        <li>支持多语言实现</li>
+                        <li>易于扩展新环境</li>
+                    </ul>
+                </div>
+                <div class="comparison-item right">
+                    <h4>verl-agent (单体)</h4>
+                    <ul>
+                        <li>环境紧耦合在框架中</li>
+                        <li>内部函数调用</li>
+                        <li>Python为主</li>
+                        <li>适合深度定制</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Architecture -->
+        <div class="section">
+            <h2>3. 架构设计详解</h2>
+
+            <h3>3.1 微服务架构</h3>
+            <div class="box info">
+                AgentGym 采用<strong>微服务架构</strong>，环境部署在不同的服务器或端口上，通过封装的HTTP服务对外提供接口。这解耦了环境与其他部分。
+            </div>
+
+            <div class="diagram">
+┌─────────────────────────────────────────────────────────────┐
+│                      AgentGym Platform                      │
+├─────────────────────────────────────────────────────────────┤
+│  AgentController (训练/评估控制器)                           │
+│       │                                                     │
+│       │ HTTP API                                            │
+│       ↓                                                     │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐                  │
+│  │EnvServer │  │EnvServer │  │EnvServer │  ...             │
+│  │(WebShop) │  │(ALFWorld)│  │(SciWorld)│                  │
+│  │  :3001   │  │  :3002   │  │  :3003   │                  │
+│  └──────────┘  └──────────┘  └──────────┘                  │
+│     独立部署      独立部署       独立部署                     │
+└─────────────────────────────────────────────────────────────┘
+            </div>
+
+            <h3>3.2 标准API接口</h3>
+            <table>
+                <tr>
+                    <th>端点</th>
+                    <th>方法</th>
+                    <th>功能</th>
+                </tr>
+                <tr>
+                    <td><code>/createEnv</code></td>
+                    <td>POST</td>
+                    <td>创建新环境实例</td>
+                </tr>
+                <tr>
+                    <td><code>/observation</code></td>
+                    <td>GET</td>
+                    <td>获取当前观察</td>
+                </tr>
+                <tr>
+                    <td><code>/step</code></td>
+                    <td>POST</td>
+                    <td>执行动作，返回新观察</td>
+                </tr>
+                <tr>
+                    <td><code>/reset</code></td>
+                    <td>POST</td>
+                    <td>重置环境</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Environment Implementation -->
+        <div class="section">
+            <h2>4. 环境(Env)部分实现详解</h2>
+
+            <h3>4.1 环境分类</h3>
+
+            <h4>网页交互类</h4>
+            <div class="env-grid">
+                <div class="env-card">
+                    <h4>WebShop</h4>
+                    <p>电商购物网站模拟<br>轨迹: 3,930 | 评估: 200</p>
+                </div>
+                <div class="env-card">
+                    <h4>WebArena</h4>
+                    <p>真实网页任务基准<br>轨迹: 0 | 评估: 200</p>
+                </div>
+            </div>
+
+            <h4>具身智能类</h4>
+            <div class="env-grid">
+                <div class="env-card">
+                    <h4>ALFWorld</h4>
+                    <p>家务任务模拟<br>轨迹: 2,420 | 评估: 200</p>
+                </div>
+                <div class="env-card">
+                    <h4>SciWorld</h4>
+                    <p>科学实验模拟<br>轨迹: 2,120 | 评估: 200</p>
+                </div>
+                <div class="env-card">
+                    <h4>BabyAI</h4>
+                    <p>网格世界导航<br>轨迹: 810 | 评估: 90</p>
+                </div>
+            </div>
+
+            <h4>工具使用类</h4>
+            <div class="env-grid">
+                <div class="env-card">
+                    <h4>Weather</h4>
+                    <p>天气查询工具</p>
+                </div>
+                <div class="env-card">
+                    <h4>Movie</h4>
+                    <p>电影信息查询</p>
+                </div>
+                <div class="env-card">
+                    <h4>TODOList</h4>
+                    <p>待办事项管理</p>
+                </div>
+                <div class="env-card">
+                    <h4>Sheet</h4>
+                    <p>电子表格操作</p>
+                </div>
+            </div>
+
+            <h3>4.2 环境封装代码示例</h3>
+            <pre><code># agentenv_webshop/server.py
+from flask import Flask, request, jsonify
+from webshop import WebShopEnv
+
+app = Flask(__name__)
+envs = {}  # 环境实例管理
+
+@app.route('/createEnv', methods=['POST'])
+def create_env():
+    env_id = generate_env_id()
+    envs[env_id] = WebShopEnv()
+    return jsonify({"env_id": env_id, "status": "created"})
+
+@app.route('/step', methods=['POST'])
+def step():
+    data = request.json
+    env_id = data['env_id']
+    action = data['action']
+
+    env = envs[env_id]
+    obs, reward, done, info = env.step(action)
+
+    return jsonify({
+        "observation": obs,
+        "reward": reward,
+        "done": done,
+        "info": info
+    })
+
+if __name__ == '__main__':
+    app.run(port=3001)  # 每个环境不同端口</code></pre>
+
+            <h3>4.3 环境封装的关键设计</h3>
+            <div class="diagram">
+┌─────────────────────────────────────────────────────────────┐
+│                   EnvServer 封装层                          │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │           Original Environment                       │   │
+│  │  (WebShop/ALFWorld/SciWorld/etc.)                    │   │
+│  │       ↓ 原生API（各异）                              │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                            │                                │
+│                            ↓ 封装                           │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │              AgentGym EnvServer                      │   │
+│  │  ┌─────────────────────────────────────────────┐   │   │
+│  │  │ 统一接口：                                   │   │   │
+│  │  │ - /createEnv → env.reset()                   │   │   │
+│  │  │ - /step → env.step(action)                   │   │   │
+│  │  │ - /observation → env.get_obs()               │   │   │
+│  │  └─────────────────────────────────────────────┘   │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                            │                                │
+│                            ↓ HTTP                           │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │              AgentController                         │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+            </div>
+        </div>
+
+        <!-- Dataset -->
+        <div class="section">
+            <h2>5. AgentTraj-L 轨迹数据集</h2>
+
+            <div class="box success">
+                AgentTraj-L 是AgentGym提供的大规模高质量轨迹数据集，包含<strong>14+种环境</strong>的交互轨迹，用于行为克隆和Agent训练。
+            </div>
+
+            <h3>5.1 数据格式示例</h3>
+            <pre><code>{
+  "conversations": [
+    {"from": "human", "value": "Task: Find me a coffee maker under $50"},
+    {"from": "gpt", "value": "Thought: I need to search for coffee makers.\nAction: search[coffee maker under 50]"},
+    {"from": "human", "value": "Observation: You see 5 results..."},
+    {"from": "gpt", "value": "Thought: The first one looks good.\nAction: click[item_1]"},
+    ...
+  ],
+  "item_id": "webshop_5238",
+  "loss": [0, 1, 1, 0, ...]  // 哪些turn参与训练
+}</code></pre>
+        </div>
+
+        <!-- RL Support -->
+        <div class="section">
+            <h2>6. AgentGym-RL：强化学习支持</h2>
+
+            <div class="box info">
+                <strong>2025年9月更新：</strong>AgentGym-RL 扩展了原框架，支持多轮强化学习训练，包括PPO、GRPO等算法。
+            </div>
+
+            <h3>6.1 架构</h3>
+            <div class="diagram">
+AgentGym-RL = AgentGym + RL Trainer
+
+┌─────────────────────────────────────────┐
+│           RL Trainer (新增)             │
+│  ┌─────────────┐ ┌─────────────────┐   │
+│  │  Trajectory │ │  Advantage      │   │
+│  │  Collector  │ │  Computation    │   │
+│  └──────┬──────┘ └────────┬────────┘   │
+│         │                  │            │
+│         └────────┬─────────┘            │
+│                  ↓                      │
+│           Policy Update                 │
+└──────────────────┬──────────────────────┘
+                   │ HTTP API
+                   ↓
+┌─────────────────────────────────────────┐
+│        Existing EnvServers              │
+│   (无需修改，直接使用)                   │
+└─────────────────────────────────────────┘
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="section">
+            <h2>7. 总结</h2>
+
+            <h3>7.1 AgentGym vs verl-agent 核心区别</h3>
+            <table>
+                <tr>
+                    <th>维度</th>
+                    <th>AgentGym</th>
+                    <th>verl-agent</th>
+                </tr>
+                <tr>
+                    <td><strong>架构</strong></td>
+                    <td>微服务，HTTP解耦</td>
+                    <td>单体，紧耦合</td>
+                </tr>
+                <tr>
+                    <td><strong>环境</strong></td>
+                    <td>14+异构环境，即插即用</td>
+                    <td>需自定义环境</td>
+                </tr>
+                <tr>
+                    <td><strong>数据</strong></td>
+                    <td>提供预训练轨迹</td>
+                    <td>在线生成</td>
+                </tr>
+                <tr>
+                    <td><strong>用途</strong></td>
+                    <td>通用Agent研究平台</td>
+                    <td>RL训练框架</td>
+                </tr>
+            </table>
+
+            <h3>7.2 适用建议</h3>
+            <div class="comparison">
+                <div class="comparison-item left">
+                    <h4>用 AgentGym</h4>
+                    <ul>
+                        <li>研究通用Agent能力</li>
+                        <li>需要多环境评估</li>
+                        <li>需要预训练数据</li>
+                        <li>快速原型开发</li>
+                    </ul>
+                </div>
+                <div class="comparison-item right">
+                    <h4>用 verl-agent</h4>
+                    <ul>
+                        <li>专注RL算法优化</li>
+                        <li>大规模并行训练</li>
+                        <li>特定任务深度优化</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>7.3 独特价值</h3>
+            <ol>
+                <li><strong>标准化：</strong>统一的环境接口降低开发门槛</li>
+                <li><strong>可扩展：</strong>微服务架构支持无限扩展</li>
+                <li><strong>数据驱动：</strong>提供高质量轨迹数据加速研究</li>
+                <li><strong>全链路：</strong>覆盖训练-评估-进化的完整流程</li>
+            </ol>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>AgentGym 技术报告 | GitHub: <a href="https://github.com/WooooDyy/AgentGym" target="_blank">WooooDyy/AgentGym</a></p>
+            <p>整理日期: 2026-03-18 | 整理者: 王明达 (AI Agent)</p>
+        </div>
+    </div>
+</body>
+</html>

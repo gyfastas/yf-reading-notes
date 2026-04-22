@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POET · 精读笔记</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0c0a08;
+  --s0:       #12100c;
+  --s1:       #1a1610;
+  --s2:       #221e16;
+  --border:   #2a251c;
+  --border2:  #363020;
+  --text:     #cec8b8;
+  --muted:    #7a6e58;
+  --muted2:   #54493a;
+  --head:     #e8e0d0;
+  --accent:   #c8a07e;
+  --accent2:  #a8845e;
+  --red:      #d9736a;
+  --amber:    #c8a04a;
+  --blue:     #5ea8c0;
+  --purple:   #8878b8;
+  --green:    #6dbb84;
+  --teal:     #4db8a4;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; font-size:15px; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 300;
+  line-height: 1.8;
+}
+
+.layout { display:flex; min-height:100vh; }
+
+aside {
+  position: fixed; top: 0; left: 0;
+  width: 210px; height: 100vh;
+  background: var(--s0);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  overflow-y: auto; z-index: 200;
+}
+.aside-head { padding: 26px 20px 20px; border-bottom: 1px solid var(--border); }
+.back-link {
+  font-family: 'JetBrains Mono', monospace; font-size: 9.5px;
+  letter-spacing: .16em; text-transform: uppercase;
+  color: var(--muted); text-decoration: none;
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 14px; transition: color .2s;
+}
+.back-link:hover { color: var(--accent); }
+.aside-title { font-family: 'Lora', serif; font-size: 14px; font-weight: 600; color: var(--head); line-height: 1.4; }
+.aside-sub { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--muted); margin-top: 5px; letter-spacing: .06em; }
+
+nav { padding: 14px 0; flex: 1; }
+.nav-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 6px 20px; font-size: 12px; color: var(--muted);
+  text-decoration: none; cursor: pointer;
+  transition: color .2s, background .2s;
+  border-left: 2px solid transparent;
+}
+.nav-item:hover { color: var(--text); background: rgba(255,255,255,.02); }
+.nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(200,160,126,.05); }
+.nav-item .n { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--muted2); min-width: 16px; }
+
+.aside-foot {
+  padding: 14px 20px; border-top: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--muted2); line-height: 1.8;
+}
+
+main { margin-left: 210px; flex: 1; max-width: 820px; padding: 52px 48px 100px; }
+
+.hero { margin-bottom: 52px; }
+.hero-eyebrow {
+  font-family: 'JetBrains Mono', monospace; font-size: 9.5px;
+  letter-spacing: .22em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 14px;
+}
+.hero h1 { font-family: 'Lora', serif; font-size: 32px; font-weight: 500; color: var(--head); line-height: 1.25; margin-bottom: 6px; letter-spacing: -.02em; }
+.hero h1 em { font-style: italic; color: var(--accent); }
+.hero-sub { font-family: 'Lora', serif; font-style: italic; font-size: 15px; color: var(--muted); margin-bottom: 20px; }
+.hero-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+.chip { font-family: 'JetBrains Mono', monospace; font-size: 10px; padding: 3px 10px; border-radius: 3px; text-decoration: none; transition: opacity .15s; }
+.chip:hover { opacity: .75; }
+.chip-arxiv { background:rgba(94,168,192,.12); color:var(--blue); border:1px solid rgba(94,168,192,.22); }
+.chip-venue { background:rgba(200,160,126,.10); color:var(--accent); border:1px solid rgba(200,160,126,.2); }
+
+.hero-abstract {
+  background: var(--s1); border: 1px solid var(--border);
+  border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0;
+  padding: 16px 20px; font-size: 13.5px; color: #908878; line-height: 1.75;
+}
+.hero-abstract strong { color: var(--text); }
+
+.sec { margin-bottom: 50px; }
+.sec-header { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+.sec-num { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted2); letter-spacing: .08em; min-width: 24px; }
+.sec-line { width: 3px; height: 20px; border-radius: 2px; flex-shrink: 0; }
+.sec-title { font-family: 'Lora', serif; font-size: 21px; font-weight: 500; color: var(--head); }
+
+p { margin-bottom: 12px; font-size: 13.5px; }
+p:last-child { margin-bottom: 0; }
+strong { color: var(--head); font-weight: 500; }
+em { color: var(--accent); font-style: italic; }
+
+.pipeline { display: flex; flex-direction: column; gap: 2px; margin: 16px 0; }
+.pipeline-step { display: grid; grid-template-columns: 40px 1fr; background: var(--s1); border: 1px solid var(--border); border-radius: 7px; overflow: hidden; transition: border-color .2s; }
+.pipeline-step:hover { border-color: var(--border2); }
+.step-gutter { background: var(--s0); display: flex; align-items: flex-start; justify-content: center; padding: 14px 0 0; border-right: 1px solid var(--border); }
+.step-badge { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; font-weight: 500; color: var(--accent); letter-spacing: .06em; }
+.step-inner { padding: 12px 18px; }
+.step-h { font-size: 13.5px; font-weight: 500; color: var(--head); margin-bottom: 5px; }
+.step-p { font-size: 12.5px; color: var(--muted); line-height: 1.65; }
+.step-p strong { color: var(--text); }
+
+.comp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border-radius: 8px; overflow: hidden; margin: 16px 0; }
+.comp-card { background: var(--s1); padding: 16px 18px; transition: background .2s; }
+.comp-card:hover { background: var(--s2); }
+.comp-tag { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+.comp-name { font-size: 13.5px; font-weight: 500; color: var(--head); margin-bottom: 7px; }
+.comp-body { font-size: 12.5px; color: var(--muted); line-height: 1.65; }
+.comp-body strong { color: var(--text); }
+
+.callout { border-radius: 7px; padding: 13px 16px; font-size: 13px; line-height: 1.7; margin: 14px 0; display: flex; gap: 12px; }
+.callout-icon { font-size: 14px; flex-shrink: 0; padding-top: 1px; }
+.callout-body { flex: 1; }
+.callout-body strong { font-weight: 500; }
+.callout.warn  { background:rgba(200,160,74,.08);  border:1px solid rgba(200,160,74,.18);  color:#a89060; }
+.callout.info  { background:rgba(94,168,192,.08);  border:1px solid rgba(94,168,192,.18);  color:#6898a8; }
+.callout.good  { background:rgba(109,187,132,.08); border:1px solid rgba(109,187,132,.18); color:#5a9e8c; }
+.callout.key   { background:rgba(200,160,126,.08); border:1px solid rgba(200,160,126,.18); color:#a8906e; }
+
+.insight-cards { display:flex; flex-direction:column; gap:10px; }
+.insight-card { display: grid; grid-template-columns: 3px 1fr; gap: 14px; background: var(--s1); border: 1px solid var(--border); border-radius: 7px; overflow: hidden; padding: 14px 16px; transition: border-color .2s; }
+.insight-card:hover { border-color: var(--border2); }
+.insight-stripe { border-radius: 2px; }
+.insight-title { font-size: 13.5px; font-weight:500; color:var(--head); margin-bottom:5px; }
+.insight-body  { font-size: 12.5px; color:var(--muted); line-height:1.65; }
+.insight-body strong { color:var(--text); }
+
+.arch-diagram {
+  background: var(--s0); border: 1px solid var(--border); border-radius: 8px;
+  padding: 20px 24px; margin: 16px 0;
+  font-family: 'JetBrains Mono', monospace; font-size: 11.5px; line-height: 1.9; color: #5a5040; overflow-x: auto;
+}
+.arch-box { display: inline-block; padding: 2px 10px; border-radius: 4px; font-size: 11px; }
+.arch-box.env   { background:rgba(200,160,126,.14); color:var(--accent); border:1px solid rgba(200,160,126,.3); }
+.arch-box.agent { background:rgba(109,187,132,.12); color:var(--green); border:1px solid rgba(109,187,132,.25); }
+.arch-box.sel   { background:rgba(94,168,192,.12);  color:var(--blue);  border:1px solid rgba(94,168,192,.25); }
+
+.divider { border:none; border-top:1px solid var(--border); margin:28px 0; }
+
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+@media (max-width:700px) {
+  aside { display:none; }
+  main  { margin-left:0; padding:28px 18px 60px; }
+  .comp-grid { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="aside-head">
+    <a href="../../Reference.html" class="back-link">&larr; 返回 Reference</a>
+    <div class="aside-title">POET</div>
+    <div class="aside-sub">精读笔记 &middot; GECCO 2019</div>
+  </div>
+  <nav>
+    <a class="nav-item active" href="#overview"><span class="n">00</span>Overview</a>
+    <a class="nav-item" href="#mechanism"><span class="n">01</span>核心机制</a>
+    <a class="nav-item" href="#algorithm"><span class="n">02</span>算法流程</a>
+    <a class="nav-item" href="#takeaways"><span class="n">03</span>对本研究的启发</a>
+  </nav>
+  <div class="aside-foot">
+    arXiv:1901.01753<br>
+    Wang, Lehman, Clune, Stanley<br>
+    GECCO 2019
+  </div>
+</aside>
+
+<main>
+
+<!-- Hero -->
+<div class="hero" id="overview">
+  <div class="hero-eyebrow">Co-Evolution &middot; arXiv:1901.01753</div>
+  <h1>Paired Open-Ended <em>Trailblazer</em></h1>
+  <div class="hero-sub">POET: Endlessly Generating Increasingly Complex and Diverse Learning Environments and Their Solutions</div>
+  <div class="hero-chips">
+    <a href="https://arxiv.org/abs/1901.01753" target="_blank" class="chip chip-arxiv">&nearr; arXiv:1901.01753</a>
+    <span class="chip chip-venue">Wang, Lehman, Clune, Stanley &middot; GECCO 2019</span>
+  </div>
+  <div class="hero-abstract">
+    <strong>POET</strong> 首次提出同时维护两个共同进化的种群——<strong>环境种群</strong>（environment population）和<strong>策略种群</strong>（agent policy population）——它们在开放式过程中相互推动对方变得越来越复杂。环境不断变异产生新挑战，agent 在不同环境间迁移（transfer），形成"<strong>stepping stones</strong>"效应：在一个简单环境中学到的能力可能恰好成为攻克另一个困难环境的跳板。该框架在 2D 双足行走任务上展示出远超单一课程学习和随机生成的性能。
+  </div>
+</div>
+
+<!-- 01 核心机制 -->
+<section class="sec" id="mechanism">
+  <div class="sec-header">
+    <span class="sec-num">01</span>
+    <div class="sec-line" style="background:var(--accent)"></div>
+    <h2 class="sec-title">核心机制</h2>
+  </div>
+
+  <div class="comp-grid">
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--accent)">Dual Population</div>
+      <div class="comp-name">双种群共同进化</div>
+      <div class="comp-body">
+        维护 <strong>N 个 (environment, agent) 对</strong>，每个 agent 专注于自己配对的环境。环境通过变异（mutation）逐渐变难/变化，agent 通过强化学习优化策略。两个种群在同一个循环中迭代进化——环境的变化驱动 agent 学习，agent 的能力水平决定哪些环境变异是"适度困难"的。
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--green)">Minimal Criteria</div>
+      <div class="comp-name">最低准入标准</div>
+      <div class="comp-body">
+        新生成的环境必须满足 <strong>minimal criteria</strong>：至少有一个现存 agent 能在其中获得正向 reward（不太难），但也不能让所有 agent 都轻松通过（不太简单）。这确保环境种群始终处于"适度困难"的前沿，避免产出无法学习的死亡环境或毫无挑战的退化环境。
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--blue)">Cross-Environment Transfer</div>
+      <div class="comp-name">跨环境迁移</div>
+      <div class="comp-body">
+        定期尝试将一个环境中训练的 agent 策略 <strong>迁移到另一个环境</strong>。如果迁移后的策略在目标环境上比该环境原有 agent 表现更好，则替换。这一机制是"stepping stone"效应的核心——在环境 A 中获得的技能可能恰好是环境 B 的关键突破口。
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--purple)">Stepping Stone</div>
+      <div class="comp-name">踏脚石效应</div>
+      <div class="comp-body">
+        多个看似"不相关"的简单环境各自培养的 agent 能力，组合后可能解决一个单独学习无法攻克的复杂环境。例如：agent 在平坦地面上学会稳定行走，在低矮障碍上学会跨步，这两项能力迁移后可以攻克<strong>高障碍+不平地面</strong>的组合挑战。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 算法流程 -->
+<section class="sec" id="algorithm">
+  <div class="sec-header">
+    <span class="sec-num">02</span>
+    <div class="sec-line" style="background:var(--blue)"></div>
+    <h2 class="sec-title">算法流程</h2>
+  </div>
+
+  <p>POET 的主循环包含三个交替执行的阶段，每隔固定迭代数执行一次环境生成和迁移。</p>
+
+  <div class="arch-diagram">
+    <div style="line-height:2.2">
+      <span style="color:var(--muted2)">POET Main Loop:</span><br>
+      <span class="arch-box env">Environment Population</span> <span style="color:var(--muted2)">&larr; mutation &rarr;</span> <span class="arch-box env">New Environments</span><br>
+      <span style="color:var(--muted2)">        &darr; minimal criteria filter</span><br>
+      <span class="arch-box agent">Agent Population</span> <span style="color:var(--muted2)">&larr; RL optimize on paired env</span><br>
+      <span style="color:var(--muted2)">        &darr; periodic transfer attempts</span><br>
+      <span class="arch-box sel">Cross-Transfer</span> <span style="color:var(--muted2)">&rarr; replace if better fitness</span><br>
+      <span style="color:var(--muted2)">        &darr; repeat</span>
+    </div>
+  </div>
+
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">1</span></div>
+      <div class="step-inner">
+        <div class="step-h">环境变异与筛选</div>
+        <div class="step-p">对现有环境进行随机变异（改变地形参数：间隙宽度、障碍高度、粗糙度等），生成候选新环境。用 <strong>minimal criteria</strong> 过滤：保留那些至少有一个 agent 能取得正向 reward、但没有任何 agent 已经"精通"的环境。通过筛选的环境加入种群，配对一个从最相关 agent 复制的策略。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">2</span></div>
+      <div class="step-inner">
+        <div class="step-h">Agent 在各自环境中训练</div>
+        <div class="step-p">每个 (environment, agent) 对独立做若干步强化学习（使用 ES/进化策略）。Agent 只能看到自己配对的环境，不断优化在该环境上的表现。这一阶段是标准的 RL 训练，没有跨环境信息交互。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">3</span></div>
+      <div class="step-inner">
+        <div class="step-h">跨环境迁移尝试</div>
+        <div class="step-p">每隔 T 轮，评估所有 agent 在所有环境上的表现。如果某个 agent <em>a_i</em>（来自环境 <em>e_i</em>）在环境 <em>e_j</em> 上的表现超过了 <em>e_j</em> 原有的 agent <em>a_j</em>，则用 <em>a_i</em> 替换 <em>a_j</em>。这种"<strong>全对全评估 + 最优替换</strong>"机制实现了 stepping stone 效应。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-icon">i</div>
+    <div class="callout-body">
+      <strong>环境编码</strong>：在 2D BipedalWalker 实验中，环境用一个低维参数向量表示（stump height、gap width、roughness 等），变异就是对这些参数施加高斯噪声。环境复杂度的"开放性"来自参数空间的组合爆炸和不断推进的 minimal criteria 边界。
+    </div>
+  </div>
+</section>
+
+<!-- 03 对本研究的启发 -->
+<section class="sec" id="takeaways">
+  <div class="sec-header">
+    <span class="sec-num">03</span>
+    <div class="sec-line" style="background:var(--accent)"></div>
+    <h2 class="sec-title">对本研究的启发</h2>
+  </div>
+
+  <div class="insight-cards">
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--accent)"></div>
+      <div>
+        <div class="insight-title">双种群共进化 = scaffold-model 共进化的原型</div>
+        <div class="insight-body">
+          POET 的 (environment, agent) 双种群共进化与我们提出的 <strong>scaffold-model co-evolution</strong> 高度同构：scaffold（prompt/tool 设计）对应 environment，model weights 对应 agent policy。环境变得更具挑战性 = scaffold 要求提高；agent 变强 = model 能力提升。POET 证明了这种双向驱动可以开放式地持续提升，不陷入收敛。
+        </div>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--green)"></div>
+      <div>
+        <div class="insight-title">Minimal Criteria 机制直接对应 curriculum 难度控制</div>
+        <div class="insight-body">
+          POET 的 minimal criteria（不太简单不太难）与训练数据 curriculum 中的 <strong>difficulty-centric filtering</strong> 完全对应。在 scaffold co-evolution 中，可以用类似机制筛选训练任务：只保留当前 model 有一定概率解决但又非轻松通过的任务，实现自适应难度递增。
+        </div>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--blue)"></div>
+      <div>
+        <div class="insight-title">跨环境迁移 = 跨 scaffold 知识迁移</div>
+        <div class="insight-body">
+          POET 的 cross-transfer 机制启示：在��个 scaffold 配置上训练的 model，应该定期尝试<strong>跨 scaffold 评估和策略迁移</strong>。一个 scaffold 上学到的能力（如某种 tool use pattern）可能成为攻克另一个 scaffold 挑战的关键跳板。这对 multi-scaffold 训练策略的设计有直接指导意义。
+        </div>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--purple)"></div>
+      <div>
+        <div class="insight-title">开放式进化需要多样性维护</div>
+        <div class="insight-body">
+          POET 的一个教训：如果不维护环境种群的多样性，系统会快速收敛到少数类似环境。同理，scaffold co-evolution 需要显式维护 scaffold 多样性（不同 tool 组合、不同 prompt 结构、不同任务类型），避免 model 过拟合到单一 scaffold 模式。
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+
+<script>
+const sections = document.querySelectorAll('section.sec[id], .hero[id]');
+const navItems = document.querySelectorAll('nav .nav-item');
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id;
+      navItems.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + id));
+    }
+  });
+}, { rootMargin: '-20% 0px -65% 0px' });
+sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>

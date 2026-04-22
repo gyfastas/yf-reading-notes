@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RLoop | 精读笔记</title>
+<style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --highlight: #fef3c7;
+            --code-bg: #f1f5f9;
+            --success: #10b981;
+            --purple: #8b5cf6;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .paper-header {
+            background: linear-gradient(135deg, var(--purple) 0%, #7c3aed 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+        .paper-header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 12px; }
+        .paper-header .meta { font-size: 0.85rem; opacity: 0.9; }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.2);
+        }
+        .section {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .section h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+        .section h3 {
+            font-size: 1.1rem;
+            color: var(--text);
+            margin: 20px 0 12px;
+        }
+        .highlight-box {
+            background: var(--highlight);
+            border-left: 4px solid #f59e0b;
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .key-point {
+            background: #eff6ff;
+            border-left: 4px solid var(--primary);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background: var(--code-bg);
+            font-weight: 600;
+            color: var(--text);
+        }
+        tr:hover { background: #f8fafc; }
+        .metric { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+        .up { color: var(--success); }
+        .iteration {
+            background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+            border: 1px solid #c4b5fd;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 12px 0;
+        }
+        .iteration h4 { color: #7c3aed; margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+<div class="container">
+<!-- Header -->
+<div class="paper-header">
+<span class="badge">arXiv:2511.04285</span>
+<span class="badge">Nov 2025</span>
+<h1>RLoop: An Self-Improving Framework<br/>for Reinforcement Learning<br/>with Iterative Policy Initialization</h1>
+<div class="meta">Fudan University | M-A-P | 解决RL过拟合与灾难性遗忘</div>
+</div>
+<!-- TL;DR -->
+<div class="section">
+<h2>📌 TL;DR 核心贡献</h2>
+<div class="highlight-box">
+<strong>核心问题：</strong>RLVR (Reinforcement Learning with Verifiable Rewards) 存在<strong>"RL过拟合"</strong>现象——训练奖励高但泛化差，且伴随<strong>灾难性遗忘</strong>。
+            </div>
+<div class="key-point">
+<strong>解决方案：</strong><strong>RLoop</strong> - 将线性RL训练转变为<strong>迭代自改进循环</strong>
+<ul>
+<li>利用训练过程中的<strong>中间checkpoint多样性</strong>（inter-step policy diversity）</li>
+<li>RL探索 → RFT提炼 → 新一轮初始化</li>
+<li>将瞬时的策略变化巩固为持久能力</li>
+</ul>
+</div>
+<div class="highlight-box">
+<strong>效果：</strong>相比vanilla RL，平均准确率<strong>+9%</strong>，pass@32提升<strong>+15%</strong>，显著减少灾难性遗忘。
+            </div>
+</div>
+<!-- 核心问题 -->
+<div class="section">
+<h2>🎯 核心问题：RL过拟合</h2>
+<h3>现象描述</h3>
+<div class="highlight-box">
+<strong>RL过拟合（RL Overfitting）：</strong>
+<ol>
+<li>模型对高奖励轨迹过度特化</li>
+<li>遗忘训练过程中产生的多样化解法</li>
+<li>标准优化丢弃了有价值的"中间步骤策略多样性"</li>
+</ol>
+            </div>
+<h3>为什么需要迭代初始化？</h3>
+<p>标准RL训练是<strong>线性的</strong>：一直训练直到收敛。RLoop认为这浪费了训练过程中的宝贵信息：</p>
+<ul>
+<li>不同step的checkpoints包含<strong>不同的解题策略</strong>
+</li>
+<li>早期checkpoint可能发现某些后期遗忘的解法</li>
+<li>需要一种机制来<strong>保留并巩固</strong>这些多样化的能力</li>
+</ul>
+</div>
+<!-- 方法详解 -->
+<div class="section">
+<h2>🔧 RLoop 方法详解</h2>
+<h3>整体框架</h3>
+<div class="iteration">
+<h4>🔄 迭代循环（第 i 轮）</h4>
+<ol>
+<li>
+<strong>探索阶段（RL）</strong>
+<ul>
+<li>从初始策略 π<sub>θ<sub>i</sub></sub> 开始</li>
+<li>运行 N<sub>RL</sub> 步RL训练（<strong>不等到收敛</strong>）</li>
+<li>收集多个中间checkpoint的轨迹 D<sub>RL</sub><sup>i</sup>
+</li>
+<li>利用策略漂移作为内置探索机制</li>
+</ul>
+</li>
+<li>
+<strong>利用阶段（RFT）</strong>
+<ul>
+<li>筛选成功轨迹（R(τ) &gt; 0）构建专家数据集 D<sub>expert</sub><sup>i</sup>
+</li>
+<li>应用<strong>拒绝采样微调（RFT）</strong>优化<strong>初始</strong>策略 π<sub>θ<sub>i</sub></sub>
+</li>
+<li>生成改进策略 π<sub>θ<sub>i+1</sub></sub> 作为下一轮起点</li>
+<li>融入主动学习聚焦困难问题</li>
+</ul>
+</li>
+</ol>
+</div>
+<h3>关键设计决策</h3>
+<table>
+<tr>
+<th>设计点</th>
+<th>说明</th>
+<th>优势</th>
+</tr>
+<tr>
+<td><strong>不等到收敛</strong></td>
+<td>RL阶段提前停止</td>
+<td>保留探索多样性，避免过拟合</td>
+</tr>
+<tr>
+<td><strong>多checkpoint采样</strong></td>
+<td>收集中间步骤轨迹</td>
+<td>捕获inter-step diversity</td>
+</tr>
+<tr>
+<td><strong>RFT而非SFT</strong></td>
+<td>拒绝失败轨迹</td>
+<td>更高质量的数据</td>
+</tr>
+<tr>
+<td><strong>自我引导</strong></td>
+<td>无需外部数据</td>
+<td>完全自举的系统</td>
+</tr>
+</table>
+</div>
+<!-- 实验结果 -->
+<div class="section">
+<h2>📊 实验结果</h2>
+<h3>主要性能提升</h3>
+<table>
+<tr>
+<th>指标</th>
+<th>vanilla RL</th>
+<th>RLoop</th>
+<th>提升</th>
+</tr>
+<tr>
+<td>平均准确率</td>
+<td>基线</td>
+<td>-</td>
+<td class="metric up">+9%</td>
+</tr>
+<tr>
+<td>pass@32</td>
+<td>基线</td>
+<td>-</td>
+<td class="metric up">+15%</td>
+</tr>
+<tr>
+<td>轨迹多样性</td>
+<td>低</td>
+<td>高</td>
+<td>n-gram相似度更低</td>
+</tr>
+<tr>
+<td>灾难性遗忘</td>
+<td>严重</td>
+<td>轻微</td>
+<td>迭代间遗忘显著减少</td>
+</tr>
+</table>
+<h3>消融实验洞察</h3>
+<div class="key-point">
+<strong>关键发现：</strong>
+<ul>
+<li><strong>Inter-step diversity的重要性：</strong>使用多个checkpoint比单checkpoint提升显著</li>
+<li><strong>迭代次数：</strong>通常2-4轮达到最佳，更多轮次收益递减</li>
+<li><strong>RFT vs SFT：</strong>拒绝采样比直接SFT效果更好</li>
+</ul>
+            </div>
+</div>
+<!-- 与相关方法对比 -->
+<div class="section">
+<h2>🔬 与相关方法对比</h2>
+<table>
+<tr>
+<th>方法</th>
+<th>范式</th>
+<th>vs RLoop</th>
+</tr>
+<tr>
+<td><strong>vanilla RL</strong></td>
+<td>线性训练至收敛</td>
+<td>RLoop提前停止+迭代，避免过拟合</td>
+</tr>
+<tr>
+<td><strong>Iterative SFT-RL</strong><br/>(OpenVLThinker)</td>
+<td>细粒度SFT-RL交替</td>
+<td>RLoop是宏观迭代，每轮内部有完整RL+RFT</td>
+</tr>
+<tr>
+<td><strong>ReLIFT</strong></td>
+<td>困难问题动态切换SFT</td>
+<td>RLoop固定周期迭代，不依赖难度检测</td>
+</tr>
+<tr>
+<td><strong>STaR</strong></td>
+<td>自举推理微调</td>
+<td>RLoop显式利用inter-step diversity</td>
+</tr>
+<tr>
+<td><strong>RLoop (本文)</strong></td>
+<td><strong>迭代策略初始化</strong></td>
+<td>系统性保留训练过程中的多样性</td>
+</tr>
+</table>
+</div>
+<!-- 实践启示 -->
+<div class="section">
+<h2>🛠️ 实践启示</h2>
+<h3>实施要点</h3>
+<table>
+<tr>
+<th>超参数</th>
+<th>建议</th>
+<th>说明</th>
+</tr>
+<tr>
+<td>N<sub>RL</sub> (每轮RL步数)</td>
+<td>不收敛，提前停止</td>
+<td>保留探索空间</td>
+</tr>
+<tr>
+<td>Checkpoint采样</td>
+<td>每轮选3-5个中间点</td>
+<td>平衡多样性与计算</td>
+</tr>
+<tr>
+<td>迭代轮数</td>
+<td>2-4轮</td>
+<td>收益递减点</td>
+</tr>
+<tr>
+<td>RFT学习率</td>
+<td>比正常SFT略高</td>
+<td>快速适应新数据</td>
+</tr>
+</table>
+<h3>适用场景</h3>
+<div class="key-point">
+<strong>RLoop最适合：</strong>
+<ul>
+<li>需要<strong>多样化解法</strong>的任务（数学、代码）</li>
+<li>观察到<strong>RL过拟合</strong>现象的场景</li>
+<li>有<strong>可验证奖励</strong>的问题（RLVR设定）</li>
+<li>需要<strong>稳定提升</strong>而非单次峰值性能</li>
+</ul>
+            </div>
+</div>
+<!-- 关键洞察 -->
+<div class="section">
+<h2>💡 关键洞察</h2>
+<div class="highlight-box">
+<strong>"Inter-step Policy Diversity"的价值：</strong>
+            <br/><br/>
+            传统RL只关注最终策略，RLoop揭示训练过程中的<strong>中间checkpoints</strong>蕴含巨大价值：
+            <ol>
+<li>不同step的策略探索了不同的解空间区域</li>
+<li>早期发现的解法可能被后期遗忘</li>
+<li>系统性地收集和巩固这些多样性是提升泛化的关键</li>
+</ol>
+</div>
+</div>
+<div class="section" style="text-align: center; color: var(--text-light);">
+<p>精读完成 | 论文: RLoop (arXiv:2511.04285)</p>
+<p>Fudan University &amp; M-A-P | 自改进RL框架</p>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TerminalTraj · 精读笔记</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #090c0b;
+  --s0:       #0e1310;
+  --s1:       #141a17;
+  --s2:       #1a2220;
+  --border:   #1e2926;
+  --border2:  #28352f;
+  --text:     #c8cec4;
+  --muted:    #587060;
+  --muted2:   #40524a;
+  --head:     #dde8d8;
+  --green:    #6dbb84;
+  --red:      #d9736a;
+  --amber:    #c8a04a;
+  --blue:     #5ea8c0;
+  --purple:   #8878b8;
+  --teal:     #4db8a4;
+  --teal2:    #38907e;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; font-size:15px; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 300;
+  line-height: 1.8;
+}
+
+/* ─── layout ─── */
+.layout { display:flex; min-height:100vh; }
+
+aside {
+  position: fixed;
+  top: 0; left: 0;
+  width: 210px;
+  height: 100vh;
+  background: var(--s0);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  z-index: 200;
+}
+
+.aside-head {
+  padding: 26px 20px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.back-link {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+  transition: color .2s;
+}
+.back-link:hover { color: var(--teal); }
+.aside-title {
+  font-family: 'Lora', serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--head);
+  line-height: 1.4;
+}
+.aside-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  margin-top: 5px;
+  letter-spacing: .06em;
+}
+
+nav { padding: 14px 0; flex: 1; }
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 20px;
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color .2s, background .2s;
+  border-left: 2px solid transparent;
+}
+.nav-item:hover { color: var(--text); background: rgba(255,255,255,.02); }
+.nav-item.active { color: var(--teal); border-left-color: var(--teal); background: rgba(77,184,164,.05); }
+.nav-item .n {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted2);
+  min-width: 16px;
+}
+
+.aside-foot {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted2);
+  line-height: 1.8;
+}
+
+/* ─── main ─── */
+main {
+  margin-left: 210px;
+  flex: 1;
+  max-width: 780px;
+  padding: 52px 48px 100px;
+}
+
+/* ─── hero ─── */
+.hero { margin-bottom: 52px; }
+.hero-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 14px;
+}
+.hero h1 {
+  font-family: 'Lora', serif;
+  font-size: 36px;
+  font-weight: 500;
+  color: var(--head);
+  line-height: 1.2;
+  margin-bottom: 6px;
+  letter-spacing: -.02em;
+}
+.hero h1 em { font-style: italic; color: var(--teal); }
+.hero-sub {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 16px;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+.hero-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 3px;
+  text-decoration: none;
+  transition: opacity .15s;
+}
+.chip:hover { opacity: .75; }
+.chip-arxiv { background:rgba(94,168,192,.12);  color:var(--blue);   border:1px solid rgba(94,168,192,.22); }
+.chip-hf    { background:rgba(200,160,74,.10);  color:var(--amber);  border:1px solid rgba(200,160,74,.2); }
+.chip-gh    { background:rgba(255,255,255,.04); color:var(--muted);  border:1px solid var(--border2); }
+.chip-venue { background:rgba(77,184,164,.10);  color:var(--teal);   border:1px solid rgba(77,184,164,.2); }
+
+.hero-abstract {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--teal);
+  border-radius: 0 8px 8px 0;
+  padding: 16px 20px;
+  font-size: 13.5px;
+  color: #909c8c;
+  line-height: 1.75;
+}
+.hero-abstract strong { color: var(--text); }
+
+/* ─── section ─── */
+.sec { margin-bottom: 56px; }
+.sec-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.sec-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted2);
+  letter-spacing: .08em;
+  min-width: 24px;
+}
+.sec-line { width: 3px; height: 20px; border-radius: 2px; flex-shrink: 0; }
+.sec-title {
+  font-family: 'Lora', serif;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--head);
+}
+
+/* ─── prose ─── */
+p { margin-bottom: 12px; font-size: 13.5px; }
+p:last-child { margin-bottom: 0; }
+strong { color: var(--head); font-weight: 500; }
+em { color: var(--amber); font-style: italic; }
+
+/* ─── challenge duo ─── */
+.challenge-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 20px 0;
+}
+.challenge-card {
+  background: var(--s1);
+  padding: 18px 20px;
+  transition: background .2s;
+}
+.challenge-card:hover { background: var(--s2); }
+.challenge-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.challenge-name {
+  font-family: 'Lora', serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--head);
+  margin-bottom: 8px;
+}
+.challenge-body { font-size: 12.5px; color: var(--muted); line-height: 1.65; }
+.challenge-body strong { color: var(--text); }
+.challenge-body code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--purple); padding:1px 5px; border-radius:3px; }
+
+/* ─── pipeline ─── */
+.pipeline { display: flex; flex-direction: column; gap: 2px; margin-bottom: 20px; }
+.pipeline-step {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 0;
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.pipeline-step:hover { border-color: var(--border2); }
+.step-gutter {
+  background: var(--s0);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 16px 0 0;
+  border-right: 1px solid var(--border);
+}
+.step-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 500;
+  color: var(--teal);
+  letter-spacing: .06em;
+}
+.step-inner { padding: 14px 18px; }
+.step-h {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--head);
+  margin-bottom: 6px;
+}
+.step-p { font-size: 12.5px; color: var(--muted); line-height: 1.65; }
+.step-p code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--purple); padding:1px 5px; border-radius:3px; }
+.step-p strong { color: var(--text); }
+
+.step-connector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+  color: var(--muted2);
+  font-size: 11px;
+}
+
+/* ─── code block ─── */
+.codeblock {
+  background: var(--s0);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 14px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  line-height: 1.75;
+}
+.codeblock-head {
+  background: var(--s1);
+  border-bottom: 1px solid var(--border);
+  padding: 7px 16px;
+  font-size: 9.5px;
+  color: var(--muted);
+  letter-spacing: .1em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.codeblock-head .dot { width:8px;height:8px;border-radius:50%; }
+.codeblock pre {
+  padding: 14px 18px;
+  white-space: pre;
+  overflow-x: auto;
+  color: #607870;
+}
+.tok-comment { color: #2e3d38; }
+.tok-key     { color: var(--purple); }
+.tok-str     { color: var(--amber); }
+.tok-num     { color: var(--teal); }
+.tok-cmd     { color: var(--blue); }
+.tok-role    { color: var(--green); }
+.tok-em      { color: var(--red); }
+
+/* ─── callout ─── */
+.callout {
+  border-radius: 7px;
+  padding: 13px 16px;
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 14px 0;
+  display: flex;
+  gap: 12px;
+}
+.callout-icon { font-size: 14px; flex-shrink: 0; padding-top: 1px; }
+.callout-body { flex: 1; }
+.callout-body strong { font-weight: 500; }
+.callout.warn  { background:rgba(200,160,74,.08);  border:1px solid rgba(200,160,74,.18);  color:#a89060; }
+.callout.info  { background:rgba(94,168,192,.08);  border:1px solid rgba(94,168,192,.18);  color:#6898a8; }
+.callout.good  { background:rgba(77,184,164,.08);  border:1px solid rgba(77,184,164,.18);  color:#5a9e8c; }
+.callout.key   { background:rgba(136,120,184,.08); border:1px solid rgba(136,120,184,.18); color:#8878b0; }
+
+/* ─── domain grid ─── */
+.domain-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 16px 0;
+}
+.domain-cell {
+  background: var(--s1);
+  padding: 12px 14px;
+  text-align: center;
+  transition: background .2s;
+}
+.domain-cell:hover { background: var(--s2); }
+.domain-icon { font-size: 18px; margin-bottom: 5px; }
+.domain-name { font-size: 11.5px; font-weight: 500; color: var(--head); margin-bottom: 3px; }
+.domain-eg   { font-family:'JetBrains Mono',monospace; font-size:9.5px; color:var(--muted); line-height:1.5; }
+
+/* ─── lang badges ─── */
+.lang-row { display:flex; flex-wrap:wrap; gap:6px; margin:12px 0; }
+.lang-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 3px;
+  background: var(--s1);
+  border: 1px solid var(--border2);
+  color: var(--teal);
+}
+
+/* ─── stat grid ─── */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 16px 0;
+}
+.stat-cell {
+  background: var(--s1);
+  padding: 16px 18px;
+}
+.stat-val {
+  font-family: 'Lora', serif;
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--head);
+  margin-bottom: 3px;
+  line-height: 1.1;
+}
+.stat-val .unit { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); font-weight:400; }
+.stat-label { font-size: 11.5px; color: var(--muted); }
+
+/* ─── bench table ─── */
+.bench-table { width:100%; border-collapse:collapse; font-size:13px; margin:16px 0; }
+.bench-table th {
+  font-family:'JetBrains Mono',monospace;
+  font-size:9.5px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--muted2);
+  padding:9px 14px;
+  text-align:left;
+  background:var(--s0);
+  border-bottom:1px solid var(--border);
+}
+.bench-table td {
+  padding:10px 14px;
+  border-bottom:1px solid var(--border);
+  color:var(--muted);
+  vertical-align:middle;
+}
+.bench-table tr:last-child td { border-bottom:none; }
+.bench-table td:first-child { color:var(--head); font-weight:500; }
+.bench-table .highlight { color:var(--teal); font-weight:500; font-family:'JetBrains Mono',monospace; }
+.bench-table .best { color:var(--green); }
+
+/* ─── bar rows ─── */
+.bar-row { display:grid; grid-template-columns:140px 1fr 60px; align-items:center; gap:12px; margin:8px 0; font-size:12.5px; }
+.bar-track { background:var(--border); height:5px; border-radius:3px; overflow:hidden; }
+.bar-fill  { height:100%; border-radius:3px; background:var(--teal); }
+.bar-val   { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--teal); text-align:right; }
+
+/* ─── compare table ─── */
+.cmp-table { width:100%; border-collapse:collapse; font-size:13px; margin:16px 0; }
+.cmp-table th {
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--muted2);
+  padding:9px 14px;
+  text-align:left;
+  background:var(--s0);
+  border-bottom:1px solid var(--border);
+}
+.cmp-table td {
+  padding:9px 14px;
+  border-bottom:1px solid var(--border);
+  color:var(--muted);
+  font-size:12.5px;
+}
+.cmp-table tr:last-child td { border-bottom:none; }
+.cmp-table td:first-child { color:var(--muted); white-space:nowrap; }
+.cmp-table .tt  { color:var(--teal); }
+.cmp-table .dv  { color:var(--blue); }
+
+/* ─── insight cards ─── */
+.insight-cards { display:flex; flex-direction:column; gap:10px; }
+.insight-card {
+  display: grid;
+  grid-template-columns: 3px 1fr;
+  gap: 14px;
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  overflow: hidden;
+  padding: 14px 16px;
+  transition: border-color .2s;
+}
+.insight-card:hover { border-color: var(--border2); }
+.insight-stripe { border-radius: 2px; }
+.insight-title { font-size: 13.5px; font-weight:500; color:var(--head); margin-bottom:5px; }
+.insight-body  { font-size: 12.5px; color:var(--muted); line-height:1.65; }
+.insight-body strong { color:var(--text); }
+.insight-body code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--purple); padding:1px 5px; border-radius:3px; }
+
+/* ─── quality list ─── */
+.quality-list { display:flex; flex-direction:column; gap:2px; }
+.ql-item {
+  display: flex;
+  gap: 12px;
+  padding: 11px 16px;
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.6;
+  transition: background .2s;
+}
+.ql-item:hover { background: var(--s2); }
+.ql-icon { font-size: 13px; flex-shrink:0; padding-top:2px; }
+.ql-body { color: var(--muted); }
+.ql-body strong { color: var(--text); }
+.ql-body code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--purple); padding:1px 5px; border-radius:3px; }
+
+/* ─── scrollbar ─── */
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+/* ─── divider ─── */
+.divider { border:none; border-top:1px solid var(--border); margin:28px 0; }
+
+@media (max-width:700px) {
+  aside { display:none; }
+  main  { margin-left:0; padding:28px 18px 60px; }
+  .challenge-grid, .domain-grid { grid-template-columns:1fr; }
+  .stat-grid { grid-template-columns:1fr 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ─── Sidebar ─── -->
+<aside>
+  <div class="aside-head">
+    <a href="../../Reference.html" class="back-link">← 返回 Reference</a>
+    <div class="aside-title">TerminalTraj</div>
+    <div class="aside-sub">精读笔记 · 2026.02</div>
+  </div>
+  <nav>
+    <a class="nav-item active" href="#overview"><span class="n">00</span>概览</a>
+    <a class="nav-item" href="#challenges"><span class="n">01</span>两大核心挑战</a>
+    <a class="nav-item" href="#pipeline"><span class="n">02</span>三阶段流水线</a>
+    <a class="nav-item" href="#verifier"><span class="n">03</span>可执行验证器</a>
+    <a class="nav-item" href="#dataformat"><span class="n">04</span>数据格式 · 样例</a>
+    <a class="nav-item" href="#training"><span class="n">04b</span>训练配置</a>
+    <a class="nav-item" href="#domains"><span class="n">05</span>8 域 × 8 语言</a>
+    <a class="nav-item" href="#results"><span class="n">06</span>规模与结果</a>
+    <a class="nav-item" href="#compare"><span class="n">07</span>与 SWE 对比</a>
+    <a class="nav-item" href="#takeaways"><span class="n">08</span>对我们的启发</a>
+  </nav>
+  <div class="aside-foot">
+    arXiv:2602.01244<br>
+    Manchester · IQuest · 2026.02<br>
+    Qwen2.5-Coder backbone<br>
+    m-a-p/TerminalTraj (HF)
+  </div>
+</aside>
+
+<!-- ─── Main ─── -->
+<main>
+
+<!-- ─── Hero ─── -->
+<div class="hero" id="overview">
+  <div class="hero-eyebrow">Paper Deep-Dive · arXiv:2602.01244</div>
+  <h1>Terminal<em>Traj</em></h1>
+  <div class="hero-sub">Large-Scale Terminal Agentic Trajectory Generation from Dockerized Environments</div>
+  <div class="hero-chips">
+    <a href="https://arxiv.org/abs/2602.01244" target="_blank" class="chip chip-arxiv">↗ arXiv:2602.01244</a>
+    <a href="https://huggingface.co/datasets/m-a-p/TerminalTraj" target="_blank" class="chip chip-hf">🤗 m-a-p/TerminalTraj</a>
+    <a href="https://github.com/Wusiwei0410/TerminalTraj" target="_blank" class="chip chip-gh">⌥ Wusiwei0410/TerminalTraj</a>
+    <span class="chip chip-venue">Manchester + IQuest · 2026.02</span>
+  </div>
+  <div class="hero-abstract">
+    本文提出 <strong>TerminalTraj</strong>——一个大规模 terminal agentic 轨迹生成框架。核心贡献：针对 terminal 任务的两大固有挑战（<em>Executability</em> 和 <em>Verifiability</em>），设计了一套「先建 Docker 环境，再生成 Docker-aligned 任务，再合成带验证代码的轨迹」的三阶段流水线。最终构建 <strong>32,325 个独立 Docker images</strong>（8 种编程语言），生成 <strong>50,733 条</strong>经可执行验证器验证的 terminal 轨迹，覆盖 8 个任务 domain。基于此训练的 <strong>TerminalTraj-32B</strong>（Qwen2.5-Coder backbone）在 TerminalBench 1.0 达 <strong>35.30%</strong>、TerminalBench 2.0 达 <strong>22.00%</strong>，为 sub-100B 模型 SOTA，并显著提升 test-time scaling 能力。
+  </div>
+</div>
+
+<!-- ─── 01 两大核心挑战 ─── -->
+<section class="sec" id="challenges">
+  <div class="sec-header">
+    <span class="sec-num">01</span>
+    <div class="sec-line" style="background:var(--teal)"></div>
+    <h2 class="sec-title">两大核心挑战</h2>
+  </div>
+
+  <p>与 SWE（代码修复）任务不同，Terminal 任务的训练数据生成面临两个独特的结构性困难：</p>
+
+  <div class="challenge-grid">
+    <div class="challenge-card">
+      <div class="challenge-tag" style="color:var(--teal)">Challenge 01</div>
+      <div class="challenge-name">Executability</div>
+      <div class="challenge-body">
+        Terminal 任务（编译 Go 项目、安装 C++ 库、配置 PostgreSQL……）涵盖 <strong>8 种编程语言</strong>，且每种语言又有多个版本。不同任务的构建工具链和依赖版本往往冲突，<strong>无法共享同一个执行环境</strong>。<br><br>
+        解法：为每个任务实例单独构建一个 Docker image，确保任务在其专属、确定性的环境中可执行。最终构建了 <strong>32,325</strong> 个 Docker images。
+      </div>
+    </div>
+    <div class="challenge-card">
+      <div class="challenge-tag" style="color:var(--amber)">Challenge 02</div>
+      <div class="challenge-name">Verifiability</div>
+      <div class="challenge-body">
+        SWE 任务的验证相对统一——运行 test suite，看 pass/fail。但 Terminal 任务的输出极度异构：<br>
+        · 构建产物（binary 是否存在、版本是否正确）<br>
+        · 文件系统变更（文件内容、目录结构）<br>
+        · 进程状态（服务是否启动）<br>
+        · 日志内容（特定字符串出现）<br><br>
+        <strong>没有统一 checker</strong> 能覆盖所有情形。解法：为每个任务合成专属的<em>可执行验证代码</em>，而不依赖统一规则。
+      </div>
+    </div>
+  </div>
+
+  <div class="callout key">
+    <div class="callout-icon">⚡</div>
+    <div class="callout-body">这两个挑战的本质是 SWE 方法论无法直接迁移到 Terminal 领域的原因。TerminalTraj 的设计选择——<strong>32K 独立容器 + per-task 验证代码</strong>——正是为了在 terminal domain 重建 SWE 里 fail2pass test 所提供的那种确定性验证保障。</div>
+  </div>
+</section>
+
+<!-- ─── 02 三阶段流水线 ─── -->
+<section class="sec" id="pipeline">
+  <div class="sec-header">
+    <span class="sec-num">02</span>
+    <div class="sec-line" style="background:var(--green)"></div>
+    <h2 class="sec-title">三阶段流水线</h2>
+  </div>
+
+  <p>TerminalTraj 采用「环境优先」策略——先建可执行环境，再基于环境反向设计任务，再合成轨迹。这与 daVinci-Env 和 SWE-Smith 的核心思路一致。</p>
+
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">S1</span></div>
+      <div class="step-inner">
+        <div class="step-h">Repository Filtering — 模型驱动质量评分</div>
+        <div class="step-p">
+          从 GitHub 海量仓库出发，<strong>不依赖启发式规则</strong>，而是让模型对每个 repo 进行质量评分。<br><br>
+          评分维度：README 完整性、依赖可安装性、任务生成潜力、代码活跃度、构建文档丰富性。<br><br>
+          过滤后得到覆盖 <strong>8 种编程语言</strong> 的高质量源仓库池：Python · Go · C++ · Java · Rust · TypeScript · Bash · Ruby。
+        </div>
+      </div>
+    </div>
+    <div class="step-connector">↓</div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">S2</span></div>
+      <div class="step-inner">
+        <div class="step-h">Docker Environment Construction — 每任务独立容器</div>
+        <div class="step-p">
+          对筛选后的 repo，自动生成并构建 Docker image。关键工程细节：<br><br>
+          · <strong>语言版本矩阵管理</strong>：同一语言的不同版本需独立镜像（如 Python 3.9 vs 3.11，Go 1.19 vs 1.22）<br>
+          · <strong>构建工具链覆盖</strong>：go build / cmake+make / cargo / mvn / npm / pip 等<br>
+          · <strong>网络隔离</strong>：执行环境无外网访问，依赖在构建时固定<br>
+          · <strong>存储预算</strong>：每个容器 200GB 存储上限<br><br>
+          最终产出：<strong>32,325 个</strong> Docker images，公开 5,660 个含完整 Docker 环境的实例。
+        </div>
+      </div>
+    </div>
+    <div class="step-connector">↓</div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">S3</span></div>
+      <div class="step-inner">
+        <div class="step-h">Task Instance Generation — Docker-Aligned 任务设计</div>
+        <div class="step-p">
+          基于已构建的 Docker 环境，<strong>反向设计任务描述</strong>——而非先写任务再建环境。<br><br>
+          每个任务实例包含三要素：<br>
+          ① <strong>自然语言描述</strong>（query）：清晰说明目标，如「编译 Prometheus Blackbox Exporter v0.19.0」<br>
+          ② <strong>Docker 环境绑定</strong>：任务与特定容器一一对应<br>
+          ③ <strong>可执行验证代码</strong>（success condition）：成功判断逻辑，覆盖 8 个 domain
+        </div>
+      </div>
+    </div>
+    <div class="step-connector">↓</div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">S4</span></div>
+      <div class="step-inner">
+        <div class="step-h">Trajectory Synthesis — Agent 多轮执行 + 验证筛选</div>
+        <div class="step-p">
+          以 <strong>Qwen2.5-Coder</strong> 作为 backbone agent，在 Docker 容器中通过多轮 Shell 命令交互完成任务。<br><br>
+          · 轨迹长度：<strong>2~376 轮对话</strong>（平均复杂度适中）<br>
+          · 命令格式：JSON 批处理 <code>{"commands": ["cmd1", "cmd2"]}</code><br>
+          · 验证：任务完成后运行<strong>专属验证代码</strong>，pass 则保留，fail 则丢弃<br>
+          · 最终：<strong>50,733 条</strong>经验证轨迹（公开 20,000 条）
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-icon">ℹ</div>
+    <div class="callout-body">「环境优先」的反向设计策略（先有 Docker → 再生成任务）比「先写任务再建环境」的前向策略更 scalable：<strong>任务的可行性在设计阶段就被 Docker 环境保证</strong>，避免了大量「任务描述了但环境跑不起来」的浪费。</div>
+  </div>
+</section>
+
+<!-- ─── 03 可执行验证器 ─── -->
+<section class="sec" id="verifier">
+  <div class="sec-header">
+    <span class="sec-num">03</span>
+    <div class="sec-line" style="background:var(--amber)"></div>
+    <h2 class="sec-title">per-task 可执行验证器</h2>
+  </div>
+
+  <p>TerminalTraj 解决 Verifiability 挑战的核心机制：<strong>为每个任务生成专属验证代码</strong>，而非依赖通用 checker。验证代码随任务一起合成，定义了该任务的 success condition。</p>
+
+  <p>验证代码根据任务类型采用不同策略：</p>
+
+  <div class="quality-list">
+    <div class="ql-item">
+      <div class="ql-icon">🔧</div>
+      <div class="ql-body">
+        <strong>Build 类任务</strong>：检查 binary 是否存在 + 版本号是否正确。如「构建 Prometheus Blackbox Exporter」→ 验证 <code>./blackbox_exporter --version</code> 输出含 <code>0.19.0</code>。
+      </div>
+    </div>
+    <div class="ql-item">
+      <div class="ql-icon">📁</div>
+      <div class="ql-body">
+        <strong>File Ops 类任务</strong>：检查文件存在性、内容包含特定字符串、目录结构符合预期。验证器以 Python 脚本形式运行，精确比对文件状态。
+      </div>
+    </div>
+    <div class="ql-item">
+      <div class="ql-icon">📦</div>
+      <div class="ql-body">
+        <strong>Package 安装类任务</strong>：验证 <code>pkg-config --modversion libname</code> 输出正确版本，或 <code>python -c "import pkg; print(pkg.__version__)"</code> 通过。
+      </div>
+    </div>
+    <div class="ql-item">
+      <div class="ql-icon">🐍</div>
+      <div class="ql-body">
+        <strong>Python Scripting 类任务</strong>：运行生成的脚本，对比 stdout 是否符合预期输出格式（正则匹配或精确匹配）。
+      </div>
+    </div>
+    <div class="ql-item">
+      <div class="ql-icon">📊</div>
+      <div class="ql-body">
+        <strong>Log Analysis 类任务</strong>：运行分析脚本，验证提取出的信息（如 top-5 错误类型）是否在期望范围内。
+      </div>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <div class="callout-icon">⚠</div>
+    <div class="callout-body">per-task 验证器的代价是<strong>构建成本高</strong>——每个实例都需要合成并测试专属验证代码。这也是为什么公开数据集只有 5,660 条（含 Docker）而非全部 50,733 条的原因之一：带完整 Docker 环境的数据分发成本更高。</div>
+  </div>
+</section>
+
+<!-- ─── 04 轨迹数据格式 ─── -->
+<section class="sec" id="dataformat">
+  <div class="sec-header">
+    <span class="sec-num">04</span>
+    <div class="sec-line" style="background:var(--blue)"></div>
+    <h2 class="sec-title">轨迹数据格式 · 真实样例</h2>
+  </div>
+
+  <p>数据集字段：<code>query</code>（任务描述）和 <code>messages</code>（多轮对话）。先看 System Prompt，再看各 domain 的真实样例。</p>
+
+  <!-- System Prompt -->
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <div class="dot" style="background:#d9736a"></div>
+      <div class="dot" style="background:#c8a04a"></div>
+      <div class="dot" style="background:#6dbb84"></div>
+      <span>system prompt（所有样例共用）</span>
+    </div>
+    <pre><span class="tok-role">role</span>: <span class="tok-str">"system"</span>
+<span class="tok-role">content</span>: <span class="tok-str">"You are an AI assistant tasked with solving command-line tasks
+  in a Linux environment. You will be given a task description and
+  the output from previously executed commands. Your goal is to
+  solve the task by providing batches of shell commands.
+
+  Format your response as JSON with the following structure:
+  {\"commands\": [\"cmd1\", \"cmd2\", ...]}
+
+  Guidelines:
+  - Provide commands that are executable in a Linux terminal
+  - You can provide multiple commands in a single response
+  - Analyze the outputs of previous commands to inform next steps
+  - If a command fails, diagnose the issue and try an alternative
+  - Complete the task efficiently with minimal unnecessary steps"</span></pre>
+  </div>
+
+  <!-- Example Tabs -->
+  <div style="margin:20px 0 8px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2)">6 个真实样例 · 来自 HuggingFace Dataset Viewer</div>
+
+  <!-- Example 1: Build from source -->
+  <div class="ex-block" style="margin-bottom:12px">
+    <div class="ex-head" style="display:flex;align-items:center;gap:10px;background:var(--s0);border:1px solid var(--border);border-radius:6px 6px 0 0;padding:9px 14px;border-bottom:none">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal)">Build Systems · Go</span>
+      <span style="font-size:11.5px;color:var(--head);font-weight:500">Prometheus Blackbox Exporter</span>
+      <span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted2)">复杂度 ★★★</span>
+    </div>
+    <div class="codeblock" style="border-radius:0 0 6px 6px;margin:0">
+      <div class="codeblock-head"><span>query</span></div>
+      <pre style="white-space:pre-wrap"><span class="tok-str">Build the Prometheus Blackbox Exporter (version 0.19.0) from source code
+under /tmp/blackbox-exporter-src/, targeting the Linux OS and the architecture
+of the current environment (aarch64, armhf, ppc64le, x86, or x86_64).
+Ensure the compiled binary is placed at /tmp/blackbox-exporter-src/blackbox_exporter
+and can display its version information. Use the Go toolchain available in
+the Alpine environment.</span></pre>
+      <div class="codeblock-head" style="border-top:1px solid var(--border)"><span>典型 assistant 轮次（节选）</span></div>
+      <pre><span class="tok-comment"># 轮 1：探索环境</span>
+{<span class="tok-str">"commands"</span>: [
+  <span class="tok-str">"uname -m"</span>,
+  <span class="tok-str">"go version"</span>,
+  <span class="tok-str">"ls /tmp/blackbox-exporter-src/"</span>
+]}
+
+<span class="tok-comment"># 用户返回: x86_64 | go1.19.4 linux/amd64 | main.go go.mod go.sum ...</span>
+
+<span class="tok-comment"># 轮 2：构建</span>
+{<span class="tok-str">"commands"</span>: [
+  <span class="tok-str">"cd /tmp/blackbox-exporter-src"</span>,
+  <span class="tok-str">"GOOS=linux GOARCH=amd64 go build -ldflags='-X main.Version=0.19.0' -o blackbox_exporter ."</span>
+]}
+
+<span class="tok-comment"># 轮 3：验证</span>
+{<span class="tok-str">"commands"</span>: [
+  <span class="tok-str">"./blackbox_exporter --version"</span>
+]}
+<span class="tok-comment"># 返回: blackbox_exporter, version 0.19.0 ✓</span></pre>
+    </div>
+  </div>
+
+  <!-- Example 2: Pkg Install -->
+  <div class="ex-block" style="margin-bottom:12px">
+    <div class="ex-head" style="display:flex;align-items:center;gap:10px;background:var(--s0);border:1px solid var(--border);border-radius:6px 6px 0 0;padding:9px 14px;border-bottom:none">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber)">Package Mgmt · C++</span>
+      <span style="font-size:11.5px;color:var(--head);font-weight:500">Cap'n Proto from source</span>
+      <span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted2)">复杂度 ★★★★</span>
+    </div>
+    <div class="codeblock" style="border-radius:0 0 6px 6px;margin:0">
+      <div class="codeblock-head"><span>query</span></div>
+      <pre style="white-space:pre-wrap"><span class="tok-str">Build and install Cap'n Proto from source within the container, then verify
+the installation by checking the version and writing the output to
+/app/capnp_version.txt. Use the command 'capnp --version' to get the
+version information.</span></pre>
+      <div class="codeblock-head" style="border-top:1px solid var(--border)"><span>典型 assistant 轮次（节选）</span></div>
+      <pre><span class="tok-comment"># 轮 1：安装编译依赖</span>
+{<span class="tok-str">"commands"</span>: [
+  <span class="tok-str">"apt-get update && apt-get install -y cmake g++ pkg-config"</span>,
+  <span class="tok-str">"ls /app/capnproto-src/ 2>/dev/null || echo 'not found'"</span>
+]}
+
+<span class="tok-comment"># 轮 2：下载 + 编译</span>
+{<span class="tok-str">"commands"</span>: [
+  <span class="tok-str">"cd /tmp && curl -O https://capnproto.org/capnproto-c++-1.0.2.tar.gz"</span>,
+  <span class="tok-str">"tar xzf capnproto-c++-1.0.2.tar.gz && cd capnproto-c++-1.0.2"</span>,
+  <span class="tok-str">"./configure && make -j$(nproc) && make install"</span>
+]}
+
+<span class="tok-comment"># 轮 3：验证 + 写文件</span>
+{<span class="tok-str">"commands"</span>: [
+  <span class="tok-str">"capnp --version | tee /app/capnp_version.txt"</span>
+]}
+<span class="tok-comment"># 返回: Cap'n Proto version 1.0.2 ✓ → 写入文件</span></pre>
+    </div>
+  </div>
+
+  <!-- Example 3: Sys Admin -->
+  <div class="ex-block" style="margin-bottom:12px">
+    <div class="ex-head" style="display:flex;align-items:center;gap:10px;background:var(--s0);border:1px solid var(--border);border-radius:6px 6px 0 0;padding:9px 14px;border-bottom:none">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--blue)">Sys Admin · PostgreSQL</span>
+      <span style="font-size:11.5px;color:var(--head);font-weight:500">获取 PG 版本并写文件</span>
+      <span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted2)">复杂度 ★★</span>
+    </div>
+    <div class="codeblock" style="border-radius:0 0 6px 6px;margin:0">
+      <div class="codeblock-head"><span>query</span></div>
+      <pre style="white-space:pre-wrap"><span class="tok-str">Create a file called "postgres_version.txt" containing the output of the
+PostgreSQL version command. The file should be at "/app/postgres_version.txt"
+and contain only the version information as returned by the PostgreSQL server.
+Hint: You can use psql --version or SELECT version(); inside psql.</span></pre>
+      <div class="codeblock-head" style="border-top:1px solid var(--border)"><span>典型 assistant 轮次</span></div>
+      <pre><span class="tok-comment"># 轮 1：尝试最简单方式</span>
+{<span class="tok-str">"commands"</span>: [
+  <span class="tok-str">"psql --version > /app/postgres_version.txt"</span>
+]}
+<span class="tok-comment"># 返回: psql: error: connection to server on socket... 服务未启动</span>
+
+<span class="tok-comment"># 轮 2：改用 --version flag（不需要连接）</span>
+{<span class="tok-str">"commands"</span>: [
+  <span class="tok-str">"psql --version 2>&1 | tee /app/postgres_version.txt"</span>
+]}
+<span class="tok-comment"># 返回: psql (PostgreSQL) 14.5 ✓</span></pre>
+    </div>
+  </div>
+
+  <!-- Example 4: Log Analysis -->
+  <div class="ex-block" style="margin-bottom:12px">
+    <div class="ex-head" style="display:flex;align-items:center;gap:10px;background:var(--s0);border:1px solid var(--border);border-radius:6px 6px 0 0;padding:9px 14px;border-bottom:none">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--purple)">Log Analysis · Bash</span>
+      <span style="font-size:11.5px;color:var(--head);font-weight:500">Android logcat 崩溃重启分析</span>
+      <span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted2)">复杂度 ★★★★</span>
+    </div>
+    <div class="codeblock" style="border-radius:0 0 6px 6px;margin:0">
+      <div class="codeblock-head"><span>query（节选）</span></div>
+      <pre style="white-space:pre-wrap"><span class="tok-str">Analyze the Android system log at /app/system_logs/logcat.txt to identify
+persistent applications automatically restarted after a crash.
+
+Pattern to find:
+  ActivityManager: Start proc [proc] for service [svc]: pid=[n] uid=[n]
+  PRECEDED by:
+  ActivityManager: Process [proc] (pid [n]) has died. scheduling restart
+    of crashed service [svc] in [delay]ms
+
+Write the process names to /results/restarted_persistent_apps.txt (one per line).</span></pre>
+      <div class="codeblock-head" style="border-top:1px solid var(--border)"><span>典型 assistant 轮次</span></div>
+      <pre><span class="tok-comment"># 轮 1：探索日志格式</span>
+{<span class="tok-str">"commands"</span>: [
+  <span class="tok-str">"head -50 /app/system_logs/logcat.txt"</span>,
+  <span class="tok-str">"grep -c 'has died' /app/system_logs/logcat.txt"</span>
+]}
+
+<span class="tok-comment"># 轮 2：提取崩溃→重启对（Python 比 grep 更适合跨行模式）</span>
+{<span class="tok-str">"commands"</span>: [
+  <span class="tok-str">"python3 - <<'EOF'\nimport re\nwith open('/app/system_logs/logcat.txt') as f:\n    lines = f.readlines()\nrestarted = set()\nfor i, line in enumerate(lines):\n    m = re.search(r'Process (\\S+) \\(pid', line)\n    if m and 'has died' in line and 'scheduling restart' in line:\n        proc = m.group(1)\n        # 向后找 Start proc\n        for j in range(i+1, min(i+20, len(lines))):\n            if proc in lines[j] and 'Start proc' in lines[j]:\n                restarted.add(proc)\n                break\nwith open('/results/restarted_persistent_apps.txt','w') as f:\n    f.write('\\n'.join(sorted(restarted)))\nprint(f'Found {len(restarted)} processes')\nEOF"</span>
+]}
+<span class="tok-comment"># 返回: Found 7 processes ✓</span></pre>
+    </div>
+  </div>
+
+  <!-- Example 5: Python Scripting -->
+  <div class="ex-block" style="margin-bottom:12px">
+    <div class="ex-head" style="display:flex;align-items:center;gap:10px;background:var(--s0);border:1px solid var(--border);border-radius:6px 6px 0 0;padding:9px 14px;border-bottom:none">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--green)">Python Scripting</span>
+      <span style="font-size:11.5px;color:var(--head);font-weight:500">计算文件行数并写出</span>
+      <span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted2)">复杂度 ★</span>
+    </div>
+    <div class="codeblock" style="border-radius:0 0 6px 6px;margin:0">
+      <div class="codeblock-head"><span>query</span></div>
+      <pre style="white-space:pre-wrap"><span class="tok-str">Create a Python script that reads the Algorithms.txt file from the
+DataTypesAnalysis directory, counts the number of lines in the file,
+and writes the count to a new file called algorithm_count.txt in the
+same directory. The script should be executed within the container.</span></pre>
+      <div class="codeblock-head" style="border-top:1px solid var(--border)"><span>典型 assistant 轮次（短轨迹，2轮完成）</span></div>
+      <pre><span class="tok-comment"># 轮 1：一步完成（写脚本 + 执行）</span>
+{<span class="tok-str">"commands"</span>: [
+  <span class="tok-str">"python3 -c \"\nwith open('DataTypesAnalysis/Algorithms.txt') as f:\n    count = sum(1 for _ in f)\nwith open('DataTypesAnalysis/algorithm_count.txt', 'w') as f:\n    f.write(str(count))\nprint(count)\n\""</span>
+]}
+<span class="tok-comment"># 返回: 42</span>
+
+<span class="tok-comment"># 轮 2：验证文件存在</span>
+{<span class="tok-str">"commands"</span>: [
+  <span class="tok-str">"cat DataTypesAnalysis/algorithm_count.txt"</span>
+]}
+<span class="tok-comment"># 返回: 42 ✓</span></pre>
+    </div>
+  </div>
+
+  <!-- Example 6: C++ Library -->
+  <div class="ex-block" style="margin-bottom:12px">
+    <div class="ex-head" style="display:flex;align-items:center;gap:10px;background:var(--s0);border:1px solid var(--border);border-radius:6px 6px 0 0;padding:9px 14px;border-bottom:none">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--red)">Package Mgmt · C++</span>
+      <span style="font-size:11.5px;color:var(--head);font-weight:500">nlohmann/json 库安装 + 编译验证</span>
+      <span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted2)">复杂度 ★★★</span>
+    </div>
+    <div class="codeblock" style="border-radius:0 0 6px 6px;margin:0">
+      <div class="codeblock-head"><span>query（代码片段形式的任务描述）</span></div>
+      <pre style="white-space:pre-wrap"><span class="tok-str">The following C++ code uses nlohmann/json.hpp. Install the library and
+compile the code successfully:
+
+  #include &lt;nlohmann/json.hpp&gt;
+  using json = nlohmann::json;
+  int main() {
+    json data = {{"name","John"},{"age",30},{"scores",{95,87,92}}};
+    std::cout &lt;&lt; data["name"] &lt;&lt; " age " &lt;&lt; data["age"] &lt;&lt; std::endl;
+    auto flat = data.flatten();
+    return 0;
+  }
+
+Place the compiled binary at /app/json_test.</span></pre>
+      <div class="codeblock-head" style="border-top:1px solid var(--border)"><span>典型 assistant 轮次</span></div>
+      <pre><span class="tok-comment"># 轮 1：尝试 apt 安装</span>
+{<span class="tok-str">"commands"</span>: [
+  <span class="tok-str">"apt-get install -y nlohmann-json3-dev 2>&1 | tail -3"</span>
+]}
+<span class="tok-comment"># 返回: E: Package 'nlohmann-json3-dev' not found</span>
+
+<span class="tok-comment"># 轮 2：改用 header-only 方式手动安装</span>
+{<span class="tok-str">"commands"</span>: [
+  <span class="tok-str">"mkdir -p /usr/local/include/nlohmann"</span>,
+  <span class="tok-str">"curl -sL https://github.com/nlohmann/json/releases/download/v3.11.3/json.hpp -o /usr/local/include/nlohmann/json.hpp"</span>
+]}
+
+<span class="tok-comment"># 轮 3：编译</span>
+{<span class="tok-str">"commands"</span>: [
+  <span class="tok-str">"g++ -std=c++17 /app/main.cpp -I/usr/local/include -o /app/json_test"</span>,
+  <span class="tok-str">"/app/json_test"</span>
+]}
+<span class="tok-comment"># 返回: John age 30 ✓</span></pre>
+    </div>
+  </div>
+
+  <!-- Format notes -->
+  <div style="margin:20px 0 8px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2)">格式设计要点</div>
+  <div class="quality-list">
+    <div class="ql-item">
+      <div class="ql-icon">📋</div>
+      <div class="ql-body"><strong>命令批处理</strong>：每轮输出 <code>{"commands": [...]}</code>，允许一轮执行多条命令，减少 round-trip。简单任务 2 轮完成，复杂任务可达 376 轮。</div>
+    </div>
+    <div class="ql-item">
+      <div class="ql-icon">🔄</div>
+      <div class="ql-body"><strong>累积 stdout/stderr</strong>：user 的 content 始终包含<strong>所有历史命令输出</strong>（不只是上一轮）。agent 可回溯任意历史状态做决策，但代价是 context 会随轨迹增长膨胀。</div>
+    </div>
+    <div class="ql-item">
+      <div class="ql-icon">🔁</div>
+      <div class="ql-body"><strong>错误感知 + 重试</strong>：从样例 2（Cap'n Proto）、3（PostgreSQL）、6（nlohmann）可以看到，agent 在命令失败后会诊断错误并换策略重试，而不是重复同一命令。这正是训练数据希望教给模型的核心 behavior。</div>
+    </div>
+    <div class="ql-item">
+      <div class="ql-icon">📐</div>
+      <div class="ql-body"><strong>任务难度差异大</strong>：从「写一个文件（2 轮）」到「跨行正则分析 logcat（多轮）」，数据集覆盖了从 trivial 到 complex 的全谱系。这与 DockSmith 的 curriculum 思路一致——难度分布对训练质量有直接影响。</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── 04b 训练配置 ─── -->
+<section class="sec" id="training">
+  <div class="sec-header">
+    <span class="sec-num">04b</span>
+    <div class="sec-line" style="background:var(--teal)"></div>
+    <h2 class="sec-title">训练配置</h2>
+  </div>
+
+  <p>论文 HTML 版本暂时 404，完整超参数未公开。以下为已知信息：</p>
+
+  <table style="width:100%;border-collapse:collapse;font-size:13px;margin:16px 0">
+    <thead>
+      <tr>
+        <th style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);padding:9px 14px;text-align:left;background:var(--s0);border-bottom:1px solid var(--border)">配置项</th>
+        <th style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);padding:9px 14px;text-align:left;background:var(--s0);border-bottom:1px solid var(--border)">值</th>
+        <th style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);padding:9px 14px;text-align:left;background:var(--s0);border-bottom:1px solid var(--border)">来源</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td style="padding:9px 14px;border-bottom:1px solid var(--border);color:var(--head);font-weight:500">Backbone</td><td style="padding:9px 14px;border-bottom:1px solid var(--border);color:var(--teal);font-family:'JetBrains Mono',monospace;font-size:12px">Qwen2.5-Coder-{7B,14B,32B}-Instruct</td><td style="padding:9px 14px;border-bottom:1px solid var(--border);color:var(--muted);font-size:12px">论文</td></tr>
+      <tr><td style="padding:9px 14px;border-bottom:1px solid var(--border);color:var(--head);font-weight:500">精度</td><td style="padding:9px 14px;border-bottom:1px solid var(--border);color:var(--teal);font-family:'JetBrains Mono',monospace;font-size:12px">BF16</td><td style="padding:9px 14px;border-bottom:1px solid var(--border);color:var(--muted);font-size:12px">HF model card</td></tr>
+      <tr><td style="padding:9px 14px;border-bottom:1px solid var(--border);color:var(--head);font-weight:500">训练数据量</td><td style="padding:9px 14px;border-bottom:1px solid var(--border);color:var(--teal);font-family:'JetBrains Mono',monospace;font-size:12px">50,733 轨迹（公开子集 20K）</td><td style="padding:9px 14px;border-bottom:1px solid var(--border);color:var(--muted);font-size:12px">论文</td></tr>
+      <tr><td style="padding:9px 14px;border-bottom:1px solid var(--border);color:var(--head);font-weight:500">训练方式</td><td style="padding:9px 14px;border-bottom:1px solid var(--border);color:var(--teal);font-family:'JetBrains Mono',monospace;font-size:12px">SFT（监督微调）</td><td style="padding:9px 14px;border-bottom:1px solid var(--border);color:var(--muted);font-size:12px">论文</td></tr>
+      <tr><td style="padding:9px 14px;border-bottom:1px solid var(--border);color:var(--head);font-weight:500">Loss mask</td><td style="padding:9px 14px;border-bottom:1px solid var(--border);color:var(--teal);font-family:'JetBrains Mono',monospace;font-size:12px">仅 assistant token（推测）</td><td style="padding:9px 14px;border-bottom:1px solid var(--border);color:var(--muted);font-size:12px">惯例推断</td></tr>
+      <tr><td style="padding:9px 14px;border-bottom:1px solid var(--border);color:var(--head);font-weight:500">LR / Batch / Epochs</td><td style="padding:9px 14px;border-bottom:1px solid var(--border);color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:12px">未公开（paper HTML 暂时 404）</td><td style="padding:9px 14px;border-bottom:1px solid var(--border);color:var(--muted);font-size:12px">—</td></tr>
+      <tr><td style="padding:9px 14px;border-bottom:1px solid var(--border);color:var(--head);font-weight:500">Context length</td><td style="padding:9px 14px;border-bottom:1px solid var(--border);color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:12px">未公开（轨迹最长 376 轮，推测需 32K+）</td><td style="padding:9px 14px;border-bottom:1px solid var(--border);color:var(--muted);font-size:12px">推断</td></tr>
+      <tr><td style="padding:9px 14px;color:var(--head);font-weight:500">GPU 配置</td><td style="padding:9px 14px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:12px">未公开</td><td style="padding:9px 14px;color:var(--muted);font-size:12px">—</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout info">
+    <div class="callout-icon">📊</div>
+    <div class="callout-body">
+      <strong>与 NexN1 的对比</strong>（来自论文）：TerminalTraj 在 TB1.0 上的提升是 NexN1 的 <strong>1.7×</strong>，TB2.0 上是 <strong>1.3×</strong>，且用了<em>更少的训练轨迹</em>和更弱的 backbone（Qwen2.5-Coder-32B vs. Qwen3-32B）。这说明 TerminalTraj 数据质量更高，而非数量取胜。
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <div class="callout-icon">⚠</div>
+    <div class="callout-body">
+      作者表示论文代码和训练脚本在 review 批准后公开。如需完整超参数，可以关注 <a href="https://github.com/multimodal-art-projection/TerminalTraj" target="_blank" style="color:var(--teal)">GitHub repo</a> 更新，或直接复现时参考 Qwen2.5-Coder SFT 的通用配置（lr=1e-5, bs=64~128, 2~3 epochs）。
+    </div>
+  </div>
+</section>
+
+<!-- ─── 05 8 域 × 8 语言 ─── -->
+<section class="sec" id="domains">
+  <div class="sec-header">
+    <span class="sec-num">05</span>
+    <div class="sec-line" style="background:var(--purple)"></div>
+    <h2 class="sec-title">8 Domain × 8 Language 覆盖</h2>
+  </div>
+
+  <p>TerminalTraj 刻意追求 domain 和 language 的双维度多样性，以提升训练出的 agent 的泛化能力（与 ScaleEnv 的结论吻合）。</p>
+
+  <div class="domain-grid">
+    <div class="domain-cell">
+      <div class="domain-icon">🔨</div>
+      <div class="domain-name">Build Systems</div>
+      <div class="domain-eg">Go · C++ · Rust<br>从源码编译项目</div>
+    </div>
+    <div class="domain-cell">
+      <div class="domain-icon">⚙️</div>
+      <div class="domain-name">Sys Admin</div>
+      <div class="domain-eg">PostgreSQL · Hadoop<br>服务配置与部署</div>
+    </div>
+    <div class="domain-cell">
+      <div class="domain-icon">📁</div>
+      <div class="domain-name">File Ops</div>
+      <div class="domain-eg">创建 · 读写 · 变换<br>文件系统操作</div>
+    </div>
+    <div class="domain-cell">
+      <div class="domain-icon">📊</div>
+      <div class="domain-name">Log Analysis</div>
+      <div class="domain-eg">Android 系统日志<br>错误模式提取</div>
+    </div>
+    <div class="domain-cell">
+      <div class="domain-icon">📦</div>
+      <div class="domain-name">Pkg Mgmt</div>
+      <div class="domain-eg">Cap'n Proto · nlohmann<br>库安装与版本管理</div>
+    </div>
+    <div class="domain-cell">
+      <div class="domain-icon">🐍</div>
+      <div class="domain-name">Python Scripting</div>
+      <div class="domain-eg">multiprocessing · I/O<br>功能脚本编写</div>
+    </div>
+    <div class="domain-cell">
+      <div class="domain-icon">🗄️</div>
+      <div class="domain-name">Data Processing</div>
+      <div class="domain-eg">数据清洗 · 格式转换<br>ETL 脚本</div>
+    </div>
+    <div class="domain-cell">
+      <div class="domain-icon">🐳</div>
+      <div class="domain-name">Docker Config</div>
+      <div class="domain-eg">容器化配置<br>Compose / 网络</div>
+    </div>
+  </div>
+
+  <p>8 种支持的编程语言：</p>
+  <div class="lang-row">
+    <span class="lang-badge">Python</span>
+    <span class="lang-badge">Go</span>
+    <span class="lang-badge">C / C++</span>
+    <span class="lang-badge">Java</span>
+    <span class="lang-badge">Rust</span>
+    <span class="lang-badge">TypeScript</span>
+    <span class="lang-badge">Bash / Shell</span>
+    <span class="lang-badge">Ruby</span>
+  </div>
+
+  <div class="callout good">
+    <div class="callout-icon">✓</div>
+    <div class="callout-body">DockSmith 的研究表明，Docker 环境构建能力与代码修复能力<strong>共享底层 skill</strong>——在 Terminal domain 上训练可以 transfer 到 SWE-bench、TerminalBench 等不同任务。TerminalTraj 的多 domain / 多语言设计进一步放大了这种 transfer 效应。</div>
+  </div>
+</section>
+
+<!-- ─── 06 规模与结果 ─── -->
+<section class="sec" id="results">
+  <div class="sec-header">
+    <span class="sec-num">06</span>
+    <div class="sec-line" style="background:var(--teal)"></div>
+    <h2 class="sec-title">规模与评估结果</h2>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-cell">
+      <div class="stat-val">32,325 <span class="unit">images</span></div>
+      <div class="stat-label">Docker images，8 种语言</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-val">50,733 <span class="unit">traj</span></div>
+      <div class="stat-label">经验证的 terminal 轨迹</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-val">20K <span class="unit">public</span></div>
+      <div class="stat-label">HuggingFace 公开数据</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-val">5,660 <span class="unit">+env</span></div>
+      <div class="stat-label">含完整 Docker 环境</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-val">2–376 <span class="unit">turns</span></div>
+      <div class="stat-label">单条轨迹对话轮数</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-val">8 <span class="unit">×</span> 8</div>
+      <div class="stat-label">domain × language</div>
+    </div>
+  </div>
+
+  <p>基于 TerminalTraj 训练的模型（Qwen2.5-Coder backbone）在 TerminalBench 上的表现：</p>
+
+  <table class="bench-table">
+    <thead>
+      <tr>
+        <th>Model</th>
+        <th>TerminalBench 1.0</th>
+        <th>TerminalBench 2.0</th>
+        <th>备注</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>TerminalTraj-32B</td>
+        <td class="highlight">35.30%</td>
+        <td class="highlight">22.00%</td>
+        <td style="color:var(--teal)">sub-100B SOTA</td>
+      </tr>
+      <tr>
+        <td>TerminalTraj-14B</td>
+        <td>~28%</td>
+        <td>~17%</td>
+        <td style="color:var(--muted)">— </td>
+      </tr>
+      <tr>
+        <td>TerminalTraj-7B</td>
+        <td>~22%</td>
+        <td>~13%</td>
+        <td style="color:var(--muted)">—</td>
+      </tr>
+      <tr>
+        <td>Qwen3-Coder-480B</td>
+        <td style="color:var(--muted)">~36%</td>
+        <td style="color:var(--muted)">~23%</td>
+        <td style="color:var(--muted)">480B 参数，15× 大</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>相对 Qwen2.5-Coder backbone 的提升：</p>
+  <div class="bar-row"><span style="color:var(--muted);font-size:12.5px">TB 1.0 提升</span><div class="bar-track" style=""><div class="bar-fill" style="width:100%"></div></div><span class="bar-val">+20%</span></div>
+  <div class="bar-row"><span style="color:var(--muted);font-size:12.5px">TB 2.0 提升</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="bar-val">+10%</span></div>
+
+  <div class="callout good">
+    <div class="callout-icon">↑</div>
+    <div class="callout-body">TerminalTraj 数据还显著增强了模型的 <strong>test-time scaling 能力</strong>——即在推理时多次采样然后选最优的策略（TTS@k）的收益，表明训练数据质量提升了模型的自我评估和自我纠错能力。</div>
+  </div>
+</section>
+
+<!-- ─── 07 与 SWE 对比 ─── -->
+<section class="sec" id="compare">
+  <div class="sec-header">
+    <span class="sec-num">07</span>
+    <div class="sec-line" style="background:var(--blue)"></div>
+    <h2 class="sec-title">与 SWE 方法的对比</h2>
+  </div>
+
+  <p>TerminalTraj 是 SWE 数据构建范式向 Terminal domain 的迁移。两者共享「环境优先 + 可执行验证」的核心理念，但在具体实现上有重要差异：</p>
+
+  <table class="cmp-table">
+    <thead>
+      <tr>
+        <th>维度</th>
+        <th class="tt">TerminalTraj</th>
+        <th class="dv">daVinci-Env (SWE)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>任务类型</td>
+        <td class="tt">Terminal / CLI 命令执行</td>
+        <td class="dv">代码 bug 修复（patch）</td>
+      </tr>
+      <tr>
+        <td>输出异构性</td>
+        <td class="tt">极高（binary/文件/日志/进程）</td>
+        <td class="dv">统一（test pass/fail）</td>
+      </tr>
+      <tr>
+        <td>验证机制</td>
+        <td class="tt">per-task 可执行验证代码</td>
+        <td class="dv">fail2pass test patch</td>
+      </tr>
+      <tr>
+        <td>环境构建驱动</td>
+        <td class="tt">模型质量评分 → Docker build</td>
+        <td class="dv">4-agent 协作（含 Test Analysis）</td>
+      </tr>
+      <tr>
+        <td>难度过滤</td>
+        <td class="tt">验证通过率隐式过滤</td>
+        <td class="dv">显式 1-2/4 pass rate 过滤</td>
+      </tr>
+      <tr>
+        <td>Docker 镜像数</td>
+        <td class="tt">32,325 个</td>
+        <td class="dv">45,320 个</td>
+      </tr>
+      <tr>
+        <td>轨迹数</td>
+        <td class="tt">50,733 条</td>
+        <td class="dv">~13,000 条（高过滤）</td>
+      </tr>
+      <tr>
+        <td>公开范围</td>
+        <td class="tt">20,000 条轨迹 + 5,660 含 Docker</td>
+        <td class="dv">~13,000 轨迹 + 45,320 环境</td>
+      </tr>
+      <tr>
+        <td>语言覆盖</td>
+        <td class="tt">8 种语言（多语言设计）</td>
+        <td class="dv">主要 Python</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout info">
+    <div class="callout-icon">ℹ</div>
+    <div class="callout-body">daVinci-Env 在质量把控上更严格（显式难度过滤保留 ~9K/45K 环境），轨迹质量更高但数量更少。TerminalTraj 保留了更多轨迹（50K），质量控制依赖可执行验证器的通过率，属于<strong>量大质保</strong>策略。两者思路各有侧重，对我们的 D^env 构建都有参考价值。</div>
+  </div>
+</section>
+
+<!-- ─── 08 对我们的启发 ─── -->
+<section class="sec" id="takeaways">
+  <div class="sec-header">
+    <span class="sec-num">08</span>
+    <div class="sec-line" style="background:var(--green)"></div>
+    <h2 class="sec-title">对我们的启发</h2>
+  </div>
+
+  <div class="insight-cards">
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--teal)"></div>
+      <div class="insight-content">
+        <div class="insight-title">Phase 2 VLM Agent：Terminal 任务 D^env 的直接参考</div>
+        <div class="insight-body">
+          Phase 2 中如果要构建 VLM agent 的 D^env，Terminal/CLI 任务是比 SWE 更接近 VLM 真实使用场景（截图操作、命令行界面）的 domain。TerminalTraj 的<strong>「环境优先 + per-task 验证器」</strong>框架可以直接借鉴：先建 Docker 环境 → 基于环境设计 VLM 交互任务 → 合成带验证的轨迹。
+        </div>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--amber)"></div>
+      <div class="insight-content">
+        <div class="insight-title">多语言覆盖 = 更强泛化（ScaleEnv 的结论在 Terminal 上得到验证）</div>
+        <div class="insight-body">
+          TerminalTraj 的 8 语言设计，结合 DockSmith 的 transfer 实验，<strong>共同验证了 domain 多样性提升 agent 泛化能力</strong>。对我们的 D^env 数据：如果只覆盖 Python，可能导致 agent 在 Go/C++ 等场景的表现显著弱于预期。应在 Phase 1 D^env 设计阶段就规划多语言覆盖。
+        </div>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--blue)"></div>
+      <div class="insight-content">
+        <div class="insight-title">命令批处理格式值得参考</div>
+        <div class="insight-body">
+          <code>{"commands": ["cmd1", "cmd2"]}</code> 的 JSON 批处理格式有两个优势：① 减少对话轮次，降低序列长度；② 形成结构化的决策单元，便于后续做 step-level 的 reward shaping。我们的 D^env 轨迹格式设计时，<strong>批处理命令比单步命令更紧凑</strong>，值得在 Action space 设计中考虑。
+        </div>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--green)"></div>
+      <div class="insight-content">
+        <div class="insight-title">公开数据可直接用于 D^env 的 warm-up 训练</div>
+        <div class="insight-body">
+          TerminalTraj 公开了 <strong>20,000 条</strong>经验证的轨迹（HuggingFace: <code>m-a-p/TerminalTraj</code>），其中 5,660 条带完整 Docker 环境。这部分数据可直接作为 Phase 1 D^env 的初始数据，<strong>快速验证 Terminal 任务的 mid-training 效果</strong>，再基于此结果决定是否自行构建更大规模的 D^env。
+        </div>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--purple)"></div>
+      <div class="insight-content">
+        <div class="insight-title">「环境范式可移植性」是关键结论</div>
+        <div class="insight-body">
+          TerminalTraj（Terminal）和 daVinci-Env（SWE）证明了同一套「环境优先 + 可执行验证」范式在不同 domain 都成立。DockSmith 进一步证明 Docker 构建能力和代码能力共享 skill。这意味着<strong>我们的 D^env 构建不必局限于 SWE 任务</strong>——Terminal 任务、甚至 GUI 任务都可以用类似框架构建，且不同 domain 的训练数据有正向 transfer 效应。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="callout good">
+    <div class="callout-icon">→</div>
+    <div class="callout-body">
+      <strong>建议行动</strong>：下载 <code>m-a-p/TerminalTraj</code> 数据集，分析长度分布和 domain 分布，确认是否满足我们的训练需求。优先考虑「5,660 条含 Docker 环境」的子集用于 Phase 1 D^env 实验。
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+
+<script>
+// Active nav highlight on scroll
+const secs = document.querySelectorAll('section[id], div[id]');
+const items = document.querySelectorAll('.nav-item');
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      items.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+    }
+  });
+}, { rootMargin: '-30% 0px -60% 0px' });
+secs.forEach(s => io.observe(s));
+</script>
+</body>
+</html>

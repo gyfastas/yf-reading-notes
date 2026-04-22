@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pre-training Token Scaling 调研 | 文献综述</title>
+<style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --highlight: #fef3c7;
+            --code-bg: #f1f5f9;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --purple: #8b5cf6;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .paper-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+        .paper-header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 12px; }
+        .paper-header .meta { font-size: 0.85rem; opacity: 0.9; }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.2);
+        }
+        .section {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .section h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+        .section h3 {
+            font-size: 1.1rem;
+            color: var(--text);
+            margin: 20px 0 12px;
+        }
+        .highlight-box {
+            background: var(--highlight);
+            border-left: 4px solid var(--warning);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .key-point {
+            background: #eff6ff;
+            border-left: 4px solid var(--primary);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .success-box {
+            background: #f0fdf4;
+            border-left: 4px solid var(--success);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .danger-box {
+            background: #fef2f2;
+            border-left: 4px solid var(--danger);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background: var(--code-bg);
+            font-weight: 600;
+            color: var(--text);
+        }
+        tr:hover { background: #f8fafc; }
+        .metric { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+        .up { color: var(--success); }
+        .paper-card {
+            background: var(--code-bg);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 12px 0;
+            border-left: 4px solid var(--purple);
+        }
+        .paper-card h4 {
+            color: var(--primary);
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+        .paper-card .meta {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 8px;
+        }
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 6px;
+            background: #e0e7ff;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+<!-- Header -->
+<div class="paper-header">
+<span class="badge">文献综述</span>
+<span class="badge">Scaling Laws</span>
+<h1>Pre-training Token Scaling 调研</h1>
+<div class="meta">Pre-training阶段Token数最优配置：从Chinchilla到Inference-Aware Scaling</div>
+</div>
+<!-- TL;DR -->
+<div class="section">
+<h2>📌 核心结论速览</h2>
+<div class="highlight-box">
+<strong>Scaling Laws演进：</strong>从Kaplan的"大力出奇迹"到Chinchilla的"数据-模型平衡"，再到Inference-Aware的"全生命周期优化"。
+            </div>
+<div class="success-box">
+<strong>2025年实践建议：</strong>
+<ul>
+<li><strong>研究/实验场景：</strong>~20 tokens/param (Chinchilla最优)</li>
+<li><strong>生产部署场景：</strong>50-100+ tokens/param (Inference-Aware)</li>
+<li><strong>高推理服务：</strong>1000+ tokens/param (如Llama 3的1875:1)</li>
+</ul>
+            </div>
+</div>
+<!-- 核心论文列表 -->
+<div class="section">
+<h2>📚 核心论文列表</h2>
+<div class="paper-card">
+<h4>1. Training Compute-Optimal Large Language Models (Chinchilla)</h4>
+<div class="meta">
+<span class="tag">必读</span>
+                    Hoffmann et al., DeepMind, 2022 | arXiv:2203.15556
+                </div>
+<p><strong>核心发现：</strong>~20 tokens per parameter是计算最优比例。模型大小和数据量应该同等缩放。70B模型应训练1.4T tokens。</p>
+<p><strong>影响：</strong>揭示了GPT-3等模型被严重"欠训练"（仅用了应有数据量的1/10）。</p>
+</div>
+<div class="paper-card">
+<h4>2. Scaling Laws for Neural Language Models (Kaplan)</h4>
+<div class="meta">
+<span class="tag">历史基准</span>
+                    Kaplan et al., OpenAI, 2020 | arXiv:2001.08361
+                </div>
+<p><strong>核心发现：</strong>优先扩大模型大小而非数据量。比例仅~1.7 tokens/param。</p>
+<p><strong>局限：</strong>导致早期大模型（GPT-3）严重欠训练，性能未达最优。</p>
+</div>
+<div class="paper-card">
+<h4>3. Reconciling Kaplan and Chinchilla Scaling Laws</h4>
+<div class="meta">
+<span class="tag">理论统一</span>
+                    2024 | arXiv:2406.12907
+                </div>
+<p><strong>核心贡献：</strong>统一Kaplan和Chinchilla的理论框架，解释数据质量和任务类型如何影响最优比例。</p>
+</div>
+<div class="paper-card">
+<h4>4. Beyond Chinchilla-Optimal: Accounting for Inference</h4>
+<div class="meta">
+<span class="tag">必读</span>
+                    Sardana et al., 2024 | arXiv:2401.00448
+                </div>
+<p><strong>核心发现：</strong>考虑推理成本时，应训练更小模型+更多数据。高推理需求场景下比例可达1000+:1。</p>
+<p><strong>案例：</strong>30B质量需求+10^13推理量，用13.6B模型训练2.84×数据，总FLOPs降低28%。</p>
+</div>
+<div class="paper-card">
+<h4>5. Language models scale reliably with over-training</h4>
+<div class="meta">
+<span class="tag">过训练</span>
+                    Gadre et al., 2024 | arXiv:2403.08540
+                </div>
+<p><strong>核心发现：</strong>超过Chinchilla最优点的"过训练"仍能可靠提升下游任务性能。</p>
+<p><strong>意义：</strong>为"小模型+大数据"策略提供理论支撑。</p>
+</div>
+<div class="paper-card">
+<h4>6. Scaling Inference-Efficient Language Models</h4>
+<div class="meta">
+<span class="tag">2025最新</span>
+                    arXiv:2501.18107v2
+                </div>
+<p><strong>核心贡献：</strong>系统研究推理效率与scaling laws的关系，验证over-training的可靠性。</p>
+</div>
+<div class="paper-card">
+<h4>7. The Llama 3 Herd of Models</h4>
+<div class="meta">
+<span class="tag">工业实践</span>
+                    Meta, 2024
+                </div>
+<p><strong>实践配置：</strong>8B模型训练15T tokens（1875:1比例），大幅超越Chinchilla。</p>
+<p><strong>洞察：</strong>生产级模型需要考虑推理成本，不能仅优化训练计算。</p>
+</div>
+<div class="paper-card">
+<h4>8. DeepSeek-V3 Technical Report</h4>
+<div class="meta">
+<span class="tag">高效训练</span>
+                    DeepSeek, 2024 | arXiv:2412.19437
+                </div>
+<p><strong>配置：</strong>671B MoE模型，14.8T tokens，FP8训练。</p>
+<p><strong>效率：</strong>仅用2.664M H800小时（$5.58M），比Llama 3高效10倍。</p>
+</div>
+</div>
+<!-- Scaling Laws对比 -->
+<div class="section">
+<h2>🔬 Scaling Laws 演进对比</h2>
+<table>
+<tr>
+<th>维度</th>
+<th>Kaplan (2020)</th>
+<th>Chinchilla (2022)</th>
+<th>Inference-Aware (2024+)</th>
+</tr>
+<tr>
+<td><strong>优化目标</strong></td>
+<td>训练loss最小</td>
+<td>训练loss最小</td>
+<td>训练+推理总成本</td>
+</tr>
+<tr>
+<td><strong>Token:Param</strong></td>
+<td>~1.7:1</td>
+<td>~20:1</td>
+<td>20-1000+:1</td>
+</tr>
+<tr>
+<td><strong>核心策略</strong></td>
+<td>大力出奇迹</td>
+<td>数据-模型平衡</td>
+<td>小模型+大数据</td>
+</tr>
+<tr>
+<td><strong>代表模型</strong></td>
+<td>GPT-3 (175B)</td>
+<td>Chinchilla (70B)</td>
+<td>Llama 3 (8B/70B)</td>
+</tr>
+<tr>
+<td><strong>适用场景</strong></td>
+<td>研究/实验</td>
+<td>研究/实验</td>
+<td>生产部署</td>
+</tr>
+</table>
+</div>
+<!-- 实践配置表 -->
+<div class="section">
+<h2>🛠️ 实践配置参考</h2>
+<h3>按场景推荐</h3>
+<table>
+<tr>
+<th>场景</th>
+<th>Token:Param比例</th>
+<th>示例</th>
+<th>说明</th>
+</tr>
+<tr>
+<td><strong>纯研究/实验</strong></td>
+<td>~20:1</td>
+<td>1B模型→20B tokens</td>
+<td>Chinchilla计算最优</td>
+</tr>
+<tr>
+<td><strong>平衡型部署</strong></td>
+<td>50-100:1</td>
+<td>7B模型→350-700B tokens</td>
+<td>考虑中等推理量</td>
+</tr>
+<tr>
+<td><strong>高推理服务</strong></td>
+<td>1000+:1</td>
+<td>8B模型→15T tokens</td>
+<td>如Llama 3配置</td>
+</tr>
+<tr>
+<td><strong>内存受限</strong></td>
+<td>30-50:1</td>
+<td>小模型长训练</td>
+<td>小模型>大欠训练模型</td>
+</tr>
+</table>
+<h3>工业级案例</h3>
+<div class="key-point">
+<strong>Llama 3:</strong>
+<ul>
+<li>8B: 15T tokens (1875:1)</li>
+<li>70B: 15T tokens (214:1)</li>
+<li>405B: 15T tokens (37:1) - 接近Chinchilla</li>
+</ul>
+<strong>规律：</strong>模型越大，比例越接近Chinchilla；模型越小，比例越高。
+            </div>
+<div class="key-point">
+<strong>DeepSeek V3:</strong>
+<ul>
+<li>671B MoE (激活37B)</li>
+<li>14.8T tokens</li>
+<li>效率：FP8训练，10×于Llama 3</li>
+</ul>
+<strong>洞察：</strong>MoE架构+FP8可实现超高效训练。
+            </div>
+</div>
+<!-- 关键洞察 -->
+<div class="section">
+<h2>💡 关键洞察</h2>
+<div class="highlight-box">
+<strong>1. Chinchilla是下限，不是上限</strong>
+            <br/><br/>
+            20:1比例仅优化训练计算，未考虑推理成本。实际部署中，更高比例通常更经济。
+        </div>
+<div class="highlight-box">
+<strong>2. 经济优化 ≠ 计算优化</strong>
+            <br/><br/>
+            当考虑模型全生命周期成本（训练+推理）时，"过训练"的小模型总成本更低。
+        </div>
+<div class="highlight-box">
+<strong>3. 数据质量至关重要</strong>
+            <br/><br/>
+            高质量数据（如FineWeb-Edu、C4过滤版）可能允许稍低比例仍达到同等性能。
+        </div>
+<div class="success-box">
+<strong>4. 模型规模与比例负相关</strong>
+            <br/><br/>
+            小模型(8B)→高比例(1000+:1)<br/>
+            大模型(400B+)→接近Chinchilla(20-50:1)
+        </div>
+</div>
+<!-- 决策框架 -->
+<div class="section">
+<h2>🎯 决策框架</h2>
+<div class="danger-box">
+<strong>选择Token数量的步骤：</strong>
+            <ol>
+<li><strong>确定场景：</strong>研究实验 vs 生产部署</li>
+<li><strong>估计推理量：</strong>模型将被调用多少次？</li>
+<li><strong>选择比例：</strong>
+                    <ul>
+<li>低推理量(&lt;1B次)：20-50:1</li>
+<li>中等推理量(1-100B次)：50-200:1</li>
+<li>高推理量(&gt;100B次)：200-1000+:1</li>
+</ul>
+</li>
+<li><strong>考虑约束：</strong>训练预算、时间、数据质量</li>
+<li><strong>监控指标：</strong>训练loss、下游任务、推理成本</li>
+</ol>
+</div>
+</div>
+<!-- 相关资源 -->
+<div class="section">
+<h2>🔗 相关资源</h2>
+<h3>计算工具</h3>
+<ul>
+<li>
+<strong>Chinchilla计算器：</strong>https://mbrenndoerfer.com/writing/chinchilla-scaling-laws-compute-optimal-llm-training</li>
+<li>
+<strong>Epoch AI Scaling数据库：</strong>训练成本和计算统计</li>
+</ul>
+<h3>延伸阅读</h3>
+<ul>
+<li>Scaling Laws Meet Model Architecture (arXiv:2510.18245)</li>
+<li>Relative Scaling Laws for LLMs (arXiv:2510.24626)</li>
+<li>Revisiting Scaling Laws for Language Models (ACL 2025)</li>
+</ul>
+</div>
+<div class="section" style="text-align: center; color: var(--text-light);">
+<p>调研完成 | 覆盖2019-2025年核心文献</p>
+<p>最后更新: 2025年3月</p>
+</div>
+</div>
+</body>
+</html>

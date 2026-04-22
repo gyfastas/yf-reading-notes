@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InternVideo-Next 精读笔记</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --highlight: #fef3c7;
+            --code-bg: #f1f5f9;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .paper-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+        .paper-header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 12px; }
+        .paper-header .authors { font-size: 0.95rem; opacity: 0.9; margin-bottom: 8px; }
+        .paper-header .meta { font-size: 0.85rem; opacity: 0.8; }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+        .badge-primary { background: rgba(255,255,255,0.2); color: white; }
+        .badge-secondary { background: var(--border); color: var(--text); }
+        .section { background: var(--card); border-radius: 12px; padding: 28px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .section h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+        .section h3 {
+            font-size: 1.1rem;
+            color: var(--text);
+            margin: 20px 0 12px;
+        }
+        .highlight-box {
+            background: var(--highlight);
+            border-left: 4px solid #f59e0b;
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .key-point {
+            background: #eff6ff;
+            border-left: 4px solid var(--primary);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .method-card {
+            background: var(--code-bg);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 16px 0;
+        }
+        .method-card h4 { color: var(--primary); margin-bottom: 12px; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background: var(--code-bg);
+            font-weight: 600;
+            color: var(--text);
+        }
+        tr:hover { background: #f8fafc; }
+        .equation {
+            background: var(--code-bg);
+            padding: 16px;
+            border-radius: 8px;
+            font-family: "Courier New", monospace;
+            margin: 16px 0;
+            overflow-x: auto;
+        }
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            background: #dbeafe;
+            color: var(--primary);
+            margin-right: 6px;
+        }
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .two-col { grid-template-columns: 1fr; }
+            .paper-header h1 { font-size: 1.4rem; }
+        }
+        ul, ol { margin-left: 20px; margin-bottom: 16px; }
+        li { margin-bottom: 8px; }
+        .figure-desc {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            font-style: italic;
+            margin-top: 8px;
+        }
+        code {
+            font-family: "Courier New", monospace;
+            background: var(--code-bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="paper-header">
+            <span class="badge badge-primary">arXiv 2512.01342</span>
+            <span class="badge badge-primary">Video Foundation Model</span>
+            <span class="badge badge-primary">Self-Supervised</span>
+            <h1>InternVideo-Next: Towards General Video Foundation Models without Video-Text Supervision</h1>
+            <div class="authors">
+                Chenting Wang, Yuhan Zhu, Yicheng Xu, Jiange Yang, Ziang Yan,
+                Yali Wang, Yi Wang, Limin Wang
+            </div>
+            <div class="meta">
+                Shanghai Jiao Tong University, Shanghai AI Laboratory,
+                Shanghai Innovation Institute, Shenzhen Institutes of Advanced Technology,
+                Nanjing University
+            </div>
+        </div>
+
+        <!-- TL;DR -->
+        <div class="section">
+            <h2>📌 TL;DR 核心贡献</h2>
+            <div class="highlight-box">
+                <strong>核心问题：</strong>现有视频-文本预训练依赖噪声大、语义覆盖有限的合成字幕，忽略了物体运动、3D几何、物理规律等隐式世界知识。
+            </div>
+            <div class="key-point">
+                <strong>解决方案：</strong>提出 <strong>Encoder-Predictor-Decoder (EPD)</strong> 框架，通过两阶段预训练构建一个<strong>语义一致且保留细节</strong>的潜空间：
+                <ul>
+                    <li><strong>Stage 1:</strong> 条件扩散解码器 + 语义对齐，建立语义-细节平衡的潜空间</li>
+                    <li><strong>Stage 2:</strong> 在此潜空间中进行掩码潜变量预测，学习时空动态和因果推理</li>
+                </ul>
+            </div>
+            <p><strong>关键成果：</strong>首个无需显式视频-文本监督、在Kinetics-400和SSv2上超越视频-文本预训练方法的模型。</p>
+        </div>
+
+        <!-- Motivation -->
+        <div class="section">
+            <h2>🎯 研究动机</h2>
+
+            <h3>现有方法的局限</h3>
+            <table>
+                <tr>
+                    <th>方法类型</th>
+                    <th>代表工作</th>
+                    <th>局限</th>
+                </tr>
+                <tr>
+                    <td>视频-文本预训练</td>
+                    <td>InternVid, VideoPrism</td>
+                    <td>依赖噪声字幕，忽略非语义信息（3D几何、物理规律）</td>
+                </tr>
+                <tr>
+                    <td>掩码视频建模(MVM)</td>
+                    <td>VideoMAE, V-JEPA</td>
+                    <td>收敛困难，低层重建与高层语义冲突</td>
+                </tr>
+            </table>
+
+            <h3>核心洞察</h3>
+            <div class="highlight-box">
+                <strong>发现：</strong>自监督视频预训练的性能差距<strong>并非</strong>内在限制，而是源于两个未解决的建筑挑战：
+                <ol>
+                    <li><strong>像素级保真度</strong>与<strong>高层语义抽象</strong>的冲突</li>
+                    <li>需要学习鲁棒的时空动态、因果关系和3D几何先验，而非"捷径解"</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Method -->
+        <div class="section">
+            <h2>🔧 方法详解</h2>
+
+            <h3>3.1 EPD 解耦框架</h3>
+            <div class="method-card">
+                <h4>Encoder-Predictor-Decoder 定义</h4>
+                <ul>
+                    <li><strong>E (Encoder):</strong> ViT提取时空表征，输入video → 输出特征</li>
+                    <li><strong>P (Predictor):</strong> 轻量transformer，基于可见token预测掩码区域的潜变量</li>
+                    <li><strong>D (Decoder):</strong> 重建模块，将predictor输出映射到像素空间或目标潜空间</li>
+                </ul>
+            </div>
+
+            <h3>3.2 Stage 1: 语义引导的像素重建</h3>
+
+            <div class="key-point">
+                <strong>设计目标：</strong>解决传统线性decoder强制predictor输出与像素线性投影的问题，通过扩散decoder保持predictor空间的高层语义。
+            </div>
+
+            <h4>组件详解</h4>
+            <table>
+                <tr>
+                    <th>组件</th>
+                    <th>设计</th>
+                    <th>作用</th>
+                </tr>
+                <tr>
+                    <td>语义对齐损失</td>
+                    <td>冻结SigLIP作为teacher，余弦相似度损失</td>
+                    <td>注入图像级语义先验，引导模型关注时空动态而非外观</td>
+                </tr>
+                <tr>
+                    <td>条件扩散Decoder</td>
+                    <td>轻量条件扩散模型，predictor输出作为condition</td>
+                    <td>独立建模每个patch的分布，保持predictor空间的语义丰富性</td>
+                </tr>
+                <tr>
+                    <td>Text-Decoder初始化</td>
+                    <td>Predictor用预训练text decoder权重初始化</td>
+                    <td>提供更好语义先验，加速收敛</td>
+                </tr>
+                <tr>
+                    <td>语义感知掩码</td>
+                    <td>基于语义teacher的attention score选top-k</td>
+                    <td>优先掩码时序信息丰富区域</td>
+                </tr>
+            </table>
+
+            <div class="equation">
+                L_sem = -cos( E(X_vis), vis(SigLIP(X)) )  // 语义对齐损失
+            </div>
+
+            <h3>3.3 Stage 2: 语义一致的潜变量预测</h3>
+
+            <div class="key-point">
+                <strong>核心思想：</strong>在Stage 1建立的语义一致潜空间中，通过<strong>掩码潜变量预测</strong>进一步增强时序抽象和表征泛化。
+            </div>
+
+            <table>
+                <tr>
+                    <th>设计选择</th>
+                    <th>配置</th>
+                    <th>原理</th>
+                </tr>
+                <tr>
+                    <td>初始化</td>
+                    <td>Student和Teacher都用Stage 1权重初始化</td>
+                    <td>确保潜空间语义一致</td>
+                </tr>
+                <tr>
+                    <td>预测目标</td>
+                    <td>冻结Teacher生成目标，Student预测掩码区域</td>
+                    <td>避免shortcut learning，强制学习真正的时空关系</td>
+                </tr>
+                <tr>
+                    <td>掩码策略</td>
+                    <td>Multi-block masking</td>
+                    <td>增加预测难度，促进隐式世界知识学习</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Experiments -->
+        <div class="section">
+            <h2>📊 实验结果</h2>
+
+            <h3>主要结果（表5: Attentive Probing）</h3>
+            <table>
+                <tr>
+                    <th>Model</th>
+                    <th>ViT Size</th>
+                    <th>Data</th>
+                    <th>GPU-hrs</th>
+                    <th>K400↑</th>
+                    <th>SSv2↑</th>
+                    <th>COIN↑</th>
+                </tr>
+                <tr style="background:#f0fdf4">
+                    <td><strong>InternVideo-Next<sub>s1</sub></strong></td>
+                    <td>Base</td>
+                    <td>1.1M</td>
+                    <td>1.5K</td>
+                    <td><strong>84.8</strong></td>
+                    <td><strong>58.6</strong></td>
+                    <td>89.9</td>
+                </tr>
+                <tr style="background:#f0fdf4">
+                    <td><strong>InternVideo-Next<sub>s2</sub></strong></td>
+                    <td>Base</td>
+                    <td>1.1M</td>
+                    <td>3.4K</td>
+                    <td><strong>85.9</strong></td>
+                    <td><strong>70.1</strong></td>
+                    <td>91.4</td>
+                </tr>
+                <tr>
+                    <td>V-JEPA2-L</td>
+                    <td>Large</td>
+                    <td>22M</td>
+                    <td>10K*</td>
+                    <td>83.3</td>
+                    <td>72.0</td>
+                    <td>85.9</td>
+                </tr>
+                <tr>
+                    <td>InternVideo2<sub>s1</sub></td>
+                    <td>1B</td>
+                    <td>1.1M</td>
+                    <td>15K</td>
+                    <td>85.6</td>
+                    <td>57.4</td>
+                    <td>89.6</td>
+                </tr>
+            </table>
+            <p class="figure-desc">* 仅在公开数据上训练，计算效率显著优于V-JEPA2</p>
+
+            <h3>深度估计（表6）</h3>
+            <div class="two-col">
+                <div>
+                    <p><strong>ScanNet</strong></p>
+                    <ul>
+                        <li>InternVideo-Next-L: <strong>AbsRel 9.2</strong>, δ1 92.2</li>
+                        <li>V-JEPA2-L: AbsRel 14.4, δ1 79.6</li>
+                        <li>VideoMAEv2-L: AbsRel 15.1, δ1 77.8</li>
+                    </ul>
+                </div>
+                <div>
+                    <p><strong>KITTI</strong></p>
+                    <ul>
+                        <li>InternVideo-Next-L: <strong>AbsRel 6.7</strong>, δ1 94.6</li>
+                        <li>V-JEPA2-L: AbsRel 8.7, δ1 91.2</li>
+                        <li>DINOv3-L: AbsRel 7.0, δ1 93.0</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>目标跟踪（表7: Waymo Open）</h3>
+            <ul>
+                <li>InternVideo-Next-L: <strong>72.4 mIOU</strong></li>
+                <li>V-JEPA2-L: 68.9</li>
+                <li>InternVideo2-L: 63.0</li>
+            </ul>
+
+            <h3>多模态能力（表8-11）</h3>
+            <table>
+                <tr>
+                    <th>任务</th>
+                    <th>Benchmark</th>
+                    <th>结果亮点</th>
+                </tr>
+                <tr>
+                    <td>视频动作预测</td>
+                    <td>EK100</td>
+                    <td>mean recall@5: <strong>68.9</strong> (V-JEPA2: 60.2)</td>
+                </tr>
+                <tr>
+                    <td>零样本动作识别</td>
+                    <td>K400/K700/SSv2-MC</td>
+                    <td>K400: <strong>72.1</strong>, K700: <strong>63.0</strong></td>
+                </tr>
+                <tr>
+                    <td>零样本文本-视频检索</td>
+                    <td>MSRVTT/MSVD/LSMDC</td>
+                    <td>MSRVTT R@1: <strong>43.2</strong> (纯视频训练)</td>
+                </tr>
+                <tr>
+                    <td>Video QA</td>
+                    <td>MVBench</td>
+                    <td><strong>50.6</strong> (冻结ViT + LLM)</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Ablations -->
+        <div class="section">
+            <h2>🔬 消融实验</h2>
+
+            <h3>表1: Stage 1 设计消融</h3>
+            <table>
+                <tr>
+                    <th>Variant</th>
+                    <th>K400</th>
+                    <th>SSv2</th>
+                </tr>
+                <tr>
+                    <td>Pixel Recon. Baseline</td>
+                    <td>47.2</td>
+                    <td>28.1</td>
+                </tr>
+                <tr>
+                    <td>+ SigLIP Align only</td>
+                    <td>70.7</td>
+                    <td>32.1</td>
+                </tr>
+                <tr>
+                    <td>+ Pixel Rec. + Align</td>
+                    <td>69.8</td>
+                    <td>31.8</td>
+                </tr>
+                <tr>
+                    <td>+ <strong>Diffusion Decoder</strong></td>
+                    <td>74.2</td>
+                    <td>35.4</td>
+                </tr>
+                <tr>
+                    <td>+ Text-Decoder Init</td>
+                    <td>69.4</td>
+                    <td>31.3</td>
+                </tr>
+                <tr style="background:#f0fdf4">
+                    <td>+ <strong>Keep Both</strong> (完整)</td>
+                    <td><strong>75.8</strong></td>
+                    <td><strong>36.9</strong></td>
+                </tr>
+            </table>
+            <div class="highlight-box">
+                <strong>关键发现：</strong>简单组合像素重建和语义对齐会导致性能下降（冲突）。扩散解码器成功桥接两者，带来+4.4%提升。
+            </div>
+
+            <h3>表3: Stage 2 消融</h3>
+            <table>
+                <tr>
+                    <th>Stage-2 Variant</th>
+                    <th>K400</th>
+                    <th>SSv2</th>
+                </tr>
+                <tr>
+                    <td>Stage 1 only</td>
+                    <td>75.8</td>
+                    <td>36.9</td>
+                </tr>
+                <tr style="background:#f0fdf4">
+                    <td><strong>Our Stage 2 setting</strong></td>
+                    <td><strong>76.9</strong></td>
+                    <td><strong>56.9</strong></td>
+                </tr>
+                <tr>
+                    <td>replace w/ Zero-Init V-JEPA Predictor</td>
+                    <td>74.8</td>
+                    <td>53.8</td>
+                </tr>
+                <tr>
+                    <td>replace w/ Momentum 0.9998 Target</td>
+                    <td>74.1</td>
+                    <td>54.3</td>
+                </tr>
+                <tr>
+                    <td>replace w/ Frozen SigLIP2 Target</td>
+                    <td>75.4</td>
+                    <td>45.7</td>
+                </tr>
+            </table>
+            <div class="highlight-box">
+                <strong>关键发现：</strong>Stage 1初始化（语义一致）和冻结Teacher（防止shortcut）对Stage 2至关重要。换用V-JEPA的EMA目标或SigLIP目标都会显著下降。
+            </div>
+
+            <h3>表4: 掩码和帧数设置</h3>
+            <ul>
+                <li><strong>Stage 1:</strong> Semantic mask, F16 → K400 76.4, SSv2 38.4</li>
+                <li><strong>Stage 2:</strong> Multi-block mask, F32 → K400 78.1, SSv2 59.4</li>
+            </ul>
+        </div>
+
+        <!-- Architecture -->
+        <div class="section">
+            <h2>🏗️ 实现细节</h2>
+
+            <h3>网络架构（表13）</h3>
+            <div class="method-card">
+                <h4>Encoder (ViT-B示例，8帧输入)</h4>
+                <ul>
+                    <li>Input: 3×8×224×224</li>
+                    <li>Patch: 1×14×14 → 768×8×256 tokens</li>
+                    <li>Embedding: stride 1×14×14</li>
+                    <li>Position: sine-cosine, 768×2048</li>
+                    <li>Mask: semantic mask, mask ratio ρ</li>
+                    <li>MHSA(768) × 12 layers</li>
+                    <li>Projection: LN(768) + MLP(1408) × K (unmasked token num)</li>
+                    <li>Output: K×1408×2048(1-ρ)</li>
+                </ul>
+            </div>
+
+            <h3>训练配置</h3>
+            <table>
+                <tr>
+                    <th>配置</th>
+                    <th>Stage 1</th>
+                    <th>Stage 2</th>
+                </tr>
+                <tr>
+                    <td>Optimizer</td>
+                    <td>AdamW (β1=0.9, β2=0.98)</td>
+                    <td>AdamW (β1=0.9, β2=0.98)</td>
+                </tr>
+                <tr>
+                    <td>Learning rate</td>
+                    <td>1e-3 (cosine decay)</td>
+                    <td>1e-4 (cosine decay)</td>
+                </tr>
+                <tr>
+                    <td>Batch size</td>
+                    <td>2048</td>
+                    <td>2048 (Base) / 1024 (Large)</td>
+                </tr>
+                <tr>
+                    <td>Epochs</td>
+                    <td>50</td>
+                    <td>100</td>
+                </tr>
+                <tr>
+                    <td>Input frames</td>
+                    <td>16</td>
+                    <td>32</td>
+                </tr>
+                <tr>
+                    <td>Resolution</td>
+                    <td>224</td>
+                    <td>224</td>
+                </tr>
+                <tr>
+                    <td>Mask ratio</td>
+                    <td>80%</td>
+                    <td>80%</td>
+                </tr>
+            </table>
+
+            <h3>训练数据</h3>
+            <p>K-Mash数据集（1.1M视频）：</p>
+            <ul>
+                <li>Kinetics-400/600/700</li>
+                <li>ANet, HACS, MiT（去重）</li>
+            </ul>
+        </div>
+
+        <!-- Key Insights -->
+        <div class="section">
+            <h2>💡 关键洞察与启发</h2>
+
+            <div class="key-point">
+                <h4>1. 扩散解码器桥接语义-细节鸿沟</h4>
+                <p>传统线性decoder强制predictor输出与像素空间线性对齐，损害语义。扩散decoder允许predictor保持语义丰富性，同时通过去噪过程重建像素级细节。</p>
+            </div>
+
+            <div class="key-point">
+                <h4>2. EPD解耦设计的价值</h4>
+                <p>显式分离Encoder（特征提取）、Predictor（世界模型）、Decoder（重建）三个角色，使：
+                <ul>
+                    <li>Predictor专注于学习时空动力学</li>
+                    <li>Decoder处理重建的细节要求</li>
+                    <li>语义对齐损失直接作用于Predictor输出</li>
+                </ul>
+                </p>
+            </div>
+
+            <div class="key-point">
+                <h4>3. 两阶段训练策略</h4>
+                <p>Stage 1建立"好"的潜空间（语义+细节），Stage 2在此空间学习预测。这种分解使得：</p>
+                <ul>
+                    <li>避免shortcut learning（冻结Stage 1权重）</li>
+                    <li>Masked prediction专注于时序推理而非外观重建</li>
+                </ul>
+            </div>
+
+            <div class="key-point">
+                <h4>4. 数据效率</h4>
+                <p>仅用<strong>1.1M公开视频</strong>（V-JEPA2用22M），<strong>1.5K GPU-hours</strong>达到SOTA。证明架构设计比数据规模更重要。</p>
+            </div>
+        </div>
+
+        <!-- Limitations -->
+        <div class="section">
+            <h2>⚠️ 局限性与未来方向</h2>
+            <ul>
+                <li>Stage 1仍依赖图像语义模型（SigLIP），存在对大规模图像-文本模型的依赖</li>
+                <li>作者认为这是构建视频理解模型的可能路径：先理解图像，再扩展时间维度</li>
+                <li>未来方向：多模态扩展、交互式世界建模、开放世界泛化</li>
+            </ul>
+        </div>
+
+        <!-- References -->
+        <div class="section">
+            <h2>🔗 相关对比</h2>
+            <table>
+                <tr>
+                    <th>方法</th>
+                    <th>架构</th>
+                    <th>监督</th>
+                    <th>与本文区别</th>
+                </tr>
+                <tr>
+                    <td>VideoMAE</td>
+                    <td>Encoder-Decoder</td>
+                    <td>纯视频</td>
+                    <td>直接重建像素，缺乏语义引导</td>
+                </tr>
+                <tr>
+                    <td>V-JEPA</td>
+                    <td>Encoder-Predictor</td>
+                    <td>纯视频</td>
+                    <td>潜空间预测但缺乏像素细节</td>
+                </tr>
+                <tr>
+                    <td>InternVideo2</td>
+                    <td>多teacher对齐</td>
+                    <td>视频+文本</td>
+                    <td>依赖CLIP+VideoMAE融合</td>
+                </tr>
+                <tr style="background:#f0fdf4">
+                    <td><strong>InternVideo-Next</strong></td>
+                    <td><strong>EPD</strong></td>
+                    <td>纯视频</td>
+                    <td>扩散decoder桥接语义-细节</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Footer -->
+        <div class="section" style="text-align: center; color: var(--text-light);">
+            <p>精读完成于 2026-03-26 | 论文: arXiv:2512.01342</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GLM-5 | 精读笔记</title>
+<style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --highlight: #fef3c7;
+            --code-bg: #f1f5f9;
+            --success: #10b981;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .paper-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+        .paper-header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 12px; }
+        .paper-header .meta { font-size: 0.85rem; opacity: 0.9; }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.2);
+        }
+        .section {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .section h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+        .section h3 {
+            font-size: 1.1rem;
+            color: var(--text);
+            margin: 20px 0 12px;
+        }
+        .highlight-box {
+            background: var(--highlight);
+            border-left: 4px solid #f59e0b;
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .key-point {
+            background: #eff6ff;
+            border-left: 4px solid var(--primary);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background: var(--code-bg);
+            font-weight: 600;
+            color: var(--text);
+        }
+        tr:hover { background: #f8fafc; }
+        .metric { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+    </style>
+</head>
+<body>
+<div class="container">
+<!-- Header -->
+<div class="paper-header">
+<span class="badge">arXiv:2602.15763</span>
+<span class="badge">Feb 2026</span>
+<h1>GLM-5: From Vibe Coding to Agentic Engineering</h1>
+<div class="meta">Zhipu AI / Z.ai | 744B MoE | 28.5T Tokens</div>
+</div>
+
+<!-- TL;DR -->
+<div class="section">
+<h2>📌 TL;DR 核心规格</h2>
+<div class="highlight-box">
+<strong>Pre-training Data:</strong> <span class="metric">28.5 trillion tokens</span>
+            <br/>
+            <strong>Model Size:</strong> 744B total / 40B active (256 experts, 8 active)
+            <br/>
+            <strong>Context:</strong> 200K tokens (via progressive extension)
+        </div>
+<div class="key-point">
+<strong>关键创新：</strong>
+            <ul>
+<li>DeepSeek Sparse Attention (DSA) 集成</li>
+<li>全华为昇腾芯片训练 (MindSpore框架)</li>
+<li>Slime异步RL基础设施</li>
+<li>软件工程数据160B tokens</li>
+</ul>
+</div>
+</div>
+
+<!-- Pre-training -->
+<div class="section">
+<h2>🎯 Pre-training 详情</h2>
+<table>
+<tr>
+<th>参数</th>
+<th>数值</th>
+</tr>
+<tr>
+<td>总Token数</td>
+<td class="metric">28.5T</td>
+</tr>
+<tr>
+<td>相比GLM-4.5</td>
+<td>+23.9% (从23T)</td>
+</tr>
+<tr>
+<td>软件工程数据</td>
+<td>~160B tokens</td>
+</tr>
+<tr>
+<td>数据截止</td>
+<td>2025年</td>
+</tr>
+</table>
+</div>
+
+<!-- Mid-training -->
+<div class="section">
+<h2>🔄 Mid-training / Progressive Training</h2>
+<h3>上下文扩展三阶段</h3>
+<table>
+<tr>
+<th>阶段</th>
+<th>上下文长度</th>
+<th>Token数</th>
+<th>目的</th>
+</tr>
+<tr>
+<td>Stage 1</td>
+<td>32K</td>
+<td>1T</td>
+<td>初始长上下文</td>
+</tr>
+<tr>
+<td>Stage 2</td>
+<td>128K</td>
+<td>500B</td>
+<td>文档级理解</td>
+</tr>
+<tr>
+<td>Stage 3</td>
+<td>200K</td>
+<td>50B</td>
+<td>超长文档处理</td>
+</tr>
+</table>
+<div class="highlight-box">
+<strong>长上下文数据：</strong>自然数据(书籍、学术论文) + 合成数据(交错打包技术)
+        </div>
+</div>
+
+<!-- Architecture -->
+<div class="section">
+<h2>🏗️ 架构详情</h2>
+<table>
+<tr>
+<th>组件</th>
+<th>配置</th>
+</tr>
+<tr>
+<td>总参数量</td>
+<td>744B</td>
+</tr>
+<tr>
+<td>激活参数量</td>
+<td>40B per token</td>
+</tr>
+<tr>
+<td>专家数量</td>
+<td>256 total, 8 active</td>
+</tr>
+<tr>
+<td>注意力机制</td>
+<td>DeepSeek Sparse Attention (DSA)</td>
+</tr>
+<tr>
+<td>训练框架</td>
+<td>MindSpore (华为昇腾)</td>
+</tr>
+</table>
+</div>
+
+<!-- Performance -->
+<div class="section">
+<h2>📊 关键性能</h2>
+<table>
+<tr>
+<th>基准</th>
+<th>得分</th>
+</tr>
+<tr>
+<td>SWE-bench Verified</td>
+<td class="metric">77.8%</td>
+</tr>
+<tr>
+<td>AIME 2026</td>
+<td class="metric">92.7%</td>
+</tr>
+<tr>
+<td>GPQA-Diamond</td>
+<td class="metric">86.0%</td>
+</tr>
+</table>
+</div>
+
+<div class="section" style="text-align: center; color: var(--text-light);">
+<p>精读笔记框架 | GLM-5 Technical Report</p>
+<p>GitHub: https://github.com/zai-org/GLM-5</p>
+</div>
+</div>
+</body>
+</html>

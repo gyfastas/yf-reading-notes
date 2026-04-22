@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enhanced POET · 精读笔记</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0c0a08;--s0:#12100c;--s1:#1a1610;--s2:#221e16;
+  --border:#2a251c;--border2:#363020;--text:#cec8b8;--muted:#7a6e58;--muted2:#54493a;
+  --head:#e8e0d0;--accent:#c8a07e;--accent2:#a8845e;
+  --red:#d9736a;--amber:#c8a04a;--blue:#5ea8c0;--purple:#8878b8;--green:#6dbb84;--teal:#4db8a4;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;font-size:15px}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans SC',sans-serif;font-weight:300;line-height:1.8}
+.layout{display:flex;min-height:100vh}
+aside{position:fixed;top:0;left:0;width:210px;height:100vh;background:var(--s0);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;z-index:200}
+.aside-head{padding:26px 20px 20px;border-bottom:1px solid var(--border)}
+.back-link{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:6px;margin-bottom:14px;transition:color .2s}
+.back-link:hover{color:var(--accent)}
+.aside-title{font-family:'Lora',serif;font-size:14px;font-weight:600;color:var(--head);line-height:1.4}
+.aside-sub{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-top:5px;letter-spacing:.06em}
+nav{padding:14px 0;flex:1}
+.nav-item{display:flex;align-items:center;gap:9px;padding:6px 20px;font-size:12px;color:var(--muted);text-decoration:none;cursor:pointer;transition:color .2s,background .2s;border-left:2px solid transparent}
+.nav-item:hover{color:var(--text);background:rgba(255,255,255,.02)}
+.nav-item.active{color:var(--accent);border-left-color:var(--accent);background:rgba(200,160,126,.05)}
+.nav-item .n{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted2);min-width:16px}
+.aside-foot{padding:14px 20px;border-top:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted2);line-height:1.8}
+main{margin-left:210px;flex:1;max-width:820px;padding:52px 48px 100px}
+.hero{margin-bottom:52px}
+.hero-eyebrow{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+.hero h1{font-family:'Lora',serif;font-size:30px;font-weight:500;color:var(--head);line-height:1.25;margin-bottom:6px;letter-spacing:-.02em}
+.hero h1 em{font-style:italic;color:var(--accent)}
+.hero-sub{font-family:'Lora',serif;font-style:italic;font-size:15px;color:var(--muted);margin-bottom:20px}
+.hero-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+.chip{font-family:'JetBrains Mono',monospace;font-size:10px;padding:3px 10px;border-radius:3px;text-decoration:none;transition:opacity .15s}
+.chip:hover{opacity:.75}
+.chip-arxiv{background:rgba(94,168,192,.12);color:var(--blue);border:1px solid rgba(94,168,192,.22)}
+.chip-venue{background:rgba(200,160,126,.10);color:var(--accent);border:1px solid rgba(200,160,126,.2)}
+.hero-abstract{background:var(--s1);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:16px 20px;font-size:13.5px;color:#908878;line-height:1.75}
+.hero-abstract strong{color:var(--text)}
+.sec{margin-bottom:50px}
+.sec-header{display:flex;align-items:center;gap:12px;margin-bottom:22px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.sec-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted2);letter-spacing:.08em;min-width:24px}
+.sec-line{width:3px;height:20px;border-radius:2px;flex-shrink:0}
+.sec-title{font-family:'Lora',serif;font-size:21px;font-weight:500;color:var(--head)}
+p{margin-bottom:12px;font-size:13.5px}
+p:last-child{margin-bottom:0}
+strong{color:var(--head);font-weight:500}
+em{color:var(--accent);font-style:italic}
+.comp-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border-radius:8px;overflow:hidden;margin:16px 0}
+.comp-card{background:var(--s1);padding:16px 18px;transition:background .2s}
+.comp-card:hover{background:var(--s2)}
+.comp-tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.comp-name{font-size:13.5px;font-weight:500;color:var(--head);margin-bottom:7px}
+.comp-body{font-size:12.5px;color:var(--muted);line-height:1.65}
+.comp-body strong{color:var(--text)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.two-col-card{background:var(--s1);border:1px solid var(--border);border-radius:7px;padding:14px 16px}
+.two-col-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);margin-bottom:8px}
+.two-col-body{font-size:12px;color:var(--muted);line-height:1.7}
+.two-col-body strong{color:var(--text)}
+.callout{border-radius:7px;padding:13px 16px;font-size:13px;line-height:1.7;margin:14px 0;display:flex;gap:12px}
+.callout-icon{font-size:14px;flex-shrink:0;padding-top:1px}
+.callout-body{flex:1}
+.callout-body strong{font-weight:500}
+.callout.key{background:rgba(200,160,126,.08);border:1px solid rgba(200,160,126,.18);color:#a8906e}
+.callout.info{background:rgba(94,168,192,.08);border:1px solid rgba(94,168,192,.18);color:#6898a8}
+.insight-cards{display:flex;flex-direction:column;gap:10px}
+.insight-card{display:grid;grid-template-columns:3px 1fr;gap:14px;background:var(--s1);border:1px solid var(--border);border-radius:7px;overflow:hidden;padding:14px 16px;transition:border-color .2s}
+.insight-card:hover{border-color:var(--border2)}
+.insight-stripe{border-radius:2px}
+.insight-title{font-size:13.5px;font-weight:500;color:var(--head);margin-bottom:5px}
+.insight-body{font-size:12.5px;color:var(--muted);line-height:1.65}
+.insight-body strong{color:var(--text)}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+@media(max-width:700px){aside{display:none}main{margin-left:0;padding:28px 18px 60px}.comp-grid,.two-col{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="aside-head">
+    <a href="../../Reference.html" class="back-link">&larr; 返回 Reference</a>
+    <div class="aside-title">Enhanced POET</div>
+    <div class="aside-sub">精读笔记 &middot; ICML 2020</div>
+  </div>
+  <nav>
+    <a class="nav-item active" href="#overview"><span class="n">00</span>Overview</a>
+    <a class="nav-item" href="#improvements"><span class="n">01</span>改进点 (vs POET)</a>
+    <a class="nav-item" href="#takeaways"><span class="n">02</span>对本研究的启发</a>
+  </nav>
+  <div class="aside-foot">
+    arXiv:2003.08536<br>
+    Wang, Lehman, Rawal et al.<br>
+    ICML 2020
+  </div>
+</aside>
+
+<main>
+
+<div class="hero" id="overview">
+  <div class="hero-eyebrow">Enhanced Co-Evolution &middot; arXiv:2003.08536</div>
+  <h1>Enhanced <em>POET</em></h1>
+  <div class="hero-sub">Open-Ended RL through Unbounded Invention of Learning Challenges and Their Solutions</div>
+  <div class="hero-chips">
+    <a href="https://arxiv.org/abs/2003.08536" target="_blank" class="chip chip-arxiv">&nearr; arXiv:2003.08536</a>
+    <span class="chip chip-venue">Wang, Lehman, Rawal et al. &middot; ICML 2020</span>
+  </div>
+  <div class="hero-abstract">
+    <strong>Enhanced POET</strong> 在原始 POET 的基础上做了三项关键改进：(1) 引入 <strong>domain-general novelty metric</strong>，用环境参数空间的 k-NN 距离量化新环境与已有种群的新颖度；(2) 改进 <strong>goal-switching heuristic</strong>，使 agent 更智能地选择迁移目标；(3) 使用 <strong>CPPN（Compositional Pattern-Producing Network）编码</strong>环境，大幅增加环境的表达力和复杂度。这些改进使系统能生成更多样、更复杂的环境，解决原始 POET 在环境多样性上的瓶颈。
+  </div>
+</div>
+
+<!-- 01 改进点 -->
+<section class="sec" id="improvements">
+  <div class="sec-header">
+    <span class="sec-num">01</span>
+    <div class="sec-line" style="background:var(--accent)"></div>
+    <h2 class="sec-title">改进点 (vs POET)</h2>
+  </div>
+
+  <div class="comp-grid" style="grid-template-columns:1fr">
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--accent)">Improvement 1</div>
+      <div class="comp-name">Domain-General Novelty Metric</div>
+      <div class="comp-body">
+        原始 POET 只用 minimal criteria（reward 范围）来筛选新环境，没有显式度量环境之间的<strong>新颖度</strong>，导致种群中大量环境实质相似。Enhanced POET 引入 <strong>k-nearest-neighbor 距离</strong>作为新颖度指标：在环境参数空间中，新环境到现有种群中 k 个最近邻的平均距离必须超过阈值才被接受。这是一个 <strong>domain-agnostic</strong> 的方法，不依赖特定任务的环境语义。
+      </div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="two-col-card" style="border-left:3px solid var(--blue)">
+      <div class="two-col-label" style="color:var(--blue)">Improvement 2 &middot; Goal Switching</div>
+      <div class="two-col-body">
+        原始 POET 在迁移时进行<strong>全对全评估</strong>（所有 agent 在所有 environment 上评测），计算成本 O(N^2)。Enhanced POET 引入 <strong>ranking-based goal switching</strong>：先按当前 fitness 排序，只尝试 fitness 相近的 agent-environment 对之间的迁移，大幅降低迁移开销同时保持有效性。
+      </div>
+    </div>
+    <div class="two-col-card" style="border-left:3px solid var(--green)">
+      <div class="two-col-label" style="color:var(--green)">Improvement 3 &middot; CPPN Encoding</div>
+      <div class="two-col-body">
+        原始 POET 用<strong>手工参数向量</strong>编码环境（stump height、gap width 等固定参数），表达力有限。Enhanced POET 用 <strong>CPPN（Compositional Pattern-Producing Network）</strong>作为环境生成器：一个小型神经网络将坐标映射到地形高度，通过变异 CPPN 权重产生无限多样的地形。环境复杂度不再受参数数量约束。
+      </div>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-icon">i</div>
+    <div class="callout-body">
+      <strong>效果</strong>：在相同计算预算下，Enhanced POET 产生的环境数量和多样性显著超过原始 POET，agent 的最终性能也更高。特别是 CPPN 编码使得系统能生成原始 POET 参数空间中无法表示的复杂地形（如多尺度起伏、混合障碍模式）。
+    </div>
+  </div>
+</section>
+
+<!-- 02 对本研究的启发 -->
+<section class="sec" id="takeaways">
+  <div class="sec-header">
+    <span class="sec-num">02</span>
+    <div class="sec-line" style="background:var(--accent)"></div>
+    <h2 class="sec-title">对本研究的启发</h2>
+  </div>
+
+  <div class="insight-cards">
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--accent)"></div>
+      <div>
+        <div class="insight-title">Novelty Metric 应用于 scaffold 多样性维护</div>
+        <div class="insight-body">
+          Enhanced POET 的 k-NN novelty metric 可直接迁移到 scaffold co-evolution 中：在 scaffold 配置空间（tool 组合、prompt 模板、任务类型的向量化表示）中度量新 scaffold 与已有种群的距离，<strong>拒绝过于相似的 scaffold 变异</strong>。这能避免 scaffold 种群退化为少数变体的重复。
+        </div>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--blue)"></div>
+      <div>
+        <div class="insight-title">CPPN 编码的启示：用生成模型产生 scaffold</div>
+        <div class="insight-body">
+          CPPN 作为环境生成器替代了手工参数化，同理，<strong>可以用 LLM 作为 scaffold 生成器</strong>——不是从固定参数空间采样 scaffold，而是让 LLM 根据当前 model 能力和任务目标动态生成新的 prompt 模板、tool 定义、甚至 workflow 结构。这把 scaffold 的搜索空间从离散有限变为连续无限。
+        </div>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--green)"></div>
+      <div>
+        <div class="insight-title">从 O(N^2) 到高效迁移：ranking-based selection</div>
+        <div class="insight-body">
+          在 multi-scaffold 训练中，评估 model 在所有 scaffold 上的表现成本很高。Enhanced POET 的 ranking-based goal switching 提供了一个实用策略：只在 <strong>难度相近的 scaffold 之间</strong>做迁移评估，避免在明显不匹配的 scaffold-model 对上浪费评估预算。
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+
+<script>
+const sections = document.querySelectorAll('section.sec[id], .hero[id]');
+const navItems = document.querySelectorAll('nav .nav-item');
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { const id = e.target.id; navItems.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + id)); }});
+}, { rootMargin: '-20% 0px -65% 0px' });
+sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>

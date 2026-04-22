@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Mid-Training 如何影响 Post-Training | 深度分析</title>
+<style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --highlight: #fef3c7;
+            --code-bg: #f1f5f9;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --purple: #8b5cf6;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .paper-header {
+            background: linear-gradient(135deg, var(--purple) 0%, #7c3aed 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+        .paper-header h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 12px; }
+        .paper-header .meta { font-size: 0.85rem; opacity: 0.9; }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.2);
+        }
+        .section {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .section h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+        .section h3 {
+            font-size: 1.1rem;
+            color: var(--text);
+            margin: 20px 0 12px;
+        }
+        .highlight-box {
+            background: var(--highlight);
+            border-left: 4px solid var(--warning);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .key-point {
+            background: #eff6ff;
+            border-left: 4px solid var(--primary);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .danger-box {
+            background: #fef2f2;
+            border-left: 4px solid var(--danger);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .success-box {
+            background: #f0fdf4;
+            border-left: 4px solid var(--success);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background: var(--code-bg);
+            font-weight: 600;
+            color: var(--text);
+        }
+        tr:hover { background: #f8fafc; }
+        .metric { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+        .up { color: var(--success); }
+        .down { color: var(--danger); }
+        .phase {
+            background: var(--code-bg);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 12px 0;
+            border-left: 4px solid var(--primary);
+        }
+        .phase h4 { color: var(--primary); margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+<div class="container">
+<!-- Header -->
+<div class="paper-header">
+<span class="badge">arXiv:2506.16029</span>
+<span class="badge">深度分析</span>
+<h1>Mid-Training 如何影响 Post-Training:<br/>预训练预算对后训练效果的决定性作用</h1>
+<div class="meta">From Pre-training to Post-training: Understanding the Budget Allocation</div>
+</div>
+<!-- 核心观点 -->
+<div class="section">
+<h2>📌 核心观点</h2>
+<div class="highlight-box">
+<strong>关键发现：</strong>Mid-training（预训练中期阶段）的预算分配直接决定了后训练（SFT &amp; RL）的<strong>效果上限</strong>和<strong>效率</strong>。
+            </div>
+<div class="key-point">
+<strong>三大影响机制：</strong>
+<ol>
+<li>
+<strong>能力基础</strong>：Mid-training质量决定模型是否具备解决目标任务所需的基础能力</li>
+<li>
+<strong>饱和阈值</strong>：预训练在~80B tokens后饱和，过度预训练反而损害后训练</li>
+<li>
+<strong>泛化边界</strong>：预训练预算&gt;160B后，OOD性能退化，限制后训练的泛化效果</li>
+</ol>
+</div>
+</div>
+<!-- 预训练阶段分析 -->
+<div class="section">
+<h2>🔄 预训练的三个阶段</h2>
+<div class="phase">
+<h4>阶段1: 早期预训练 (0-20B tokens)</h4>
+<ul>
+<li>
+<strong>特征</strong>：模型学习基础语言模式、世界知识</li>
+<li>
+<strong>后训练影响</strong>：基础能力不足，SFT难以教会复杂任务，RL探索空间过大</li>
+<li>
+<strong>状态</strong>：不适合进入后训练</li>
+</ul>
+</div>
+<div class="phase">
+<h4>阶段2: 最佳窗口期 (20-80B tokens) ⭐</h4>
+<ul>
+<li>
+<strong>特征</strong>：能力快速提升，ID Maj@16从8%→15%</li>
+<li>
+<strong>后训练影响</strong>：
+<ul>
+<li>SFT效率最高：模型已具备相关能力基础，易于引导</li>
+<li>RL收敛最快：策略空间适中，探索与利用平衡</li>
+<li>泛化性最佳：OOD性能稳定</li>
+</ul>
+</li>
+<li>
+<strong>状态</strong>：⭐ <strong>进入后训练的最佳时机</strong>
+</li>
+</ul>
+</div>
+<div class="phase">
+<h4>阶段3: 饱和期 (80-160B tokens)</h4>
+<ul>
+<li>
+<strong>特征</strong>：性能增长放缓 (15%→17%)，边际收益递减</li>
+<li>
+<strong>后训练影响</strong>：
+<ul>
+<li>SFT仍有效，但需要更多数据</li>
+<li>RL需要更多epoch才能收敛</li>
+<li>开始出现轻微OOD退化</li>
+</ul>
+</li>
+<li>
+<strong>状态</strong>：可进入后训练，但效率下降</li>
+</ul>
+</div>
+<div class="danger-box">
+<h4>阶段4: 过度训练 (&gt;160B tokens) ⚠️</h4>
+<ul>
+<li>
+<strong>特征</strong>：性能plateau，过拟合训练分布</li>
+<li>
+<strong>后训练影响</strong>：
+<ul>
+<li>
+<strong>SFT困难</strong>：模型过于固化，难以适应新任务</li>
+<li>
+<strong>RL效果受限</strong>：探索能力下降，陷入局部最优</li>
+<li>
+<strong>泛化严重受损</strong>：OOD性能显著下降</li>
+</ul>
+</li>
+<li>
+<strong>状态</strong>：⚠️ <strong>不推荐进入后训练，建议回退checkpoint</strong>
+</li>
+</ul>
+</div>
+</div>
+<!-- Mid-training对SFT的影响 -->
+<div class="section">
+<h2>📚 Mid-Training 对 SFT 的影响</h2>
+<h3>影响机制</h3>
+<table>
+<tr>
+<th>预训练阶段</th>
+<th>SFT数据效率</th>
+<th>SFT收敛速度</th>
+<th>最终性能</th>
+</tr>
+<tr>
+<td>不足 (&lt;20B)</td>
+<td class="down">极低</td>
+<td class="down">慢</td>
+<td class="down">差 (基础能力缺失)</td>
+</tr>
+<tr style="background: #f0fdf4;">
+<td>最佳 (20-80B)</td>
+<td class="up">高</td>
+<td class="up">快</td>
+<td class="up">好</td>
+</tr>
+<tr>
+<td>饱和 (80-160B)</td>
+<td>中等</td>
+<td>中等</td>
+<td>中等</td>
+</tr>
+<tr>
+<td>过度 (&gt;160B)</td>
+<td class="down">低</td>
+<td class="down">慢 (需更多数据)</td>
+<td class="down">受限 (过拟合)</td>
+</tr>
+</table>
+<h3>关键Insight</h3>
+<div class="key-point">
+<strong>SFT的"可教性"窗口：</strong>
+                模型在预训练80B tokens左右时<strong>最容易被SFT引导</strong>。此时：
+                <ul>
+<li>已掌握足够的世界知识和语言能力</li>
+<li>但还未过度特化到预训练分布</li>
+<li>对新任务保持开放性和适应性</li>
+</ul>
+            </div>
+</div>
+<!-- Mid-training对RL的影响 -->
+<div class="section">
+<h2>⚡ Mid-Training 对 RL 的影响</h2>
+<h3>影响机制</h3>
+<table>
+<tr>
+<th>预训练阶段</th>
+<th>RL探索空间</th>
+<th>收敛速度</th>
+<th>最终策略质量</th>
+</tr>
+<tr>
+<td>不足 (&lt;20B)</td>
+<td class="down">过大 (随机)</td>
+<td class="down">极慢/不收敛</td>
+<td class="down">差</td>
+</tr>
+<tr style="background: #f0fdf4;">
+<td>最佳 (20-80B)</td>
+<td class="up">适中</td>
+<td class="up">4-8 epochs收敛</td>
+<td class="up">高</td>
+</tr>
+<tr>
+<td>饱和 (80-160B)</td>
+<td>略小</td>
+<td>8-16 epochs</td>
+<td>中等</td>
+</tr>
+<tr>
+<td>过度 (&gt;160B)</td>
+<td class="down">过小 (固化)</td>
+<td class="down">难以突破</td>
+<td class="down">受限 (局部最优)</td>
+</tr>
+</table>
+<h3>关键Insight</h3>
+<div class="key-point">
+<strong>RL的"可探索性"：</strong>
+                预训练决定了RL策略的<strong>初始分布</strong>和<strong>探索边界</strong>：
+                <ul>
+<li>
+<strong>预训练不足</strong>：策略分布过于分散，RL难以找到有效路径</li>
+<li>
+<strong>预训练最佳</strong>：策略分布覆盖关键能力，RL可高效优化</li>
+<li>
+<strong>预训练过度</strong>：策略分布过于集中，RL陷入局部最优难以突破</li>
+</ul>
+            </div>
+<h3>RL饱和与预训练的关系</h3>
+<div class="highlight-box">
+<strong>重要发现：</strong>预训练质量直接影响RL的饱和阈值。
+                <ul>
+<li>预训练80B tokens：RL在<strong>4-8 epochs</strong>后饱和</li>
+<li>预训练160B tokens：RL可能需要<strong>16+ epochs</strong>才饱和，但提升有限</li>
+<li>预训练&gt;160B tokens：RL难以突破预训练固化的能力边界</li>
+</ul>
+            </div>
+</div>
+<!-- OOD性能与后训练 -->
+<div class="section">
+<h2>🌐 OOD 性能：Mid-Training 的隐性代价</h2>
+<h3>发现：160B tokens 后 OOD 退化</h3>
+<table>
+<tr>
+<th>预训练预算</th>
+<th>ID性能</th>
+<th>OOD性能</th>
+<th>Gap</th>
+</tr>
+<tr>
+<td>80B</td>
+<td>15%</td>
+<td>14%</td>
+<td>1% ✅</td>
+</tr>
+<tr>
+<td>160B</td>
+<td>17%</td>
+<td>13%</td>
+<td>4% ⚠️</td>
+</tr>
+<tr>
+<td>320B</td>
+<td>17%</td>
+<td>11%</td>
+<td>6% ❌</td>
+</tr>
+</table>
+<div class="danger-box">
+<strong>对后训练的影响：</strong>
+                OOD退化意味着：
+                <ol>
+<li>
+<strong>SFT泛化差</strong>：在训练集上表现好，但在测试集上差</li>
+<li>
+<strong>RL奖励 hacking</strong>：模型学会利用训练分布特性而非真正理解</li>
+<li>
+<strong>实际部署效果差</strong>：用户输入与训练分布不同时，输出质量下降</li>
+</ol>
+            </div>
+</div>
+<!-- 最优预算分配 -->
+<div class="section">
+<h2>💰 最优预算分配策略</h2>
+<h3>以1B模型为例</h3>
+<div class="success-box">
+<strong>推荐配置：</strong>
+<ul>
+<li>
+<strong>预训练</strong>：80B tokens (~80×模型大小)
+                    <ul>
+<li>占总计算预算的<span class="metric">80%</span>
+</li>
+<li>在最佳窗口期停止，避免过度训练</li>
+</ul>
+</li>
+<li>
+<strong>SFT</strong>：50K-100K样本
+                    <ul>
+<li>占总计算预算的<span class="metric">10%</span>
+</li>
+<li>轻量级微调，利用预训练获得的能力</li>
+</ul>
+</li>
+<li>
+<strong>RL</strong>：4-8 epochs (~50-100K rollouts)
+                    <ul>
+<li>占总计算预算的<span class="metric">10%</span>
+</li>
+<li>快速收敛，避免无意义的过度训练</li>
+</ul>
+</li>
+</ul>
+            </div>
+<h3>预算分配曲线</h3>
+<table>
+<tr>
+<th>阶段</th>
+<th>预算占比</th>
+<th>边际收益</th>
+<th>建议</th>
+</tr>
+<tr>
+<td>预训练 (0-80B)</td>
+<td>80%</td>
+<td class="up">高</td>
+<td>必须充分投入</td>
+</tr>
+<tr>
+<td>预训练 (80-160B)</td>
+<td>+10%</td>
+<td>中</td>
+<td>视资源情况而定</td>
+</tr>
+<tr>
+<td>预训练 (&gt;160B)</td>
+<td>+10%</td>
+<td class="down">低/负</td>
+<td>不推荐</td>
+</tr>
+<tr>
+<td>SFT</td>
+<td>10%</td>
+<td class="up">高 (在好checkpoint上)</td>
+<td>轻量即可</td>
+</tr>
+<tr>
+<td>RL</td>
+<td>10%</td>
+<td class="up">高 (4-8 epochs)</td>
+<td>早停</td>
+</tr>
+</table>
+</div>
+<!-- 实践建议 -->
+<div class="section">
+<h2>🛠️ 实践建议</h2>
+<h3>1. Checkpoint选择</h3>
+<div class="key-point">
+<strong>最佳实践：</strong>
+                <ul>
+<li>监控预训练验证集loss，在<strong>平台期前停止</strong>
+</li>
+<li>保存多个checkpoint（60B, 80B, 100B tokens）</li>
+<li>用小规模SFT实验选择最优checkpoint</li>
+<li>
+<strong>避免</strong>使用&gt;160B tokens的checkpoint进行后训练</li>
+</ul>
+            </div>
+<h3>2. 动态调整策略</h3>
+<table>
+<tr>
+<th>预训练质量</th>
+<th>SFT策略</th>
+<th>RL策略</th>
+</tr>
+<tr>
+<td>不足 (&lt;60B)</td>
+<td>延长预训练</td>
+<td>暂不进行RL</td>
+</tr>
+<tr>
+<td>最佳 (60-100B)</td>
+<td>标准轻量SFT</td>
+<td>4-8 epochs GRPO</td>
+</tr>
+<tr>
+<td>过度 (&gt;160B)</td>
+<td>数据增强 + 正则化</td>
+<td>高探索率 + 早停</td>
+</tr>
+</table>
+<h3>3. 评估指标</h3>
+<div class="highlight-box">
+<strong>进入后训练前必须检查：</strong>
+<ol>
+<li>
+<strong>ID性能</strong>：验证集准确率是否达到平台期</li>
+<li>
+<strong>OOD性能</strong>：在分布外数据上是否稳定</li>
+<li>
+<strong>多样性</strong>：生成样本的Self-BLEU是否合理</li>
+<li>
+<strong>可训练性</strong>：小规模SFT测试是否快速收敛</li>
+</ol>
+            </div>
+</div>
+<!-- 总结 -->
+<div class="section">
+<h2>📝 总结</h2>
+<div class="success-box">
+<strong>核心结论：</strong>
+<ol>
+<li>
+<strong>Mid-training质量决定后训练上限</strong>：预训练80B tokens是最佳平衡点</li>
+<li>
+<strong>过度预训练有害</strong>：&gt;160B tokens后，后训练效果反而下降</li>
+<li>
+<strong>资源分配二八原则</strong>：80%预算给预训练（到最佳窗口），20%给后训练</li>
+<li>
+<strong>OOD性能是关键指标</strong>：监控预训练过程中的OOD泛化，防止过拟合</li>
+</ol>
+            </div>
+</div>
+<div class="section" style="text-align: center; color: var(--text-light);">
+<p>深度分析完成 | 基于论文: arXiv:2506.16029</p>
+<p>重点: Mid-Training 对 Post-Training 的影响机制</p>
+</div>
+</div>
+</body>
+</html>

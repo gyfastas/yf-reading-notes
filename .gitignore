@@ -1,0 +1,16 @@
+# Paper reading notes repository
+# Raw PDFs and extracted images are excluded
+# Only reading notes (HTML) and Q&As are version controlled
+
+# Raw papers
+*.pdf
+
+# Extracted images
+**/images/
+
+# Extracted raw text (intermediate)
+**/paper_text.txt
+
+# System files
+.DS_Store
+agents/AgentGym/repo

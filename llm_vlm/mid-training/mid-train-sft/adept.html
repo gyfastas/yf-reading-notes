@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ADEPT | 精读笔记</title>
+<style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --highlight: #fef3c7;
+            --code-bg: #f1f5f9;
+            --success: #10b981;
+            --purple: #8b5cf6;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .paper-header {
+            background: linear-gradient(135deg, var(--purple) 0%, #7c3aed 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+        .paper-header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 12px; }
+        .paper-header .meta { font-size: 0.85rem; opacity: 0.9; }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.2);
+        }
+        .section {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .section h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+        .section h3 {
+            font-size: 1.1rem;
+            color: var(--text);
+            margin: 20px 0 12px;
+        }
+        .highlight-box {
+            background: var(--highlight);
+            border-left: 4px solid #f59e0b;
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .key-point {
+            background: #eff6ff;
+            border-left: 4px solid var(--primary);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .success-box {
+            background: #f0fdf4;
+            border-left: 4px solid var(--success);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background: var(--code-bg);
+            font-weight: 600;
+            color: var(--text);
+        }
+        tr:hover { background: #f8fafc; }
+        .metric { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+        .up { color: var(--success); }
+        .formula {
+            background: var(--code-bg);
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            margin: 12px 0;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+<!-- Header -->
+<div class="paper-header">
+<span class="badge">arXiv:2510.10071</span>
+<span class="badge">October 2025</span>
+<h1>ADEPT: Continual Pretraining<br/>via Adaptive Expansion and<br/>Dynamic Decoupled Tuning</h1>
+<div class="meta">Peking University | Zhejiang University | 高效领域适配</div>
+</div>
+<!-- TL;DR -->
+<div class="section">
+<h2>📌 TL;DR 核心贡献</h2>
+<div class="highlight-box">
+<strong>核心问题：</strong>Continual Pre-training (CPT) 面临灾难性遗忘和领域容量限制。
+            </div>
+<div class="key-point">
+<strong>解决方案：</strong><strong>ADEPT</strong> - 基于功能专业化的自适应扩展框架
+<ul>
+<li><strong>功能专业化洞察：</strong>不同层和单元对通用能力的重要性不同</li>
+<li><strong>选择性层扩展：</strong>仅复制对通用能力最不关键的层</li>
+<li><strong>动态解耦调优：</strong>单元级神经元解耦 + 自适应学习率</li>
+</ul>
+</div>
+<div class="success-box">
+<strong>效果：</strong>
+            <ul>
+<li>仅调优<strong>15%参数</strong>，训练时间<strong>&lt;50%</strong></li>
+<li>通用基准提升<strong>+5.76%</strong></li>
+<li>领域基准提升<strong>+5.58%</strong></li>
+</ul>
+</div>
+</div>
+<!-- 核心洞察 -->
+<div class="section">
+<h2>💡 核心洞察：功能专业化</h2>
+<div class="highlight-box">
+<strong>发现：</strong>LLM表现出<strong>功能专业化</strong>——不同层和单元对通用能力的重要性差异显著。
+            <br/><br/>
+            这意味着：
+            <ul>
+<li>均匀扩展（如LLaMA-Pro）是次优的</li>
+<li>应该根据功能重要性选择性扩展</li>
+<li>参数更新也应差异化</li>
+</ul>
+</div>
+<h3>层重要性测量</h3>
+<div class="key-point">
+<strong>梯度探测法：</strong>通过mask每一层计算loss增加来测量重要性
+            <ul>
+<li>Loss增加大 → 层重要（保留）</li>
+<li>Loss增加小 → 层不重要（可扩展）</li>
+</ul>
+</div>
+</div>
+<!-- 方法详解 -->
+<div class="section">
+<h2>🔧 ADEPT 方法详解</h2>
+<h3>阶段1: 通用能力引导的选择性层扩展</h3>
+<div class="key-point">
+<strong>步骤：</strong>
+            <ol>
+<li>识别对通用领域性能<strong>最不关键</strong>的层</li>
+<li>复制这些层（而非所有层）</li>
+<li>原始层保持冻结</li>
+<li>复制的层可训练</li>
+</ol>
+<strong>优势：</strong>
+            <ul>
+<li>增加领域知识的表示容量</li>
+<li>最小化对通用能力的干扰</li>
+</ul>
+</div>
+<h3>阶段2: 自适应单元级解耦调优</h3>
+<div class="key-point">
+<strong>单元级神经元解耦：</strong>
+            <ul>
+<li>在扩展层内，将参数分割成语义单元</li>
+<li>使用梯度敏感度信号评估单元重要性</li>
+</ul>
+<strong>动态学习率适应：</strong>
+            <div class="formula">
+                lr_U = 2 · (1 - I_unit) · lr_base
+            </div>
+            其中 I_unit 是单元重要性分数
+            <ul>
+<li>通用关键单元：低学习率（保留知识）</li>
+<li>不重要单元：高学习率（吸收领域知识）</li>
+</ul>
+</div>
+<h3>动态调整</h3>
+<div class="highlight-box">
+<strong>周期性重计算：</strong>训练过程中定期重新计算重要性分数，实现动态适应。
+        </div>
+</div>
+<!-- 实验结果 -->
+<div class="section">
+<h2>📊 实验结果</h2>
+<h3>测试领域</h3>
+<table>
+<tr>
+<th>领域</th>
+<th>数据集</th>
+<th>任务类型</th>
+</tr>
+<tr>
+<td><strong>数学</strong></td>
+<td>OpenWebMath, AceReason-Math</td>
+<td>数学推理</td>
+</tr>
+<tr>
+<td><strong>医学</strong></td>
+<td>MMedC, IndustryIns, MMedBench</td>
+<td>医学问答</td>
+</tr>
+</table>
+<h3>骨干模型</h3>
+<ul>
+<li>Qwen3-Base (1.7B, 4B, 8B)</li>
+<li>LLaMA3.1-8B-Base</li>
+</ul>
+<h3>主要结果</h3>
+<table>
+<tr>
+<th>方法</th>
+<th>通用基准</th>
+<th>领域基准</th>
+<th>可调参数</th>
+<th>训练时间</th>
+</tr>
+<tr>
+<td>Full-parameter CPT</td>
+<td>基线</td>
+<td>基线</td>
+<td>100%</td>
+<td>100%</td>
+</tr>
+<tr>
+<td>Replay-based</td>
+<td>提升</td>
+<td>提升</td>
+<td>100%</td>
+<td>~100%</td>
+</tr>
+<tr>
+<td>LLaMA-Pro</td>
+<td>提升</td>
+<td>提升</td>
+<td>~50%</td>
+<td>~70%</td>
+</tr>
+<tr>
+<td><strong>ADEPT</strong></td>
+<td class="metric up">+5.76%</td>
+<td class="metric up">+5.58%</td>
+<td class="metric up">15%</td>
+<td class="metric up">&lt;50%</td>
+</tr>
+</table>
+</div>
+<!-- 对比分析 -->
+<div class="section">
+<h2>🔬 与相关方法对比</h2>
+<table>
+<tr>
+<th>方法</th>
+<th>策略</th>
+<th>局限</th>
+<th>vs ADEPT</th>
+</tr>
+<tr>
+<td><strong>Full-parameter CPT</strong></td>
+<td>全参数更新</td>
+<td>灾难性遗忘严重</td>
+<td>ADEPT遗忘更少</td>
+</tr>
+<tr>
+<td><strong>Replay-based</strong></td>
+<td>混合通用数据</td>
+<td>需要存储通用数据</td>
+<td>ADEPT无需重放</td>
+</tr>
+<tr>
+<td><strong>LLaMA-Pro</strong></td>
+<td>均匀层插入</td>
+<td>未考虑层重要性差异</td>
+<td>ADEPT选择性扩展</td>
+</tr>
+<tr>
+<td><strong>LoRA/TaSL</strong></td>
+<td>低秩适配</td>
+<td>容量受限</td>
+<td>ADEPT容量更大</td>
+</tr>
+</table>
+</div>
+<!-- 实践启示 -->
+<div class="section">
+<h2>🛠️ 实践启示</h2>
+<h3>实施要点</h3>
+<table>
+<tr>
+<th>组件</th>
+<th>配置</th>
+<th>说明</th>
+</tr>
+<tr>
+<td>层扩展比例</td>
+<td>20-30%</td>
+<td>基于重要性选择</td>
+</tr>
+<tr>
+<td>学习率基值</td>
+<td>Pre-training的10-20%</td>
+<td>相对较小</td>
+</tr>
+<tr>
+<td>重计算频率</td>
+<td>每1K-5K steps</td>
+<td>动态适应</td>
+</tr>
+<tr>
+<td>冻结策略</td>
+<td>原始层冻结</td>
+<td>保护通用能力</td>
+</tr>
+</table>
+<h3>适用场景</h3>
+<div class="key-point">
+<strong>ADEPT最适合：</strong>
+            <ul>
+<li>需要<strong>高效领域适配</strong>的场景</li>
+<li>计算资源<strong>有限</strong>的情况</li>
+<li>对<strong>灾难性遗忘敏感</strong>的应用</li>
+<li>需要在<strong>多个领域顺序适配</strong>的场景</li>
+</ul>
+            </div>
+</div>
+<!-- 关键洞察 -->
+<div class="section">
+<h2>💡 关键洞察</h2>
+<div class="highlight-box">
+<strong>"功能感知优于均匀处理"</strong>
+            <br/><br/>
+            ADEPT的核心贡献是揭示LLM的<strong>功能专业化</strong>现象，并利用这一现象设计更有效的适配策略。
+            <br/><br/>
+            这与神经科学中的发现一致：大脑不同区域专门化负责不同功能。
+            <br/><br/>
+            启示：模型压缩、扩展、适配都应该考虑功能专业化，而非均匀处理。
+        </div>
+</div>
+<div class="section" style="text-align: center; color: var(--text-light);">
+<p>精读完成 | 论文: ADEPT (arXiv:2510.10071)</p>
+<p>GitHub: https://github.com/PuppyKnightUniversity/ADEPT</p>
+</div>
+</div>
+</body>
+</html>

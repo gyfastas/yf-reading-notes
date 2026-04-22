@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>daVinci-Env · 精读笔记</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0b0c10;
+  --s0:       #111218;
+  --s1:       #17181f;
+  --s2:       #1e1f28;
+  --border:   #23242f;
+  --border2:  #2d2e3c;
+  --text:     #ccc8be;
+  --muted:    #60617a;
+  --muted2:   #484860;
+  --head:     #e8e2d4;
+  --green:    #6dbb84;
+  --red:      #d9736a;
+  --amber:    #d4a84b;
+  --blue:     #6aa4c4;
+  --purple:   #9575c4;
+  --teal:     #4db8a4;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; font-size:15px; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 300;
+  line-height: 1.8;
+}
+
+/* ─── layout ─── */
+.layout { display:flex; min-height:100vh; }
+
+aside {
+  position: fixed;
+  top: 0; left: 0;
+  width: 210px;
+  height: 100vh;
+  background: var(--s0);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  z-index: 200;
+}
+
+.aside-head {
+  padding: 26px 20px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.back-link {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+  transition: color .2s;
+}
+.back-link:hover { color: var(--blue); }
+.aside-title {
+  font-family: 'Lora', serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--head);
+  line-height: 1.4;
+}
+.aside-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  margin-top: 5px;
+  letter-spacing: .06em;
+}
+
+nav { padding: 14px 0; flex: 1; }
+.nav-group { margin-bottom: 4px; }
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 20px;
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color .2s, background .2s;
+  border-left: 2px solid transparent;
+}
+.nav-item:hover { color: var(--text); background: rgba(255,255,255,.03); }
+.nav-item.active { color: var(--blue); border-left-color: var(--blue); background: rgba(106,164,196,.06); }
+.nav-item .n {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted2);
+  min-width: 16px;
+}
+
+.aside-foot {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted2);
+  line-height: 1.8;
+}
+
+/* ─── main ─── */
+main {
+  margin-left: 210px;
+  flex: 1;
+  max-width: 780px;
+  padding: 52px 48px 100px;
+}
+
+/* ─── hero ─── */
+.hero {
+  margin-bottom: 52px;
+}
+.hero-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 14px;
+}
+.hero h1 {
+  font-family: 'Lora', serif;
+  font-size: 36px;
+  font-weight: 500;
+  color: var(--head);
+  line-height: 1.2;
+  margin-bottom: 6px;
+  letter-spacing: -.02em;
+}
+.hero h1 em { font-style: italic; color: var(--teal); }
+.hero-sub {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 16px;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+.hero-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 3px;
+  text-decoration: none;
+  transition: opacity .15s;
+}
+.chip:hover { opacity: .75; }
+.chip-arxiv  { background:rgba(106,164,196,.12); color:var(--blue);   border:1px solid rgba(106,164,196,.22); }
+.chip-hf     { background:rgba(212,168,75,.10);  color:var(--amber);  border:1px solid rgba(212,168,75,.2); }
+.chip-gh     { background:rgba(255,255,255,.05); color:var(--muted);  border:1px solid var(--border2); }
+.chip-venue  { background:rgba(109,187,132,.10); color:var(--green);  border:1px solid rgba(109,187,132,.2); }
+
+.hero-abstract {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--teal);
+  border-radius: 0 8px 8px 0;
+  padding: 16px 20px;
+  font-size: 13.5px;
+  color: #a8a49c;
+  line-height: 1.75;
+}
+.hero-abstract strong { color: var(--text); }
+
+/* ─── section ─── */
+.sec { margin-bottom: 56px; }
+.sec-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.sec-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted2);
+  letter-spacing: .08em;
+  min-width: 24px;
+}
+.sec-line { width: 3px; height: 20px; border-radius: 2px; flex-shrink: 0; }
+.sec-title {
+  font-family: 'Lora', serif;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--head);
+}
+
+/* ─── prose ─── */
+p { margin-bottom: 12px; font-size: 13.5px; }
+p:last-child { margin-bottom: 0; }
+strong { color: var(--head); font-weight: 500; }
+em { color: var(--amber); font-style: italic; }
+
+/* ─── agents grid ─── */
+.agents-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.agent-card {
+  background: var(--s1);
+  padding: 16px 18px;
+  transition: background .2s;
+}
+.agent-card:hover { background: var(--s2); }
+.agent-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 6px;
+}
+.agent-name {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--head);
+  margin-bottom: 7px;
+}
+.agent-body { font-size: 12.5px; color: var(--muted); line-height: 1.65; }
+.agent-body code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--purple); padding:1px 5px; border-radius:3px; }
+
+.model-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  background: rgba(149,117,196,.12);
+  color: var(--purple);
+  border: 1px solid rgba(149,117,196,.22);
+  padding: 3px 9px;
+  border-radius: 3px;
+  margin-bottom: 16px;
+}
+
+/* ─── pipeline ─── */
+.pipeline { display: flex; flex-direction: column; gap: 2px; margin-bottom: 20px; }
+.pipeline-step {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 0;
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.pipeline-step:hover { border-color: var(--border2); }
+.step-gutter {
+  background: var(--s0);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 16px 0 0;
+  border-right: 1px solid var(--border);
+}
+.step-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 500;
+  color: var(--teal);
+  letter-spacing: .06em;
+}
+.step-inner { padding: 14px 18px; }
+.step-h {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--head);
+  margin-bottom: 6px;
+}
+.step-p { font-size: 12.5px; color: var(--muted); line-height: 1.65; }
+.step-p code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--purple); padding:1px 5px; border-radius:3px; }
+.step-p strong { color: var(--text); }
+
+/* connector */
+.step-connector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+  color: var(--muted2);
+  font-size: 11px;
+}
+
+/* ─── feedback loop diagram ─── */
+.feedback-loop {
+  background: var(--s0);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 20px;
+  margin: 20px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  overflow-x: auto;
+}
+.fl-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  white-space: nowrap;
+}
+.fl-box {
+  background: var(--s2);
+  border: 1px solid var(--border2);
+  border-radius: 5px;
+  padding: 5px 10px;
+  color: var(--blue);
+  font-size: 10.5px;
+}
+.fl-arrow { color: var(--muted2); padding: 0 6px; font-size: 12px; }
+.fl-feedback {
+  margin-top: 10px;
+  color: var(--muted2);
+  font-size: 10px;
+  padding-left: 10px;
+  border-left: 2px solid var(--border2);
+  line-height: 1.8;
+}
+.fl-fb-item { display: flex; align-items: baseline; gap: 8px; }
+.fl-fb-src { color: var(--red); min-width: 100px; }
+.fl-fb-arrow { color: var(--muted2); }
+.fl-fb-dst { color: var(--amber); }
+
+/* ─── code block ─── */
+.codeblock {
+  background: var(--s0);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 14px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  line-height: 1.75;
+}
+.codeblock-head {
+  background: var(--s1);
+  border-bottom: 1px solid var(--border);
+  padding: 7px 16px;
+  font-size: 9.5px;
+  color: var(--muted);
+  letter-spacing: .1em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.codeblock-head .dot { width:8px;height:8px;border-radius:50%; }
+.codeblock pre {
+  padding: 14px 18px;
+  white-space: pre;
+  overflow-x: auto;
+  color: #7a8496;
+}
+.tok-comment { color: #3e404e; }
+.tok-key     { color: var(--purple); }
+.tok-str     { color: var(--amber); }
+.tok-num     { color: var(--teal); }
+.tok-cmd     { color: var(--blue); }
+.tok-em      { color: var(--red); }
+
+/* ─── callout ─── */
+.callout {
+  border-radius: 7px;
+  padding: 13px 16px;
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 14px 0;
+  display: flex;
+  gap: 12px;
+}
+.callout-icon { font-size: 14px; flex-shrink: 0; padding-top: 1px; }
+.callout-body { flex: 1; }
+.callout-body strong { font-weight: 500; }
+.callout.warn  { background:rgba(212,168,75,.08);  border:1px solid rgba(212,168,75,.18);  color:#b8a070; }
+.callout.info  { background:rgba(106,164,196,.08); border:1px solid rgba(106,164,196,.18); color:#7ea8c0; }
+.callout.good  { background:rgba(109,187,132,.08); border:1px solid rgba(109,187,132,.18); color:#78b08a; }
+.callout.key   { background:rgba(149,117,196,.08); border:1px solid rgba(149,117,196,.18); color:#9880b8; }
+
+/* ─── difficulty vis ─── */
+.diff-vis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin: 16px 0;
+}
+.dv-cell {
+  border-radius: 8px;
+  padding: 14px 10px;
+  text-align: center;
+  border: 1px solid var(--border);
+}
+.dv-frac {
+  font-family: 'Lora', serif;
+  font-size: 22px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+.dv-verdict {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.dv-reason { font-size: 11.5px; color: var(--muted); }
+.dv-cell.no   { background:rgba(217,115,106,.07); border-color:rgba(217,115,106,.2); }
+.dv-cell.no .dv-frac { color: var(--red); }
+.dv-cell.no .dv-verdict { color: var(--red); }
+.dv-cell.yes  { background:rgba(109,187,132,.08); border-color:rgba(109,187,132,.25); }
+.dv-cell.yes .dv-frac { color: var(--green); }
+.dv-cell.yes .dv-verdict { color: var(--green); }
+
+/* ─── funnel ─── */
+.funnel { display:flex; flex-direction:column; gap:0; margin:16px 0; }
+.funnel-row {
+  display: grid;
+  grid-template-columns: 90px 1fr 180px;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 16px;
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  font-size: 12.5px;
+}
+.funnel-row:first-child { border-radius: 7px 7px 0 0; }
+.funnel-row:last-child  { border-bottom: 1px solid var(--border); border-radius: 0 0 7px 7px; }
+.funnel-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: right;
+}
+.funnel-track { background: var(--border); height: 5px; border-radius: 3px; position:relative; overflow:hidden; }
+.funnel-fill  { height: 100%; border-radius: 3px; }
+.funnel-label { color: var(--muted); font-size: 12px; }
+
+/* ─── stat grid ─── */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 16px 0;
+}
+.stat-cell {
+  background: var(--s1);
+  padding: 16px 18px;
+}
+.stat-val {
+  font-family: 'Lora', serif;
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--head);
+  margin-bottom: 3px;
+  line-height: 1.1;
+}
+.stat-val .unit {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 400;
+}
+.stat-label { font-size: 11.5px; color: var(--muted); }
+
+/* ─── quality list ─── */
+.quality-list { display:flex; flex-direction:column; gap:2px; }
+.ql-item {
+  display: flex;
+  gap: 12px;
+  padding: 11px 16px;
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.6;
+  transition: background .2s;
+}
+.ql-item:hover { background: var(--s2); }
+.ql-icon { font-size: 13px; flex-shrink:0; padding-top:2px; }
+.ql-body { color: var(--muted); }
+.ql-body strong { color: var(--text); }
+.ql-body code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--purple); padding:1px 5px; border-radius:3px; }
+
+/* ─── insights for us ─── */
+.insight-cards { display:flex; flex-direction:column; gap:10px; }
+.insight-card {
+  display: grid;
+  grid-template-columns: 3px 1fr;
+  gap: 14px;
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  overflow: hidden;
+  padding: 14px 16px;
+  transition: border-color .2s;
+}
+.insight-card:hover { border-color: var(--border2); }
+.insight-stripe { border-radius: 2px; }
+.insight-content {}
+.insight-title { font-size: 13.5px; font-weight:500; color:var(--head); margin-bottom:5px; }
+.insight-body  { font-size: 12.5px; color:var(--muted); line-height:1.65; }
+.insight-body strong { color:var(--text); }
+.insight-body code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--purple); padding:1px 5px; border-radius:3px; }
+
+/* ─── infra table ─── */
+.infra-table { width:100%; border-collapse:collapse; font-size:13px; margin:14px 0; }
+.infra-table th {
+  font-family:'JetBrains Mono',monospace;
+  font-size:9.5px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--muted2);
+  padding:9px 14px;
+  text-align:left;
+  background:var(--s0);
+  border-bottom:1px solid var(--border);
+}
+.infra-table td {
+  padding:10px 14px;
+  border-bottom:1px solid var(--border);
+  color:var(--muted);
+  vertical-align:top;
+}
+.infra-table tr:last-child td { border-bottom:none; }
+.infra-table td:first-child { color:var(--text); font-weight:500; white-space:nowrap; }
+
+/* ─── scrollbar ─── */
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+/* ─── divider ─── */
+.divider { border:none; border-top:1px solid var(--border); margin:28px 0; }
+
+@media (max-width:700px) {
+  aside { display:none; }
+  main  { margin-left:0; padding:28px 18px 60px; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ─── Sidebar ─── -->
+<aside>
+  <div class="aside-head">
+    <a href="../../Reference.html" class="back-link">← 返回 Reference</a>
+    <div class="aside-title">daVinci-Env</div>
+    <div class="aside-sub">精读笔记 · 2026.03</div>
+  </div>
+  <nav>
+    <a class="nav-item active" href="#overview"><span class="n">00</span>概览</a>
+    <a class="nav-item" href="#agents"><span class="n">01</span>四个 Agent</a>
+    <a class="nav-item" href="#pipeline"><span class="n">02</span>六步流水线</a>
+    <a class="nav-item" href="#feedback"><span class="n">03</span>反馈路由环</a>
+    <a class="nav-item" href="#difficulty"><span class="n">04</span>难度过滤</a>
+    <a class="nav-item" href="#quality"><span class="n">05</span>质量保障</a>
+    <a class="nav-item" href="#infra"><span class="n">06</span>基础设施</a>
+    <a class="nav-item" href="#stats"><span class="n">07</span>规模与成本</a>
+    <a class="nav-item" href="#takeaways"><span class="n">08</span>对我们的启发</a>
+  </nav>
+  <div class="aside-foot">
+    arXiv:2603.13023<br>
+    GAIR-NLP · 2026.03<br>
+    DeepSeek-V3.2 驱动<br>
+    64节点 ECS 集群
+  </div>
+</aside>
+
+<!-- ─── Main ─── -->
+<main>
+
+<!-- Hero -->
+<div class="hero" id="overview">
+  <div class="hero-eyebrow">Paper Deep-Dive · arXiv:2603.13023</div>
+  <h1>daVinci-<em>Env</em></h1>
+  <div class="hero-sub">Open SWE Environment Synthesis at Scale</div>
+  <div class="hero-chips">
+    <a href="https://arxiv.org/abs/2603.13023" target="_blank" class="chip chip-arxiv">↗ arXiv:2603.13023</a>
+    <a href="https://huggingface.co/datasets/GAIR/OpenSWE" target="_blank" class="chip chip-hf">🤗 GAIR/OpenSWE</a>
+    <a href="https://github.com/GAIR-NLP/OpenSWE" target="_blank" class="chip chip-gh">⌥ GAIR-NLP/OpenSWE</a>
+    <span class="chip chip-venue">GAIR-NLP · 2026.03</span>
+  </div>
+  <div class="hero-abstract">
+    本文提出 <strong>OpenSWE</strong>——一个大规模、全自动的 SWE 训练环境构建系统。核心贡献：通过四 agent 协作流水线，从 572,114 个 GitHub PR 中自动构建出 <strong>45,320 个可执行 Docker 环境</strong>（覆盖 12,800 个 repo），并进一步通过 <strong>difficulty-centric filtering</strong> 筛选出 ~9,000 个高质量环境用于生成 ~13,000 条训练轨迹。在此基础上训练的 <strong>OpenSWE-32B / 72B</strong> 在 SWE-Bench Verified 上分别达到 <strong>62.4% / 66.0%</strong>，同时显著提升了数学推理（+12pt）和科学（+5pt）等 out-of-domain 能力。
+  </div>
+</div>
+
+<!-- ─── 01 四个 Agent ─── -->
+<section class="sec" id="agents">
+  <div class="sec-header">
+    <span class="sec-num">01</span>
+    <div class="sec-line" style="background:var(--teal)"></div>
+    <h2 class="sec-title">四个专职 Agent</h2>
+  </div>
+
+  <div class="model-badge">
+    <span>⚙</span> 所有 Agent 统一由 <strong>DeepSeek-V3.2</strong> 驱动
+  </div>
+
+  <div class="agents-grid">
+    <div class="agent-card">
+      <div class="agent-tag">Agent 01</div>
+      <div class="agent-name">Repo Exploration Agent</div>
+      <div class="agent-body">
+        从本地 repo checkout 中提取 setup/test 相关信息。<br><br>
+        仅暴露三个受限 API：<code>browse</code>（结构探索）、<code>search</code>（定位配置文件）、<code>digest</code>（提取文件内容）。<br><br>
+        <strong>cost-aware 策略</strong>：默认浅探索，仅在 Test Analysis Agent 明确请求时才深入获取额外文件，节省 token。
+      </div>
+    </div>
+    <div class="agent-card">
+      <div class="agent-tag">Agent 02</div>
+      <div class="agent-name">Dockerfile Agent</div>
+      <div class="agent-body">
+        生成可复现的 Docker build 文件。<br><br>
+        使用预置 base image <code>openswe-python-{ver}</code>（覆盖 Python 2.7 ~ 3.14，内置 conda + testbed env + 包镜像）。用本地 bare repo cache + <code>COPY</code> 代替运行时 <code>git clone</code>，彻底绕开 GitHub rate limit。<br><br>
+        硬性禁令：<strong>FORBIDDEN to run tests in the Dockerfile</strong>。
+      </div>
+    </div>
+    <div class="agent-card">
+      <div class="agent-tag">Agent 03</div>
+      <div class="agent-name">Evaluation Script Agent</div>
+      <div class="agent-body">
+        生成 bash 脚本验证 patch 正确性。<br><br>
+        只跑 targeted tests，不跑全量 test suite。<strong>可合成原 PR 里没有的新测试用例</strong>——这是与 SWE-Bench 静态 fail2pass 脚本的本质区别。<br><br>
+        禁止 <code>set -e</code>（会截断 error code），必须输出 <code>OPENSWE_EXIT_CODE=$rc</code>。
+      </div>
+    </div>
+    <div class="agent-card">
+      <div class="agent-tag">Agent 04</div>
+      <div class="agent-name">Test Analysis Agent</div>
+      <div class="agent-body">
+        分析执行结果，判断 pass/fail 并精确路由反馈。<br><br>
+        <strong>Pass 时</strong>：检查有无硬编码 exit code 或跳过真实测试的 shortcut。<br>
+        <strong>Fail 时</strong>：诊断根因并路由到对应 agent，无解情形（依赖 404、版本不存在）直接 <code>is_finish=true</code> 提前退出。<br><br>
+        输出结构化 JSON：<code>{is_finish, dockerfile_fb, eval_fb, explore_fb}</code>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-icon">ℹ</div>
+    <div class="callout-body">四个 agent 共享同一个 LLM 后端（DeepSeek-V3.2），但接受不同的 system prompt 和工具集约束，形成明确的职责边界。每个 agent 只在自己的职责范围内决策，避免单一大 agent 的幻觉叠加问题。</div>
+  </div>
+</section>
+
+<!-- ─── 02 六步流水线 ─── -->
+<section class="sec" id="pipeline">
+  <div class="sec-header">
+    <span class="sec-num">02</span>
+    <div class="sec-line" style="background:var(--blue)"></div>
+    <h2 class="sec-title">六步构建流水线</h2>
+  </div>
+
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">S1</span></div>
+      <div class="step-inner">
+        <div class="step-h">GitHub PR 四层漏斗过滤</div>
+        <div class="step-p">
+          从原始 <strong>572,114 个 GitHub PR</strong> 开始，四层串行过滤：<br>
+          ① repo ≥ 5 stars &nbsp;·&nbsp;
+          ② 主语言为 Python &nbsp;·&nbsp;
+          ③ 有 linked issue（含描述文字）&nbsp;·&nbsp;
+          ④ PR 不能只改 <code>*tests*</code> / <code>*spec*</code> / <code>*e2e*</code> 目录
+        </div>
+      </div>
+    </div>
+    <div class="step-connector">↓</div>
+
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">S2</span></div>
+      <div class="step-inner">
+        <div class="step-h">Repo Exploration</div>
+        <div class="step-p">
+          Agent 接收 repo 名称、commit/version、patch 提示的文件线索，通过三个受限 API 按需探索。<strong>捕获 Python 特定框架</strong>（poetry, uv）和测试框架信息，输出精确的依赖版本（如 <code>flask==2.0.3</code>）和测试命令。
+        </div>
+      </div>
+    </div>
+    <div class="step-connector">↓</div>
+
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">S3</span></div>
+      <div class="step-inner">
+        <div class="step-h">Dockerfile 构建</div>
+        <div class="step-p">
+          基于探索结果生成 Dockerfile。关键工程决策：<br>
+          · <strong>预置 base image</strong> 避免重复安装基础依赖<br>
+          · <strong>Layer 顺序优化</strong>：stable 层放前面充分利用 Docker cache；dev 依赖层独立，便于廉价迭代<br>
+          · 强制 <code>pip install -e .</code> 防止加载已安装的过期包
+        </div>
+      </div>
+    </div>
+    <div class="step-connector">↓</div>
+
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">S4</span></div>
+      <div class="step-inner">
+        <div class="step-h">Evaluation Script 生成</div>
+        <div class="step-p">生成的脚本必须遵循严格格式，用 heredoc 注入 patch，输出结构化分隔符与机器可读 exit code：</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <div class="dot" style="background:#e06c75"></div>
+      <div class="dot" style="background:#e5c07b"></div>
+      <div class="dot" style="background:#98c379"></div>
+      eval_script.sh · 必须包含的固定结构
+    </div>
+    <pre><span class="tok-comment"># patch via heredoc（随机分隔符，防止内容冲突）</span>
+<span class="tok-cmd">git apply</span> -v - &lt;&lt;<span class="tok-str">'EOF_114329324912'</span>
+&lt;patch content&gt;
+<span class="tok-str">EOF_114329324912</span>
+
+<span class="tok-comment"># 结构化输出分隔符（regex 解析用）</span>
+<span class="tok-cmd">echo</span> <span class="tok-str">"&gt;&gt;&gt;&gt;&gt; Start Test Output"</span>
+
+<span class="tok-comment"># 只跑 targeted tests，不跑全量 test suite</span>
+<span class="tok-comment"># 可合成原 PR 里没有的新 test case</span>
+pytest tests/test_target.py -v
+
+<span class="tok-key">rc</span>=$?                                 <span class="tok-comment"># 立即捕获 exit code</span>
+<span class="tok-cmd">echo</span> <span class="tok-str">"&gt;&gt;&gt;&gt;&gt; End Test Output"</span>
+<span class="tok-cmd">echo</span> <span class="tok-str">"OPENSWE_EXIT_CODE=$rc"</span>           <span class="tok-comment"># machine-readable signal</span>
+
+<span class="tok-em"># ⚠ 严禁 set -e（会在 test fail 时截断 exit code 输出）</span></pre>
+  </div>
+
+  <div class="pipeline" style="margin-top:4px">
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">S5</span></div>
+      <div class="step-inner">
+        <div class="step-h">双条件 Rule-Based 验证</div>
+        <div class="step-p">
+          每个环境执行两次，必须同时满足：<br>
+          ① <strong>仅 test patch</strong>：exit code ≠ 0（测试应该失败，证明 bug 存在）<br>
+          ② <strong>完整 fix patch</strong>：exit code = 0（测试应该通过，证明 fix 有效）<br><br>
+          优化：<strong>Dockerfile 不变时复用已构建 image</strong>，只重跑 eval script → <em>5× 速度提升</em>。<br>
+          容器资源上限：4 CPU / 24GB RAM / 200GB 存储。
+        </div>
+      </div>
+    </div>
+    <div class="step-connector">↓</div>
+
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">S6</span></div>
+      <div class="step-inner">
+        <div class="step-h">Test Analysis 诊断与路由</div>
+        <div class="step-p">
+          解析 <code>OPENSWE_EXIT_CODE=X</code> 标记（regex），缺失则触发 failure。<br>
+          诊断失败原因并精确路由反馈，或标记无解案例直接退出（Dockerfile 问题 / Script 问题 / 不可解）。
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── 03 反馈路由环 ─── -->
+<section class="sec" id="feedback">
+  <div class="sec-header">
+    <span class="sec-num">03</span>
+    <div class="sec-line" style="background:var(--amber)"></div>
+    <h2 class="sec-title">迭代反馈路由环</h2>
+  </div>
+
+  <p>四个 agent 形成一个<strong>带精确路由的迭代修复环</strong>，而不是简单的串行流水线。失败时反馈被定向发送给负责该问题的 agent，避免无效重试。</p>
+
+  <div class="feedback-loop">
+    <div class="fl-row">
+      <div class="fl-box">Repo Exploration</div>
+      <div class="fl-arrow">→</div>
+      <div class="fl-box">Dockerfile</div>
+      <div class="fl-arrow">→</div>
+      <div class="fl-box">Eval Script</div>
+      <div class="fl-arrow">→</div>
+      <div class="fl-box">Execute</div>
+      <div class="fl-arrow">→</div>
+      <div class="fl-box" style="border-color:var(--amber);color:var(--amber)">Test Analysis</div>
+    </div>
+    <div class="fl-feedback" style="margin-top:12px">
+      <div class="fl-fb-item">
+        <span class="fl-fb-src">Dockerfile 错误</span>
+        <span class="fl-fb-arrow">────────────────────→</span>
+        <span class="fl-fb-dst">Dockerfile Agent 重生成</span>
+      </div>
+      <div class="fl-fb-item">
+        <span class="fl-fb-src">Script 错误</span>
+        <span class="fl-fb-arrow">────────────────────→</span>
+        <span class="fl-fb-dst">Eval Script Agent 重生成</span>
+      </div>
+      <div class="fl-fb-item">
+        <span class="fl-fb-src">需要更多文件</span>
+        <span class="fl-fb-arrow">────────────────────→</span>
+        <span class="fl-fb-dst">Repo Exploration Agent 深入</span>
+      </div>
+      <div class="fl-fb-item">
+        <span class="fl-fb-src">无解情形</span>
+        <span class="fl-fb-arrow">────────────────────→</span>
+        <span class="fl-fb-dst">is_finish=true，提前退出</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <div class="callout-icon">⚠</div>
+    <div class="callout-body"><strong>无解情形的识别</strong>：依赖包 404、Python 版本不存在（如 numpy ≤ 1.8）、conflicting dependencies 等情形，Test Analysis Agent 会标记 <code>is_finish=true</code> 直接终止，不浪费资源继续重试。网络问题则设置 <code>is_finish=false</code> 重试。</div>
+  </div>
+</section>
+
+<!-- ─── 04 难度过滤 ─── -->
+<section class="sec" id="difficulty">
+  <div class="sec-header">
+    <span class="sec-num">04</span>
+    <div class="sec-line" style="background:var(--green)"></div>
+    <h2 class="sec-title">Difficulty-Centric Filtering</h2>
+  </div>
+
+  <p>45,320 个通过验证的环境并不都适合训练——<strong>太简单的和太难的都会降低学习效率</strong>。论文设计了一套基于 pass rate 的难度校准机制：</p>
+
+  <div class="callout key">
+    <div class="callout-icon">⚙</div>
+    <div class="callout-body">用 <strong>GLM-4.7</strong> 在 <strong>OpenHands 或 SWE-Agent scaffold</strong> 上对每个环境采样 <strong>4 条轨迹</strong>（temperature = 1.0，200k context window，max 300 steps），统计成功条数作为难度代理指标。</div>
+  </div>
+
+  <div class="diff-vis">
+    <div class="dv-cell no">
+      <div class="dv-frac">0/4</div>
+      <div class="dv-verdict">丢弃</div>
+      <div class="dv-reason">无解 / 不可修复<br>任何 agent 都无法解决</div>
+    </div>
+    <div class="dv-cell yes">
+      <div class="dv-frac">1/4</div>
+      <div class="dv-verdict">保留 ✓</div>
+      <div class="dv-reason">适合难度<br>有挑战，但可解</div>
+    </div>
+    <div class="dv-cell yes">
+      <div class="dv-frac">2/4</div>
+      <div class="dv-verdict">保留 ✓</div>
+      <div class="dv-reason">适合难度<br>有挑战，但可解</div>
+    </div>
+    <div class="dv-cell no">
+      <div class="dv-frac">3–4/4</div>
+      <div class="dv-verdict">丢弃</div>
+      <div class="dv-reason">过于简单<br>对训练无增益</div>
+    </div>
+  </div>
+
+  <div class="callout good">
+    <div class="callout-icon">✓</div>
+    <div class="callout-body">这一机制解决了两类核心质量风险：<strong>PR-Issue 不对齐</strong>（patch 没有真正解决描述的 issue）和<strong>Triviality</strong>（issue 描述直接泄露了解决方案）。通过 agent 的实际表现来过滤，比规则过滤更鲁棒。</div>
+  </div>
+
+  <hr class="divider">
+  <p style="font-size:13px;color:var(--muted)">过滤结果：45,320 → <strong style="color:var(--text)">~9,000</strong> 高质量环境，用于生成 <strong style="color:var(--text)">~13,000</strong> 条 curated trajectories。yield rate ≈ 20%。</p>
+</section>
+
+<!-- ─── 05 质量保障 ─── -->
+<section class="sec" id="quality">
+  <div class="sec-header">
+    <span class="sec-num">05</span>
+    <div class="sec-line" style="background:var(--purple)"></div>
+    <h2 class="sec-title">多层质量保障</h2>
+  </div>
+
+  <div class="quality-list">
+    <div class="ql-item">
+      <div class="ql-icon">①</div>
+      <div class="ql-body">
+        <strong>Rule-Based 双条件验证</strong>：fail2pass 通过 exit code 确认，而非 log 字符串匹配（更鲁棒）。<code>OPENSWE_EXIT_CODE=X</code> 标记缺失即视为失败。
+      </div>
+    </div>
+    <div class="ql-item">
+      <div class="ql-icon">②</div>
+      <div class="ql-body">
+        <strong>Shortcut 检测</strong>：Test Analysis Agent 在 pass 后主动检查是否存在硬编码 exit code 或绕过真实测试执行的逻辑。
+      </div>
+    </div>
+    <div class="ql-item">
+      <div class="ql-icon">③</div>
+      <div class="ql-body">
+        <strong>Action Masking</strong>：训练轨迹中含 formatting error 或操作错误的 step 做 loss masking，不参与梯度计算，仅保留正确动作的训练信号。
+      </div>
+    </div>
+    <div class="ql-item">
+      <div class="ql-icon">④</div>
+      <div class="ql-body">
+        <strong>Reward Hacking 过滤</strong>：轨迹中含 <code>git pull</code> 的 bash action 直接移除——这是典型的作弊行为（通过拉取远程已有 fix 绕过真实修复）。
+      </div>
+    </div>
+    <div class="ql-item">
+      <div class="ql-icon">⑤</div>
+      <div class="ql-body">
+        <strong>Benchmark 去污染</strong>：SWE-rebench 和 SWE-Bench Verified 中的实例全部从训练集移除，防止测试集泄露。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── 06 基础设施 ─── -->
+<section class="sec" id="infra">
+  <div class="sec-header">
+    <span class="sec-num">06</span>
+    <div class="sec-line" style="background:var(--amber)"></div>
+    <h2 class="sec-title">基础设施</h2>
+  </div>
+
+  <table class="infra-table">
+    <thead>
+      <tr><th>组件</th><th>规格 / 方案</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>计算集群</td>
+        <td>64 节点 ECS，每节点 32 vCPU / 128GB RAM / 4TB SSD / 20Gbps 网络</td>
+      </tr>
+      <tr>
+        <td>构建耗时</td>
+        <td>~2 周完成 45,320 个环境构建</td>
+      </tr>
+      <tr>
+        <td>任务调度</td>
+        <td>File-based 消息队列（共享文件系统），数据并行，节点间无强耦合（非 MPI/Ray）</td>
+      </tr>
+      <tr>
+        <td>进程恢复</td>
+        <td>systemd 服务自动重启，防止单节点故障影响全局进度</td>
+      </tr>
+      <tr>
+        <td>容器管理</td>
+        <td>自动 Docker 资源清理守护进程，防止"僵尸容器"积累占用磁盘</td>
+      </tr>
+      <tr>
+        <td>监控</td>
+        <td>Prometheus + Grafana 实时监控构建进度、成功率、资源使用</td>
+      </tr>
+      <tr>
+        <td>Image 复用</td>
+        <td>Dockerfile 不变时直接复用已构建 image，仅重跑 eval script → 5× 提速</td>
+      </tr>
+      <tr>
+        <td>网络隔离</td>
+        <td>本地 bare repo cache + COPY 代替 git clone，消除 GitHub rate limit 依赖</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout info">
+    <div class="callout-icon">ℹ</div>
+    <div class="callout-body">构建系统选择 <strong>file-based 消息队列而非 MPI/Ray</strong>，有意为之——牺牲一些调度效率换来极高的容错性：任何节点崩溃都不影响其他节点，任务状态持久化在文件系统中，重启即可续跑。</div>
+  </div>
+</section>
+
+<!-- ─── 07 规模与成本 ─── -->
+<section class="sec" id="stats">
+  <div class="sec-header">
+    <span class="sec-num">07</span>
+    <div class="sec-line" style="background:var(--red)"></div>
+    <h2 class="sec-title">规模与成本</h2>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-cell">
+      <div class="stat-val">572K<span class="unit"> PRs</span></div>
+      <div class="stat-label">GitHub PR 起点</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-val">45,320</div>
+      <div class="stat-label">验证通过 Docker 环境</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-val">12.8K</div>
+      <div class="stat-label">覆盖 GitHub Repos</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-val">~9K</div>
+      <div class="stat-label">难度过滤后保留</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-val">~13K</div>
+      <div class="stat-label">Curated Trajectories</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-val">66.0<span class="unit">%</span></div>
+      <div class="stat-label">OpenSWE-72B · SWE-Bench V</div>
+    </div>
+  </div>
+
+  <div class="funnel">
+    <div class="funnel-row">
+      <span class="funnel-num" style="color:var(--text)">572,114</span>
+      <div class="funnel-track"><div class="funnel-fill" style="width:100%;background:var(--blue)"></div></div>
+      <span class="funnel-label">原始 GitHub PRs</span>
+    </div>
+    <div class="funnel-row">
+      <span class="funnel-num" style="color:var(--blue)">45,320</span>
+      <div class="funnel-track"><div class="funnel-fill" style="width:7.9%;background:var(--blue)"></div></div>
+      <span class="funnel-label">验证通过 Docker 环境 (7.9%)</span>
+    </div>
+    <div class="funnel-row">
+      <span class="funnel-num" style="color:var(--green)">~9,000</span>
+      <div class="funnel-track"><div class="funnel-fill" style="width:1.57%;background:var(--green)"></div></div>
+      <span class="funnel-label">难度过滤后 (20% of envs)</span>
+    </div>
+    <div class="funnel-row">
+      <span class="funnel-num" style="color:var(--amber)">~13,000</span>
+      <div class="funnel-track"><div class="funnel-fill" style="width:2.27%;background:var(--amber)"></div></div>
+      <span class="funnel-label">最终 Curated Trajectories</span>
+    </div>
+  </div>
+
+  <table class="infra-table" style="margin-top:16px">
+    <thead>
+      <tr><th>成本项</th><th>金额</th><th>说明</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>环境构建</td>
+        <td style="color:var(--amber);font-family:'JetBrains Mono',monospace">$891,000</td>
+        <td style="color:var(--muted)">45,320 个 Docker 环境 + Agent 调用</td>
+      </tr>
+      <tr>
+        <td>轨迹采样 + 筛选</td>
+        <td style="color:var(--amber);font-family:'JetBrains Mono',monospace">$576,000</td>
+        <td style="color:var(--muted)">GLM-4.7 × 4 次采样 × 45,320 环境</td>
+      </tr>
+      <tr>
+        <td><strong>合计</strong></td>
+        <td style="color:var(--red);font-family:'JetBrains Mono',monospace;font-weight:500">~$1,470,000</td>
+        <td style="color:var(--muted)">约 147 万美元</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ─── 08 对我们的启发 ─── -->
+<section class="sec" id="takeaways">
+  <div class="sec-header">
+    <span class="sec-num">08</span>
+    <div class="sec-line" style="background:var(--teal)"></div>
+    <h2 class="sec-title">对我们方案的启发</h2>
+  </div>
+
+  <div class="insight-cards">
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--green)"></div>
+      <div class="insight-content">
+        <div class="insight-title">直接复用 OpenSWE 环境，跳过 $891K 构建成本</div>
+        <div class="insight-body">45,320 个 Docker 环境已开源（<strong>🤗 GAIR/OpenSWE</strong>）。我们不需要重新构建——直接在这批环境上运行 rollout，用自己的 agent 生成轨迹。相当于 <strong>免费得到了 Phase 1 D^env 的执行基础设施</strong>。</div>
+      </div>
+    </div>
+
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--amber)"></div>
+      <div class="insight-content">
+        <div class="insight-title">1-2/4 Pass Rate 过滤标准可直接移植</div>
+        <div class="insight-body">难度校准的核心操作数：<strong>用小模型（GLM-4.7 级别）采样 4 次，保留 1-2 次成功的实例</strong>。不需要大规模计算，在我们的 D^env 构建里可以用 Qwen3-VL 自身做 difficulty estimation，成本可控。</div>
+      </div>
+    </div>
+
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--blue)"></div>
+      <div class="insight-content">
+        <div class="insight-title">Dockerfile 构建经验直接可借鉴</div>
+        <div class="insight-body">预置 base image、本地 repo cache、<code>pip install -e .</code> 这套工程实践是他们踩坑总结的。我们的 D^env 如果需要自建环境，直接 follow 这套范式，避免重复踩坑。特别是 <strong>5× 加速的 image 复用策略</strong>，对 eval script 迭代优化很有价值。</div>
+      </div>
+    </div>
+
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--red)"></div>
+      <div class="insight-content">
+        <div class="insight-title">git pull reward hacking 过滤要提前设计</div>
+        <div class="insight-body">论文明确指出轨迹中 <code>git pull</code> 的 bash action 需要过滤——这是 agent 通过拉远程仓库已有 fix 作弊的行为。<strong>在我们的 D^env rollout pipeline 里，这类 reward hacking 检测需要从设计阶段就纳入</strong>，而不是事后补救。</div>
+      </div>
+    </div>
+
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--purple)"></div>
+      <div class="insight-content">
+        <div class="insight-title">Evaluation Script 可合成新测试用例是关键差异化</div>
+        <div class="insight-body">与 SWE-Bench 静态 fail2pass 不同，daVinci-Env 的 Eval Script Agent 可以<strong>合成原 PR 里没有的新测试用例</strong>。这意味着即使原始 PR 的测试覆盖不足，也能构建有效验证环境。如果我们需要从 D^ctx 的 PR 数据中提取验证信号，这个思路值得参考。</div>
+      </div>
+    </div>
+
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--teal)"></div>
+      <div class="insight-content">
+        <div class="insight-title">数据量 vs 难度筛选的 trade-off</div>
+        <div class="insight-body">从 45,320 → 9,000 只保留了 20%，但最终模型效果（66.0%）超越了使用更多但未筛选数据的方案。这验证了 <strong>"质量 > 数量"</strong> 的核心判断——我们在 D^env 阶段宁可少，要精，不要盲目追求 token 量。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+
+<script>
+// Active nav on scroll
+const sections = document.querySelectorAll('section.sec[id], .hero[id]');
+const navItems = document.querySelectorAll('nav .nav-item');
+
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navItems.forEach(n => {
+        n.classList.toggle('active', n.getAttribute('href') === '#' + e.target.id);
+      });
+    }
+  });
+}, { rootMargin: '-25% 0px -65% 0px' });
+
+sections.forEach(s => io.observe(s));
+</script>
+</body>
+</html>

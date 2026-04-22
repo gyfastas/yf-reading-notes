@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Gemini 2.5 Pro | 精读笔记</title>
+<style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --highlight: #fef3c7;
+            --code-bg: #f1f5f9;
+            --success: #10b981;
+            --purple: #8b5cf6;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .paper-header {
+            background: linear-gradient(135deg, var(--purple) 0%, #7c3aed 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+        .paper-header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 12px; }
+        .paper-header .meta { font-size: 0.85rem; opacity: 0.9; }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.2);
+        }
+        .section {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .section h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+        .section h3 {
+            font-size: 1.1rem;
+            color: var(--text);
+            margin: 20px 0 12px;
+        }
+        .highlight-box {
+            background: var(--highlight);
+            border-left: 4px solid #f59e0b;
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .key-point {
+            background: #eff6ff;
+            border-left: 4px solid var(--primary);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background: var(--code-bg);
+            font-weight: 600;
+            color: var(--text);
+        }
+        tr:hover { background: #f8fafc; }
+        .metric { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+    </style>
+</head>
+<body>
+<div class="container">
+<!-- Header -->
+<div class="paper-header">
+<span class="badge">arXiv:2507.06261</span>
+<span class="badge">July 2025</span>
+<h1>Gemini 2.5: Pushing the Frontier with Advanced Reasoning, Multimodality, Long Context, and Next Generation Agentic Capabilities</h1>
+<div class="meta">Google DeepMind | 多模态 | 1M-2M Context | Agentic</div>
+</div>
+
+<!-- TL;DR -->
+<div class="section">
+<h2>📌 TL;DR 核心规格</h2>
+<div class="highlight-box">
+<strong>定位：</strong> Google最先进的AI模型
+            <br/>
+            <strong>上下文：</strong> <span class="metric">1,000,000 tokens (Pro)</span> / 2,000,000 tokens (实验性)
+            <br/>
+            <strong>核心能力：</strong> 高级推理 + 多模态 + 长上下文 + Agentic
+        </div>
+<div class="key-point">
+<strong>关键创新：</strong>
+            <ul>
+<li>原生多模态：文本、图像、音频、视频统一处理</li>
+<li>Thinking模式：内置推理能力</li>
+<li>Agentic能力：工具使用、代码执行</li>
+<li>超长上下文：百万级token处理</li>
+</ul>
+</div>
+</div>
+
+<!-- Architecture -->
+<div class="section">
+<h2>🏗️ 架构与能力</h2>
+<table>
+<tr>
+<th>组件</th>
+<th>配置</th>
+</tr>
+<tr>
+<td>模型系列</td>
+<td>Gemini 2.5 Pro / Flash</td>
+</tr>
+<tr>
+<td>上下文窗口 (Pro)</td>
+<td class="metric">1,000,000 tokens</td>
+</tr>
+<tr>
+<td>上下文窗口 (实验)</td>
+<td class="metric">2,000,000 tokens</td>
+</tr>
+<tr>
+<td>模态支持</td>
+<td>文本 + 图像 + 音频 + 视频</td>
+</tr>
+<tr>
+<td>推理模式</td>
+<td>Thinking / Non-thinking</td>
+</tr>
+</table>
+</div>
+
+<!-- Multimodality -->
+<div class="section">
+<h2>🎨 原生多模态</h2>
+<h3>统一多模态架构</h3>
+<ul>
+<li><strong>早期融合：</strong> 从底层统一处理多种模态</li>
+<li><strong>任何输入：</strong> 文本、图像、音频、视频任意组合</li>
+<li><strong>任何输出：</strong> 可生成文本、图像、结构化数据</li>
+</ul>
+<h3>视频理解</h3>
+<ul>
+<li>长视频理解能力</li>
+<li>时序推理</li>
+<li>跨帧信息整合</li>
+</ul>
+</div>
+
+<!-- Long Context -->
+<div class="section">
+<h2>📏 长上下文能力</h2>
+<div class="highlight-box">
+<strong>1M Tokens标准：</strong> 可处理整本书、大型代码库、长视频
+            <br/>
+            <strong>2M Tokens实验：</strong> 更大规模文档分析
+        </div>
+<h3>长上下文应用场景</h3>
+<ul>
+<li>大型代码库理解与修改</li>
+<li>长篇小说/论文分析</li>
+<li>多文档对比与综合</li>
+<li>长视频内容理解与问答</li>
+</ul>
+</div>
+
+<!-- Reasoning -->
+<div class="section">
+<h2>🧠 高级推理 (Thinking Mode)</h2>
+<h3>Thinking模式特点</h3>
+<ul>
+<li><strong>链式思考：</strong> 展示推理过程</li>
+<li><strong>自我修正：</strong> 识别并纠正推理错误</li>
+<li><strong>多步规划：</strong> 复杂任务分解</li>
+</ul>
+<h3>推理优化</h3>
+<ul>
+<li>数学问题解决</li>
+<li>代码调试与生成</li>
+<li>科学研究辅助</li>
+</ul>
+</div>
+
+<!-- Agentic -->
+<div class="section">
+<h2>🤖 Agentic能力</h2>
+<h3>内置工具使用</h3>
+<ul>
+<li><strong>代码执行：</strong> 内置解释器</li>
+<li><strong>搜索：</strong> 联网信息获取</li>
+<li><strong>函数调用：</strong> 结构化工具调用</li>
+</ul>
+<h3>自主执行</h3>
+<ul>
+<li>多步骤任务规划</li>
+<li>工具链组合</li>
+<li>结果验证与迭代</li>
+</ul>
+</div>
+
+<!-- Performance -->
+<div class="section">
+<h2>📊 关键性能</h2>
+<table>
+<tr>
+<th>基准</th>
+<th>表现</th>
+</tr>
+<tr>
+<td>MMLU</td>
+<td>领先水平</td>
+</tr>
+<tr>
+<td>数学推理</td>
+<td>顶尖表现</td>
+</tr>
+<tr>
+<td>代码生成</td>
+<td>业界领先</td>
+</tr>
+<tr>
+<td>多语言</td>
+<td>支持100+语言</td>
+</tr>
+</table>
+</div>
+
+<div class="section" style="text-align: center; color: var(--text-light);">
+<p>精读笔记框架 | Gemini 2.5 Technical Report</p>
+<p>Google DeepMind | https://deepmind.google/</p>
+</div>
+</div>
+</body>
+</html>

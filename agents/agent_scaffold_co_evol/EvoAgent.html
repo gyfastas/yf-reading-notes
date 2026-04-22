@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EvoAgent · 精读笔记</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0c0a08;--s0:#12100c;--s1:#1a1610;--s2:#221e16;--border:#2a251c;--border2:#363020;--text:#cec8b8;--muted:#7a6e58;--muted2:#54493a;--head:#e8e0d0;--accent:#c8a07e;--accent2:#a8845e;--red:#d9736a;--amber:#c8a04a;--blue:#5ea8c0;--purple:#8878b8;--green:#6dbb84;--teal:#4db8a4}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth;font-size:15px}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans SC',sans-serif;font-weight:300;line-height:1.8}
+.layout{display:flex;min-height:100vh}
+aside{position:fixed;top:0;left:0;width:210px;height:100vh;background:var(--s0);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;z-index:200}
+.aside-head{padding:26px 20px 20px;border-bottom:1px solid var(--border)}
+.back-link{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:6px;margin-bottom:14px;transition:color .2s}.back-link:hover{color:var(--accent)}
+.aside-title{font-family:'Lora',serif;font-size:14px;font-weight:600;color:var(--head);line-height:1.4}
+.aside-sub{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-top:5px;letter-spacing:.06em}
+nav{padding:14px 0;flex:1}
+.nav-item{display:flex;align-items:center;gap:9px;padding:6px 20px;font-size:12px;color:var(--muted);text-decoration:none;cursor:pointer;transition:color .2s,background .2s;border-left:2px solid transparent}
+.nav-item:hover{color:var(--text);background:rgba(255,255,255,.02)}
+.nav-item.active{color:var(--accent);border-left-color:var(--accent);background:rgba(200,160,126,.05)}
+.nav-item .n{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted2);min-width:16px}
+.aside-foot{padding:14px 20px;border-top:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted2);line-height:1.8}
+main{margin-left:210px;flex:1;max-width:820px;padding:52px 48px 100px}
+.hero{margin-bottom:52px}
+.hero-eyebrow{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+.hero h1{font-family:'Lora',serif;font-size:32px;font-weight:500;color:var(--head);line-height:1.25;margin-bottom:6px;letter-spacing:-.02em}
+.hero h1 em{font-style:italic;color:var(--accent)}
+.hero-sub{font-family:'Lora',serif;font-style:italic;font-size:15px;color:var(--muted);margin-bottom:20px}
+.hero-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+.chip{font-family:'JetBrains Mono',monospace;font-size:10px;padding:3px 10px;border-radius:3px;text-decoration:none;transition:opacity .15s}.chip:hover{opacity:.75}
+.chip-arxiv{background:rgba(94,168,192,.12);color:var(--blue);border:1px solid rgba(94,168,192,.22)}
+.chip-venue{background:rgba(200,160,126,.10);color:var(--accent);border:1px solid rgba(200,160,126,.2)}
+.hero-abstract{background:var(--s1);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:16px 20px;font-size:13.5px;color:#908878;line-height:1.75}
+.hero-abstract strong{color:var(--text)}
+.sec{margin-bottom:50px}
+.sec-header{display:flex;align-items:center;gap:12px;margin-bottom:22px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.sec-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted2);letter-spacing:.08em;min-width:24px}
+.sec-line{width:3px;height:20px;border-radius:2px;flex-shrink:0}
+.sec-title{font-family:'Lora',serif;font-size:21px;font-weight:500;color:var(--head)}
+p{margin-bottom:12px;font-size:13.5px}p:last-child{margin-bottom:0}
+strong{color:var(--head);font-weight:500}em{color:var(--accent);font-style:italic}
+.comp-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border);border-radius:8px;overflow:hidden;margin:16px 0}
+.comp-card{background:var(--s1);padding:16px 18px;transition:background .2s}.comp-card:hover{background:var(--s2)}
+.comp-tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.comp-name{font-size:13.5px;font-weight:500;color:var(--head);margin-bottom:7px}
+.comp-body{font-size:12.5px;color:var(--muted);line-height:1.65}.comp-body strong{color:var(--text)}
+.pipeline{display:flex;flex-direction:column;gap:2px;margin:16px 0}
+.pipeline-step{display:grid;grid-template-columns:40px 1fr;background:var(--s1);border:1px solid var(--border);border-radius:7px;overflow:hidden;transition:border-color .2s}
+.pipeline-step:hover{border-color:var(--border2)}
+.step-gutter{background:var(--s0);display:flex;align-items:flex-start;justify-content:center;padding:14px 0 0;border-right:1px solid var(--border)}
+.step-badge{font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:500;color:var(--accent);letter-spacing:.06em}
+.step-inner{padding:12px 18px}
+.step-h{font-size:13.5px;font-weight:500;color:var(--head);margin-bottom:5px}
+.step-p{font-size:12.5px;color:var(--muted);line-height:1.65}.step-p strong{color:var(--text)}
+.callout{border-radius:7px;padding:13px 16px;font-size:13px;line-height:1.7;margin:14px 0;display:flex;gap:12px}
+.callout-icon{font-size:14px;flex-shrink:0;padding-top:1px}.callout-body{flex:1}.callout-body strong{font-weight:500}
+.callout.key{background:rgba(200,160,126,.08);border:1px solid rgba(200,160,126,.18);color:#a8906e}
+.callout.info{background:rgba(94,168,192,.08);border:1px solid rgba(94,168,192,.18);color:#6898a8}
+.callout.good{background:rgba(109,187,132,.08);border:1px solid rgba(109,187,132,.18);color:#5a9e8c}
+.insight-cards{display:flex;flex-direction:column;gap:10px}
+.insight-card{display:grid;grid-template-columns:3px 1fr;gap:14px;background:var(--s1);border:1px solid var(--border);border-radius:7px;overflow:hidden;padding:14px 16px;transition:border-color .2s}
+.insight-card:hover{border-color:var(--border2)}
+.insight-stripe{border-radius:2px}
+.insight-title{font-size:13.5px;font-weight:500;color:var(--head);margin-bottom:5px}
+.insight-body{font-size:12.5px;color:var(--muted);line-height:1.65}.insight-body strong{color:var(--text)}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+@media(max-width:700px){aside{display:none}main{margin-left:0;padding:28px 18px 60px}.comp-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside>
+  <div class="aside-head">
+    <a href="../../Reference.html" class="back-link">&larr; 返回 Reference</a>
+    <div class="aside-title">EvoAgent</div>
+    <div class="aside-sub">精读笔记 &middot; NAACL 2025</div>
+  </div>
+  <nav>
+    <a class="nav-item active" href="#overview"><span class="n">00</span>Overview</a>
+    <a class="nav-item" href="#operators"><span class="n">01</span>进化算子设计</a>
+    <a class="nav-item" href="#fitness"><span class="n">02</span>适应度评估</a>
+    <a class="nav-item" href="#results"><span class="n">03</span>实验结果</a>
+    <a class="nav-item" href="#takeaways"><span class="n">04</span>对本研究的启发</a>
+  </nav>
+  <div class="aside-foot">arXiv:2406.14228<br>Yuan, Song, Chen et al.<br>NAACL 2025</div>
+</aside>
+
+<main>
+<div class="hero" id="overview">
+  <div class="hero-eyebrow">Evolutionary Multi-Agent &middot; arXiv:2406.14228</div>
+  <h1><em>EvoAgent</em></h1>
+  <div class="hero-sub">Towards Automatic Multi-Agent Generation via Evolutionary Algorithms</div>
+  <div class="hero-chips">
+    <a href="https://arxiv.org/abs/2406.14228" target="_blank" class="chip chip-arxiv">&nearr; arXiv:2406.14228</a>
+    <span class="chip chip-venue">Yuan, Song, Chen et al. &middot; NAACL 2025</span>
+  </div>
+  <div class="hero-abstract">
+    <strong>EvoAgent</strong> 将进化算法的三大算子——<strong>变异（mutation）、交叉（crossover）、选择（selection）</strong>——应用于 multi-agent 系统的配置优化。每个"个体"是一个完整的 multi-agent 配置（agent 数量、角色定义、交互拓扑），通过进化算子自动搜索最优的 agent 团队组合。引入 <strong>LLM 质量检查模块</strong>（quality inspection module）作为适应度评估器，同时维护种群的任务表现和多样性。
+  </div>
+</div>
+
+<!-- 01 进化算子 -->
+<section class="sec" id="operators">
+  <div class="sec-header">
+    <span class="sec-num">01</span>
+    <div class="sec-line" style="background:var(--accent)"></div>
+    <h2 class="sec-title">进化算子设计</h2>
+  </div>
+
+  <div class="comp-grid">
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--red)">Operator 1</div>
+      <div class="comp-name">Mutation</div>
+      <div class="comp-body">
+        对现有 multi-agent 配置进行<strong>随机扰动</strong>：修改某个 agent 的角色描述、调整 system prompt、添加/删除一个 agent、改变交互顺序。变异幅度可控——小变异微调 prompt，大变异重构整个团队。<strong>LLM 驱动的语义变异</strong>，不是随机字符串操作。
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--blue)">Operator 2</div>
+      <div class="comp-name">Crossover</div>
+      <div class="comp-body">
+        取两个表现良好的 multi-agent 配置，<strong>组合它们的优势</strong>：从配置 A 中取 agent 角色定义，从配置 B 中取交互拓扑。LLM 判断哪些组件可以兼容组合，避免语义冲突。产生的后代既继承双亲优点，又可能产生新的涌现行为。
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--green)">Operator 3</div>
+      <div class="comp-name">Selection</div>
+      <div class="comp-body">
+        基于适应度分数（任务表现 + 多样性分数的加权和）进行<strong>锦标赛选择</strong>（tournament selection）。保留 top-K 个体进入下一代，淘汰低适应度个体。多样性分数防止种群收敛到单一配置。
+      </div>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-icon">i</div>
+    <div class="callout-body">
+      <strong>与 POET 的进化类比</strong>：POET 进化的是 (环境参数, agent 策略权重)，EvoAgent 进化的是 (agent 角色定义, 交互拓扑, prompt 模板)。POET 操作连续数值向量，EvoAgent 操作自然语言/结构化配置。但核心逻辑一致：mutation 产生变异 &rarr; evaluation 评估适应度 &rarr; selection 保留最优。
+    </div>
+  </div>
+</section>
+
+<!-- 02 适应度评估 -->
+<section class="sec" id="fitness">
+  <div class="sec-header">
+    <span class="sec-num">02</span>
+    <div class="sec-line" style="background:var(--blue)"></div>
+    <h2 class="sec-title">适应度评估</h2>
+  </div>
+
+  <p>EvoAgent 的适应度评估由两部分组成：</p>
+
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">F1</span></div>
+      <div class="step-inner">
+        <div class="step-h">Task Performance Score</div>
+        <div class="step-p">multi-agent 团队在目标任务上的<strong>实际表现</strong>（accuracy、解题成功率等）。直接运行 agent 团队 + 收集输出 + 用 ground truth 评分。这是适应度的主要成分。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">F2</span></div>
+      <div class="step-inner">
+        <div class="step-h">LLM Quality Inspection Module</div>
+        <div class="step-p">一个 <strong>LLM-as-judge</strong>模块，评估 multi-agent 配置本身的质量：角色定义是否清晰、是否有冗余 agent、交互逻辑是否合理、是否存在潜在的循环依赖。这个模块<strong>不运行任务</strong>，而是直接审查配置的结构合理性，类似代码 review。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout key">
+    <div class="callout-icon">*</div>
+    <div class="callout-body">
+      <strong>双重评估的价值</strong>：纯 task performance 评估成本高（需要实际运行 multi-agent 对话）。LLM quality inspection 作为<strong>廉价的预筛选</strong>，可以快速淘汰明显不合理的配置（如两个 agent 角色完全重叠、交互链断裂），减少昂贵的 task evaluation 次数。
+    </div>
+  </div>
+</section>
+
+<!-- 03 实验结果 -->
+<section class="sec" id="results">
+  <div class="sec-header">
+    <span class="sec-num">03</span>
+    <div class="sec-line" style="background:var(--green)"></div>
+    <h2 class="sec-title">实验结果</h2>
+  </div>
+
+  <p>EvoAgent 在多个需要 multi-agent 协作的任务上评估，包括辩论式推理、协作写作、科学问答。进化后的 agent 团队配置在所有任务上<strong>超越了手工设计的 multi-agent baselines</strong>（如固定的 Researcher-Writer-Reviewer 三角色、Debate 二角色等）。</p>
+
+  <p>关键发现：</p>
+  <p>- 进化倾向于产生 <strong>3-5 个 agent</strong> 的团队，过多或过少都不是最优<br>
+  - 最优角色定义往往<strong>比人类设计的更具体</strong>（更窄的专业范围，更明确的职责边界）<br>
+  - 交互拓扑不一定是全连接或线性的，有时<strong>星形拓扑</strong>（一个 coordinator + 多个 specialist）表现最好</p>
+</section>
+
+<!-- 04 启发 -->
+<section class="sec" id="takeaways">
+  <div class="sec-header">
+    <span class="sec-num">04</span>
+    <div class="sec-line" style="background:var(--accent)"></div>
+    <h2 class="sec-title">对本研究的启发</h2>
+  </div>
+
+  <div class="insight-cards">
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--accent)"></div>
+      <div>
+        <div class="insight-title">Multi-Agent 配置 = scaffold 的一种特殊形式</div>
+        <div class="insight-body">
+          EvoAgent 进化的"multi-agent 配置"（角色定义 + 交互拓扑 + prompt 模板）本质上就是一种 <strong>scaffold</strong>——它定义了 model 如何组织和协作来解决问题。在 scaffold co-evolution 中，scaffold 的搜索空间不应局限于单 agent 的 tool + prompt，还应包括<strong>multi-agent 协作拓扑的设计</strong>。
+        </div>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--green)"></div>
+      <div>
+        <div class="insight-title">LLM-as-Judge 作为廉价预筛选</div>
+        <div class="insight-body">
+          EvoAgent 的 LLM quality inspection 模块提供了一个实用策略：在昂贵的 benchmark 评估之前，<strong>用 LLM 快速审查 scaffold 配置的结构合理性</strong>。这对 scaffold co-evolution 的效率至关重要——不是所有 scaffold 变异都值得做 full evaluation，可以用 LLM 预筛掉明显不合理的。
+        </div>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--blue)"></div>
+      <div>
+        <div class="insight-title">���化算子可以被 LLM 语义化</div>
+        <div class="insight-body">
+          EvoAgent 的 mutation 和 crossover 不是随机操作，而是 <strong>LLM 驱动的语义操作</strong>（理解配置的含义后做有意义的修改/组合）。这比传统进化算法更高效，因为 LLM 的语义理解能力大幅提升了变异的有效性。在 scaffold co-evolution 中也应采用类似的 <strong>LLM-guided evolution</strong>。
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+<script>
+const sections = document.querySelectorAll('section.sec[id], .hero[id]');
+const navItems = document.querySelectorAll('nav .nav-item');
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { const id = e.target.id; navItems.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + id)); }});
+}, { rootMargin: '-20% 0px -65% 0px' });
+sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ReLIFT | 精读笔记</title>
+<style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --highlight: #fef3c7;
+            --code-bg: #f1f5f9;
+            --success: #10b981;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .paper-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+        .paper-header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 12px; }
+        .paper-header .meta { font-size: 0.85rem; opacity: 0.9; }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.2);
+        }
+        .section {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .section h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+        .section h3 {
+            font-size: 1.1rem;
+            color: var(--text);
+            margin: 20px 0 12px;
+        }
+        .highlight-box {
+            background: var(--highlight);
+            border-left: 4px solid #f59e0b;
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .key-point {
+            background: #eff6ff;
+            border-left: 4px solid var(--primary);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background: var(--code-bg);
+            font-weight: 600;
+            color: var(--text);
+        }
+        tr:hover { background: #f8fafc; }
+        .metric { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+        .up { color: var(--success); }
+    </style>
+</head>
+<body>
+<div class="container">
+<!-- Header -->
+<div class="paper-header">
+<span class="badge">arXiv:2506.07527</span>
+<span class="badge">June 2025</span>
+<h1>ReLIFT: Reinforcement Learning<br/>Interleaved with Online Fine-Tuning</h1>
+<div class="meta">Learning What Reinforcement Learning Can't</div>
+</div>
+<!-- TL;DR -->
+<div class="section">
+<h2>📌 TL;DR 核心贡献</h2>
+<div class="highlight-box">
+<strong>核心问题：</strong>RL只能从模型当前能力范围内学习，<strong>无法突破能力边界</strong>学习全新推理模式。
+            </div>
+<div class="key-point">
+<strong>解决方案：</strong>ReLIFT（<strong>Re</strong>inforcement Learning <strong>I</strong>nterleaved with Fine-<strong>T</strong>uning）
+<ul>
+<li>以<strong>RL训练为主</strong>，但在遇到"难题"时动态切换到<strong>SFT模式</strong>
+</li>
+<li>通过SFT的示范学习突破RL的探索边界</li>
+<li>问题解决后<strong>恢复RL</strong>继续训练</li>
+</ul>
+</div>
+<div class="highlight-box">
+<strong>效果：</strong>+5.2 points平均提升，仅使用<strong>13%</strong>演示数据，Qwen2.5-Math-7B达到<span class="metric up">52.6%</span> SOTA。
+            </div>
+</div>
+<!-- 核心洞察 -->
+<div class="section">
+<h2>💡 核心洞察：RL的能力边界</h2>
+<h3>RL的根本局限</h3>
+<div class="key-point">
+<strong>发现：</strong>"RL primarily reinforces existing behaviors and struggles to instill novel reasoning capabilities beyond the base model's limitations."
+                <br/><br/>
+                RL本质上是在<strong>当前策略分布</strong>内优化，无法"发明"模型从未见过的解题方法。
+            </div>
+<h3>SFT与RL的互补性</h3>
+<table>
+<tr>
+<th>方法</th>
+<th>强项</th>
+<th>局限</th>
+</tr>
+<tr>
+<td><strong>RL</strong></td>
+<td>在已知能力范围内优化和探索</td>
+<td>无法突破当前能力边界</td>
+</tr>
+<tr>
+<td><strong>SFT</strong></td>
+<td>通过示范学习全新知识/技能</td>
+<td>需要大量高质量标注数据</td>
+</tr>
+</table>
+<div class="highlight-box">
+<strong>ReLIFT的核心洞察：</strong>RL负责<strong>巩固和优化</strong>，SFT负责<strong>扩展能力边界</strong>。两者交替进行，形成能力增长的飞轮。
+            </div>
+</div>
+<!-- 方法详解 -->
+<div class="section">
+<h2>🔧 方法详解</h2>
+<h3>算法流程</h3>
+<div class="key-point">
+<strong>ReLIFT循环：</strong>
+<ol>
+<li>
+<strong>RL阶段（主要）</strong>
+<ul>
+<li>使用GRPO/RLVR进行强化学习</li>
+<li>监控模型在各问题上的表现</li>
+</ul>
+</li>
+<li>
+<strong>难度检测</strong>
+<ul>
+<li>识别模型<strong>持续失败</strong>的"难题"</li>
+<li>这些问题超出当前策略的探索范围</li>
+</ul>
+</li>
+<li>
+<strong>SFT阶段（穿插）</strong>
+<ul>
+<li>为难题收集/生成高质量解答</li>
+<li>进行轻量级SFT（online fine-tuning）</li>
+<li>模型获得新的推理模式</li>
+</ul>
+</li>
+<li>
+<strong>恢复RL</strong>
+<ul>
+<li>新能力纳入策略分布</li>
+<li>RL继续优化和巩固</li>
+</ul>
+</li>
+</ol>
+            </div>
+<h3>动态切换机制</h3>
+<table>
+<tr>
+<th>触发条件</th>
+<th>动作</th>
+<th>目的</th>
+</tr>
+<tr>
+<td>某类问题准确率&lt;阈值</td>
+<td>启动SFT burst</td>
+<td>学习新的解题模式</td>
+</tr>
+<tr>
+<td>SFT后该问题准确率提升</td>
+<td>恢复RL训练</td>
+<td>优化和巩固新能力</td>
+</tr>
+<tr>
+<td>整体性能plateau</td>
+<td>识别新的难例子集</td>
+<td>下一轮能力扩展</td>
+</tr>
+</table>
+</div>
+<!-- 实验结果 -->
+<div class="section">
+<h2>📊 实验结果</h2>
+<h3>主要性能</h3>
+<table>
+<tr>
+<th>基准测试</th>
+<th>Baseline</th>
+<th>ReLIFT</th>
+<th>提升</th>
+</tr>
+<tr>
+<td>Qwen2.5-Math-7B</td>
+<td>47.4%</td>
+<td class="metric up">52.6%</td>
+<td class="metric up">+5.2%</td>
+</tr>
+<tr>
+<td>5个竞赛级数学基准</td>
+<td>平均</td>
+<td>平均</td>
+<td class="metric up">+5.2 points</td>
+</tr>
+<tr>
+<td>OOD基准</td>
+<td>基线</td>
+<td>提升</td>
+<td>泛化性验证</td>
+</tr>
+</table>
+<h3>数据效率</h3>
+<div class="highlight-box">
+<strong>关键优势：</strong>ReLIFT仅使用纯SFT所需演示数据的<span class="metric">13%</span>。
+                <br/><br/>
+                原因：SFT只在必要时介入，而非全程使用。RL承担了大部分训练负担。
+            </div>
+</div>
+<!-- 对比分析 -->
+<div class="section">
+<h2>🔬 与相关方法对比</h2>
+<table>
+<tr>
+<th>方法</th>
+<th>范式</th>
+<th>vs ReLIFT</th>
+</tr>
+<tr>
+<td><strong>纯SFT</strong></td>
+<td>全程监督学习</td>
+<td>需要7.7×更多数据</td>
+</tr>
+<tr>
+<td><strong>纯RL</strong></td>
+<td>全程强化学习</td>
+<td>无法突破能力边界</td>
+</tr>
+<tr>
+<td><strong>SFT→RL</strong></td>
+<td>顺序两阶段</td>
+<td>SFT过度训练会saturate RL</td>
+</tr>
+<tr>
+<td><strong>STaR</strong></td>
+<td>自举迭代</td>
+<td>ReLIFT更高效的动态切换</td>
+</tr>
+<tr>
+<td><strong>ReLIFT (本文)</strong></td>
+<td><strong>动态交错</strong></td>
+<td>按需使用SFT，数据效率最优</td>
+</tr>
+</table>
+</div>
+<!-- 实践启示 -->
+<div class="section">
+<h2>🛠️ 实践启示</h2>
+<h3>适用场景</h3>
+<div class="key-point">
+<strong>ReLIFT最适合：</strong>
+<ul>
+<li>需要学习<strong>复杂多步推理</strong>的任务</li>
+<li>模型当前能力<strong>明显不足</strong>的场景</li>
+<li>标注数据<strong>有限但宝贵</strong>的情况</li>
+<li>追求<strong>数据效率</strong>而非纯计算效率</li>
+</ul>
+            </div>
+<h3>实施要点</h3>
+<table>
+<tr>
+<th>超参数</th>
+<th>建议</th>
+<th>说明</th>
+</tr>
+<tr>
+<td>难度阈值</td>
+<td>准确率&lt;20%</td>
+<td>触发SFT的问题难度</td>
+</tr>
+<tr>
+<td>SFT burst大小</td>
+<td>100-500样本</td>
+<td>轻量级快速学习</td>
+</tr>
+<tr>
+<td>SFT学习率</td>
+<td>比RL高2-5×</td>
+<td>快速适应新任务</td>
+</tr>
+<tr>
+<td>切换频率</td>
+<td>每1-2K RL steps评估</td>
+<td>及时识别难题</td>
+</tr>
+</table>
+</div>
+<div class="section" style="text-align: center; color: var(--text-light);">
+<p>精读完成 | 论文: ReLIFT (arXiv:2506.07527)</p>
+</div>
+</div>
+</body>
+</html>

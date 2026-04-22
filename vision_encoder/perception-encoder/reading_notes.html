@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perception Encoder - Paper Reading Notes</title>
+  <style>
+    :root {
+      --bg: #f8f9fa;
+      --card: #ffffff;
+      --text: #1a1a2e;
+      --text-secondary: #555;
+      --accent: #0066cc;
+      --accent-light: #e6f0fa;
+      --border: #e0e0e0;
+      --success: #2e7d32;
+      --warning: #ed6c02;
+      --danger: #d32f2f;
+      --purple: #7c4dff;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding-bottom: 60px;
+    }
+    .container { max-width: 900px; margin: 0 auto; padding: 0 20px; }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);
+      color: white;
+      padding: 50px 0 40px;
+      margin-bottom: 30px;
+    }
+    .header h1 { font-size: 2.2rem; font-weight: 700; line-height: 1.3; margin-bottom: 12px; }
+    .header .subtitle { font-size: 1.1rem; opacity: 0.9; margin-bottom: 20px; }
+    .header .meta {
+      display: flex; flex-wrap: wrap; gap: 16px;
+      font-size: 0.9rem; opacity: 0.85;
+    }
+    .header .meta span { display: flex; align-items: center; gap: 6px; }
+    .header .badge {
+      display: inline-block; background: rgba(255,255,255,0.2);
+      padding: 4px 12px; border-radius: 20px;
+      font-size: 0.8rem; margin-top: 16px;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 28px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      border: 1px solid var(--border);
+    }
+    .card h2 {
+      font-size: 1.4rem; color: var(--accent);
+      margin-bottom: 16px; padding-bottom: 10px;
+      border-bottom: 2px solid var(--accent-light);
+    }
+    .card h3 {
+      font-size: 1.1rem; color: var(--text);
+      margin: 20px 0 10px;
+    }
+    .card p { margin-bottom: 12px; color: var(--text-secondary); }
+    .card ul { padding-left: 22px; margin-bottom: 12px; }
+    .card li { margin-bottom: 8px; color: var(--text-secondary); }
+
+    /* Highlight boxes */
+    .highlight-box {
+      background: var(--accent-light);
+      border-left: 4px solid var(--accent);
+      padding: 16px 20px;
+      border-radius: 0 8px 8px 0;
+      margin: 16px 0;
+    }
+    .highlight-box strong { color: var(--accent); }
+
+    .insight-box {
+      background: #fff3e0;
+      border-left: 4px solid var(--warning);
+      padding: 16px 20px;
+      border-radius: 0 8px 8px 0;
+      margin: 16px 0;
+    }
+    .insight-box strong { color: var(--warning); }
+
+    .key-box {
+      background: #e8f5e9;
+      border-left: 4px solid var(--success);
+      padding: 16px 20px;
+      border-radius: 0 8px 8px 0;
+      margin: 16px 0;
+    }
+    .key-box strong { color: var(--success); }
+
+    /* Tables */
+    table {
+      width: 100%; border-collapse: collapse;
+      margin: 16px 0; font-size: 0.9rem;
+    }
+    th, td {
+      padding: 10px 12px; text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      background: var(--accent-light);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    tr:hover { background: #fafafa; }
+    td:first-child { font-weight: 500; }
+
+    /* Stats grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin: 20px 0;
+    }
+    .stat-item {
+      background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
+    .stat-item .number {
+      font-size: 2rem; font-weight: 700;
+      display: block; margin-bottom: 4px;
+    }
+    .stat-item .label { font-size: 0.85rem; opacity: 0.9; }
+
+    /* Architecture diagram */
+    .arch-flow {
+      display: flex; align-items: center; justify-content: center;
+      flex-wrap: wrap; gap: 8px;
+      margin: 20px 0; padding: 20px;
+      background: #f5f7fa; border-radius: 10px;
+    }
+    .arch-box {
+      background: white;
+      border: 2px solid var(--accent);
+      padding: 12px 18px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+    .arch-box.core { border-color: var(--accent); color: var(--accent); }
+    .arch-box.lang { border-color: var(--purple); color: var(--purple); }
+    .arch-box.spatial { border-color: var(--success); color: var(--success); }
+    .arch-arrow { font-size: 1.4rem; color: var(--text-secondary); }
+
+    /* Tags */
+    .tag {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-right: 6px;
+    }
+    .tag-blue { background: var(--accent-light); color: var(--accent); }
+    .tag-green { background: #e8f5e9; color: var(--success); }
+    .tag-orange { background: #fff3e0; color: var(--warning); }
+    .tag-red { background: #ffebee; color: var(--danger); }
+
+    /* Section nav */
+    .toc {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .toc h3 { font-size: 1rem; margin-bottom: 12px; color: var(--text); }
+    .toc ul { list-style: none; padding: 0; }
+    .toc li { margin-bottom: 6px; }
+    .toc a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .toc a:hover { color: var(--accent); }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 30px;
+      color: #999;
+      font-size: 0.85rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .header h1 { font-size: 1.5rem; }
+      .card { padding: 18px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="container">
+    <h1>Perception Encoder</h1>
+    <div class="subtitle">The best visual embeddings are not at the output of the network</div>
+    <div class="meta">
+      <span>📄 arXiv:2504.13181</span>
+      <span>🏢 Meta FAIR</span>
+      <span>📅 2025</span>
+      <span>👥 Bolya et al.</span>
+    </div>
+    <div class="badge">Vision Encoder · Contrastive Learning · MLLM · Dense Prediction</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="toc">
+    <h3>📑 目录</h3>
+    <ul>
+      <li><a href="#info">基本信息</a></li>
+      <li><a href="#background">Background & Motivation</a></li>
+      <li><a href="#core">核心发现</a></li>
+      <li><a href="#method">方法详解</a></li>
+      <li><a href="#results">实验结果</a></li>
+      <li><a href="#mechanism">机制分析</a></li>
+      <li><a href="#takeaways">重要 Takeaways</a></li>
+      <li><a href="#relations">与相关工作的关系</a></li>
+      <li><a href="#thinking">个人思考</a></li>
+    </ul>
+  </div>
+
+  <div class="card" id="info">
+    <h2>基本信息</h2>
+    <table>
+      <tr><th>项目</th><th>内容</th></tr>
+      <tr><td>标题</td><td>Perception Encoder: The best visual embeddings are not at the output of the network</td></tr>
+      <tr><td>作者</td><td>Daniel Bolya, Po-Yao Huang, Peize Sun, Jang Hyun Cho, Andrea Madotto, Chen Wei, Tengyu Ma, Jiale Zhi, Jathushan Rajasegaran, Hanoona Rasheed, et al.</td></tr>
+      <tr><td>机构</td><td>Meta FAIR, UT Austin, MBZUAI, Fudan University, Meta Reality Labs</td></tr>
+      <tr><td>arXiv</td><td><a href="https://arxiv.org/abs/2504.13181">arXiv:2504.13181</a></td></tr>
+      <tr><td>代码</td><td><a href="https://github.com/facebookresearch/perception_models">github.com/facebookresearch/perception_models</a></td></tr>
+      <tr><td>数据集</td><td><a href="https://ai.meta.com/datasets/pe-video/">PE Video Dataset (PVD)</a> — 1M 视频，120K 人工精修标注</td></tr>
+    </table>
+  </div>
+
+  <div class="card" id="background">
+    <h2>Background & Motivation</h2>
+    <p>视觉编码器（Vision Encoder）是计算机视觉过去十年的核心基石。从百万规模的 ImageNet 预训练 CNN，到十亿规模网络预训练的 Transformer，主流策略始终是将大规模预训练编码器适配到下游任务。</p>
+
+    <h3>现有预训练目标的局限</h3>
+    <ul>
+      <li><strong>对比学习（CLIP-style）</strong>：学习全局视觉-语言嵌入，擅长零样本分类/检索，但不直接适用于密集预测任务</li>
+      <li><strong>Captioning</strong>：用语言解码器预测图像描述，对 MLLM 任务友好，但需要联合训练语言解码器</li>
+      <li><strong>自监督空间学习（DINOv2）</strong>：学习密集空间对应关系，无需语言监督，适合检测/分割等定位任务</li>
+    </ul>
+
+    <div class="highlight-box">
+      <strong>核心矛盾：</strong> 现有工作试图组合两种或以上的技术，但策略复杂度随用例数量指数增长，难以扩展。尚未有一种<strong>单一、简单、易扩展</strong>的预训练技术能为所有下游任务学习 SOTA 特征。
+    </div>
+
+    <p>本文发现：<strong>全局视觉-语言对比学习 alone 可以成为这样一种方法。</strong></p>
+  </div>
+
+  <div class="card" id="core">
+    <h2>核心发现 🔑</h2>
+
+    <div class="insight-box">
+      <strong>"The best visual embeddings are not at the output of the network"</strong><br><br>
+      经过精心调优的对比学习预训练后，网络内部已经蕴含了 OCR、VQA、grounding、检测、深度估计、跟踪等任务的特定特征。但问题是——<strong>这些特征藏在中间层</strong>，且不同任务对应的最优层各不相同。
+    </div>
+
+    <h3>PE 模型家族</h3>
+    <div class="arch-flow">
+      <div class="arch-box core">PE<sub>core</sub><br><small>对比预训练</small></div>
+      <span class="arch-arrow">→</span>
+      <div class="arch-box lang">PE<sub>lang</sub><br><small>语言对齐</small></div>
+      <span class="arch-arrow">→</span>
+      <div class="arch-box spatial">PE<sub>spatial</sub><br><small>空间对齐</small></div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-item">
+        <span class="number">86.6</span>
+        <span class="label">ImageNet Robustness Avg<br>(zero-shot)</span>
+      </div>
+      <div class="stat-item">
+        <span class="number">76.9</span>
+        <span class="label">Kinetics-400<br>(zero-shot)</span>
+      </div>
+      <div class="stat-item">
+        <span class="number">94.6</span>
+        <span class="label">DocVQA<br>(w/ 8B LLM)</span>
+      </div>
+      <div class="stat-item">
+        <span class="number">66.0</span>
+        <span class="label">COCO box mAP<br>(新 SOTA)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="method">
+    <h2>方法详解</h2>
+
+    <h3>§2.1 鲁棒图像预训练配方</h3>
+    <p>基于 OpenCLIP ViT-L/14，固定数据（2.3B 图像-文本对）和计算预算（~1 ZFLOP），逐步改进：</p>
+    <table>
+      <tr><th>改进项</th><th>说明</th><th>IN val ↑</th><th>Robust ↑</th></tr>
+      <tr><td>Baseline</td><td>OpenCLIP ViT-L/14</td><td>75.3</td><td>69.5</td></tr>
+      <tr><td>Progressive Resolution</td><td>98→154→224 分阶段训练</td><td>-</td><td>-</td></tr>
+      <tr><td>Batch Size 64K</td><td>提升任务难度，更多 hard negatives</td><td>+0.6</td><td>+1.1</td></tr>
+      <tr><td>LAMB Optimizer</td><td>大 batch 稳定训练，lr=2e-3</td><td>+0.4</td><td>+0.7</td></tr>
+      <tr><td>Final Resolution 336</td><td>参数与分辨率联合扩展</td><td>+0.5</td><td>+1.4</td></tr>
+      <tr><td>2D RoPE</td><td>增强位置编码外推能力</td><td>+0.3</td><td>+0.9</td></tr>
+      <tr><td>Attention Pooling</td><td>attention probing 构造 CLIP embedding</td><td>+0.3</td><td>+0.9</td></tr>
+      <tr><td>Data Augmentation</td><td>强裁剪、亮度/饱和度抖动、水平翻转</td><td>-</td><td>+0.7</td></tr>
+      <tr><td>Mask Regularization</td><td>MaskFeat 改正则化，mask 1/16 batch</td><td>-</td><td>+1.2</td></tr>
+      <tr><td><strong>Final</strong></td><td><strong>全部改进叠加</strong></td><td><strong>81.3</strong></td><td><strong>78.3</strong></td></tr>
+    </table>
+
+    <h3>§2.2 视频数据引擎（三阶段）</h3>
+    <ol>
+      <li><strong>基础视频标注器 (PLM)</strong>：基于早期 Perception Language Model，在 64.7M 图像/视频上训练</li>
+      <li><strong>人工精修数据</strong>：26.5万视频用 PLM 生成标注后人工 refine，显著提升质量</li>
+      <li><strong>LLM 汇总</strong>：Llama 3.3 70B 将视频标注 + 帧标注 + 元数据融合成简洁对齐的 alt-text 格式</li>
+    </ol>
+    <p>最终生成 <strong>22M 视频</strong> 的高质量合成标注用于对比微调。</p>
+
+    <h3>§4 语言对齐 — PElang</h3>
+    <div class="key-box">
+      <strong>核心发现：</strong> 中间层特征在语言任务上可匹敌 AIMv2-3B（专门用 captioning 训练的模型）
+    </div>
+    <ul>
+      <li>用 LLM（Llama 3.2 3B）作为目标，通过 next-token prediction 将中间层特征对齐到网络末端</li>
+      <li>训练数据：图像 captioning、OCR、图表理解、图像 grounding 等</li>
+      <li>有趣的是，对齐时会<strong>丢弃最后 3 层</strong>（1.7B 参数而非 2B）</li>
+      <li>PElangG 在 MLLM 任务上平均超越所有现有视觉编码器 <strong>+3.5 点</strong></li>
+    </ul>
+
+    <h3>§5 空间对齐 — PEspatial</h3>
+    <div class="key-box">
+      <strong>核心发现：</strong> 空间任务存在明显的层间二分性——早期层适合语义分割，后期层适合深度估计/跟踪
+    </div>
+    <ul>
+      <li><strong>自蒸馏</strong>：用模型自身冻结的中间层特征作为目标，蒸馏到输出层</li>
+      <li><strong>SAM 2 空间对应蒸馏</strong>：利用 SAM 2 的空间对应能力精炼对齐过程</li>
+      <li>COCO 检测 <strong>66.0 box mAP</strong>（新 SOTA，decoder 更简单）</li>
+      <li>深度估计、跟踪、语义分割上超越 DINOv2-g 等专用模型</li>
+    </ul>
+  </div>
+
+  <div class="card" id="results">
+    <h2>实验结果</h2>
+
+    <h3>零样本图像分类 (vs. SOTA)</h3>
+    <table>
+      <tr><th>Model</th><th>参数量</th><th>分辨率</th><th>ImageNet val</th><th>Robustness Avg</th></tr>
+      <tr><td>SigLIP2-g-opt</td><td>1.1B</td><td>384</td><td>83.6</td><td>79.7</td></tr>
+      <tr><td>EVA-CLIP-18B</td><td>18B</td><td>224</td><td>83.6</td><td>79.5</td></tr>
+      <tr><td><strong>PEcoreG</strong></td><td><strong>1.9B</strong></td><td><strong>448</strong></td><td><strong>84.8</strong></td><td><strong>82.2</strong></td></tr>
+    </table>
+    <p><span class="tag tag-green">首次</span> 在不使用 Google 内部 JFT-3B 或 WebLI 数据集的情况下，超越所有专有模型。</p>
+
+    <h3>零样本视频分类</h3>
+    <table>
+      <tr><th>Model</th><th>参数量</th><th>K-400</th><th>K-600</th><th>K-700</th></tr>
+      <tr><td>InternVideo2</td><td>1.0B</td><td>73.1</td><td>72.8</td><td>64.9</td></tr>
+      <tr><td>SigLIP2-g-opt</td><td>1.1B</td><td>69.8</td><td>67.0</td><td>61.8</td></tr>
+      <tr><td><strong>PEcoreG</strong></td><td><strong>1.9B</strong></td><td><strong>76.9</strong></td><td><strong>76.1</strong></td><td><strong>69.1</strong></td></tr>
+    </table>
+
+    <h3>MLLM 结果 (w/ Llama 3.1 8B)</h3>
+    <table>
+      <tr><th>Model</th><th>DocVQA</th><th>InfoVQA</th><th>TextVQA</th><th>RefCOCO avg</th><th>VideoMME</th></tr>
+      <tr><td>SigLIP2-g-opt</td><td>60.4</td><td>36.7</td><td>70.3</td><td>69.9</td><td>58.3</td></tr>
+      <tr><td>InternViT2.5</td><td>61.1</td><td>36.2</td><td>72.1</td><td>71.4</td><td>60.3</td></tr>
+      <tr><td><strong>PElangG</strong></td><td><strong>72.4</strong></td><td><strong>41.1</strong></td><td>67.9</td><td>70.1</td><td>60.2</td></tr>
+    </table>
+
+    <h3>COCO 检测</h3>
+    <table>
+      <tr><th>Model</th><th>预训练</th><th>box mAP</th></tr>
+      <tr><td>ViTDet-H</td><td>MAE</td><td>61.3</td></tr>
+      <tr><td>DINOv2-g</td><td>自监督</td><td>62.0</td></tr>
+      <tr><td>AIMv2-3B</td><td>Captioning</td><td>63.1</td></tr>
+      <tr><td><strong>PEspatialG</strong></td><td><strong>对比学习+对齐</strong></td><td><strong>66.0</strong></td></tr>
+    </table>
+  </div>
+
+  <div class="card" id="mechanism">
+    <h2>机制分析</h2>
+
+    <h3>视频数据对图像任务的反哺</h3>
+    <p>22M 合成视频标注不仅提升视频性能，也显著提升了图像分类/检索性能：</p>
+    <ul>
+      <li>平均图像分类 <strong>+0.6%</strong></li>
+      <li>ObjectNet <strong>+1.2%</strong></li>
+      <li>ImageNet Adversarial <strong>+1.4%</strong></li>
+      <li>零样本检索平均 <strong>+3.6%</strong></li>
+    </ul>
+
+    <h3>对齐的本质</h3>
+    <div class="highlight-box">
+      <strong>Language Alignment</strong>：把中间层"已经会"的 OCR/VQA/grounding 能力搬运到输出层<br>
+      <strong>Spatial Alignment</strong>：把中间层"已经会"的检测/分割/深度特征搬运到输出层
+    </div>
+  </div>
+
+  <div class="card" id="takeaways">
+    <h2>重要 Takeaways</h2>
+    <ol>
+      <li><strong>"The best visual embeddings are not at the output of the network"</strong> — 对比学习预训练的网络内部已经蕴含了丰富的任务相关特征，只是这些特征分散在不同层，被输出层掩盖了。</li>
+      <li><strong>单一预训练目标的扩展性</strong> — 不需要复杂的复合损失（captioning + contrastive + spatial），简单对比学习 + 良好的训练配方 + 对齐调优 = 通用视觉编码器。</li>
+      <li><strong>视频数据对图像任务的反哺</strong> — 合成视频标注的质量和规模是解锁统一图像-视频理解的关键。</li>
+      <li><strong>对齐的效率</strong> — 语言对齐和空间对齐的训练成本远低于从头预训练一个专用编码器，"通用预训练 + 轻量对齐" 是未来视觉基础模型的高效范式。</li>
+      <li><strong>PE 家族设计</strong> — 一个 core 编码器 + 两种对齐方式，分别解锁 MLLM 和密集预测任务，架构简洁优雅。</li>
+    </ol>
+  </div>
+
+  <div class="card" id="relations">
+    <h2>与相关工作的关系</h2>
+    <table>
+      <tr><th>方法</th><th>预训练目标</th><th>局限</th><th>PE 的改进</th></tr>
+      <tr><td>CLIP/SigLIP</td><td>对比学习</td><td>仅擅长分类/检索</td><td>发现中间层潜力，通过对齐扩展至 MLLM 和空间任务</td></tr>
+      <tr><td>AIMv2</td><td>Captioning</td><td>需要语言解码器联合训练</td><td>对比学习即可，语言对齐只需少量 FLOP</td></tr>
+      <tr><td>DINOv2</td><td>自监督</td><td>仅擅长空间任务</td><td>对比学习即可，空间对齐后超越</td></tr>
+      <tr><td>SAM 2</td><td>空间监督</td><td>仅分割/跟踪</td><td>作为空间对齐的辅助工具</td></tr>
+    </table>
+  </div>
+
+  <div class="card" id="thinking">
+    <h2>个人思考</h2>
+    <ul>
+      <li><strong>关于特征层级：</strong>本文验证了视觉 Transformer 中间层确实学习了从低级到高级的多层次表示，且对比学习的 "global embedding" 并未充分利用这些层次信息。</li>
+      <li><strong>关于对齐的效率：</strong>语言对齐和空间对齐的训练成本远低于从头预训练一个专用编码器，这说明 "通用预训练 + 轻量对齐" 可能是未来视觉基础模型的高效范式。</li>
+      <li><strong>关于视频数据的价值：</strong>合成视频标注的质量和规模可能是解锁统一图像-视频理解的关键。PE 的视频引擎设计（PLM → Human Refine → LLM Summarize）值得借鉴。</li>
+      <li><strong>潜在局限：</strong>
+        <ul>
+          <li>对齐方法是否适用于更大规模的模型？</li>
+          <li>中间层最优特征的 "层-任务对应关系" 是否具有可迁移性？</li>
+          <li>对齐后是否损失了原始对比学习的零样本能力？</li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <div class="footer">
+    阅读笔记生成于 2025-04-19 · Perception Encoder (arXiv:2504.13181)
+  </div>
+
+</div>
+</body>
+</html>

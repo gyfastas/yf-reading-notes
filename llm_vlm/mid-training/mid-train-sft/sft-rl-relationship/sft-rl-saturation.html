@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SFT &amp; RL 饱和点研究 | 精读笔记</title>
+<style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --highlight: #fef3c7;
+            --code-bg: #f1f5f9;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .paper-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+        .paper-header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 12px; }
+        .paper-header .meta { font-size: 0.85rem; opacity: 0.9; }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.2);
+        }
+        .section {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .section h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+        .section h3 {
+            font-size: 1.1rem;
+            color: var(--text);
+            margin: 20px 0 12px;
+        }
+        .highlight-box {
+            background: var(--highlight);
+            border-left: 4px solid var(--warning);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .key-point {
+            background: #eff6ff;
+            border-left: 4px solid var(--primary);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .warning-box {
+            background: #fef2f2;
+            border-left: 4px solid var(--danger);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background: var(--code-bg);
+            font-weight: 600;
+            color: var(--text);
+        }
+        tr:hover { background: #f8fafc; }
+        .metric { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+        .up { color: var(--success); }
+        .down { color: var(--danger); }
+    </style>
+</head>
+<body>
+<div class="container">
+<!-- Header -->
+<div class="paper-header">
+<span class="badge">arXiv:2506.16029</span>
+<span class="badge">Pre-training Analysis</span>
+<h1>SFT &amp; RL 性能饱和点研究</h1>
+<div class="meta">SFT与RL在不同训练预算下的性能表现与饱和分析</div>
+</div>
+<!-- TL;DR -->
+<div class="section">
+<h2>📌 TL;DR 核心发现</h2>
+<div class="highlight-box">
+<strong>核心发现：</strong>SFT和RL都存在明确的<strong>性能饱和点</strong>，在约<span class="metric">80B tokens</span>（约80倍模型大小）后，继续训练收益微乎其微。
+            </div>
+<div class="key-point">
+<strong>关键数据：</strong>
+<ul>
+<li>SFT饱和点：~80B tokens后性能增长从快速上升转为平缓</li>
+<li>RL饱和点：4-8个epochs或50-100K样本后收益递减</li>
+<li>过度训练RL仅增加采样高质量输出的概率，<strong>不提升基础推理能力</strong>
+</li>
+</ul>
+</div>
+</div>
+<!-- 实验发现 -->
+<div class="section">
+<h2>📊 实验发现</h2>
+<h3>性能曲线分析</h3>
+<table>
+<tr>
+<th>训练阶段</th>
+<th>Token范围</th>
+<th>ID Maj@16</th>
+<th>增长趋势</th>
+</tr>
+<tr>
+<td>早期</td>
+<td>0-20B</td>
+<td class="metric">8%</td>
+<td>快速上升</td>
+</tr>
+<tr>
+<td>中期</td>
+<td>20-80B</td>
+<td class="metric">8% → 15%</td>
+<td class="up">+7% (快速提升)</td>
+</tr>
+<tr style="background: #fef3c7;">
+<td>饱和期</td>
+<td>80-160B</td>
+<td class="metric">15% → 17%</td>
+<td class="up">+2% (缓慢增长)</td>
+</tr>
+<tr>
+<td>过度训练</td>
+<td>160-320B</td>
+<td class="metric">~17%</td>
+<td>基本持平</td>
+</tr>
+</table>
+<h3>RL特定饱和现象</h3>
+<div class="warning-box">
+<strong>重要发现：</strong>固定RL epoch训练时：
+<ul>
+<li><strong>4-8 epochs</strong>：性能快速提升</li>
+<li><strong>&gt;8 epochs</strong>：性能趋于饱和</li>
+<li><strong>&gt;50-100K样本</strong>：新增样本几乎无收益</li>
+</ul>
+过度训练RL的<strong>副作用</strong>：模型学会更频繁地采样已有高质量输出，但推理能力的<strong>基础能力边界</strong>并未扩展。
+            </div>
+</div>
+<!-- OOD性能退化 -->
+<div class="section">
+<h2>⚠️ OOD性能退化</h2>
+<div class="warning-box">
+<strong>关键发现：</strong>在<span class="metric">160B tokens</span>预训练预算后，模型出现OOD（分布外）性能退化：
+<ul>
+<li>Maj@16 准确率下降</li>
+<li>RM@16（Reward Model）评分下降</li>
+<li>Pass@16 通过率下降</li>
+</ul>
+这表明过度训练导致模型过拟合训练分布，损害泛化能力。
+            </div>
+</div>
+<!-- Insight -->
+<div class="section">
+<h2>💡 关键洞察</h2>
+<h3>1. 最优训练预算</h3>
+<div class="key-point">
+<strong>推荐配置：</strong>
+<ul>
+<li><strong>预训练：</strong>~80×模型大小（约80B tokens对于1B模型）</li>
+<li><strong>RL epochs：</strong>4-8 epochs</li>
+<li><strong>RL样本量：</strong>50-100K高质量样本</li>
+</ul>
+超出此范围，计算资源投入产出比急剧下降。
+                </div>
+<h3>2. SFT vs RL 饱和差异</h3>
+<table>
+<tr>
+<th>维度</th>
+<th>SFT饱和</th>
+<th>RL饱和</th>
+</tr>
+<tr>
+<td>表现形式</td>
+<td>验证集loss不再下降</td>
+<td>奖励值 plateau</td>
+</tr>
+<tr>
+<td>继续训练后果</td>
+<td>过拟合、OOD退化</td>
+<td>输出多样性下降、模式崩溃</td>
+</tr>
+<tr>
+<td>缓解策略</td>
+<td>早停、数据增强</td>
+<td>限制epoch、KL散度约束</td>
+</tr>
+</table>
+<h3>3. 资源效率视角</h3>
+<p>从资源效率角度：</p>
+<ul>
+<li><strong>0-80B tokens：</strong>每B token投入产出比最高</li>
+<li><strong>80-160B tokens：</strong>边际收益递减但仍为正</li>
+<li><strong>&gt;160B tokens：</strong>边际收益接近零甚至为负（OOD退化）</li>
+</ul>
+</div>
+<!-- 实践建议 -->
+<div class="section">
+<h2>🛠️ 实践建议</h2>
+<h3>训练预算分配</h3>
+<div class="highlight-box">
+<strong>推荐配比（以1B模型为例）：</strong>
+<ul>
+<li>预训练：80B tokens</li>
+<li>SFT：50K-100K样本</li>
+<li>RL：4-8 epochs（约50-100K rollouts）</li>
+</ul>
+总计算预算的<span class="metric">80%</span>应投入预训练阶段。
+            </div>
+<h3>饱和检测指标</h3>
+<table>
+<tr>
+<th>指标</th>
+<th>饱和信号</th>
+<th>建议动作</th>
+</tr>
+<tr>
+<td>验证集准确率</td>
+<td>3个epoch无提升</td>
+<td>停止训练</td>
+</tr>
+<tr>
+<td>训练-验证gap</td>
+<td>差距&gt;5%</td>
+<td>增加正则化或早停</td>
+</tr>
+<tr>
+<td>输出多样性</td>
+<td>Self-BLEU上升</td>
+<td>降低RL学习率或停止</td>
+</tr>
+<tr>
+<td>OOD性能</td>
+<td>下降&gt;2%</td>
+<td>立即停止，回退checkpoint</td>
+</tr>
+</table>
+</div>
+<!-- 相关论文 -->
+<div class="section">
+<h2>🔗 相关论文</h2>
+<ul>
+<li><strong>Long CoT Degradation</strong> - 小模型长CoT训练性能退化研究</li>
+<li><strong>ReLIFT</strong> - 基于饱和检测的动态SFT/RL切换</li>
+<li><strong>s1: Simple test-time scaling</strong> - Pass@k作为RL上限的理论分析</li>
+</ul>
+</div>
+<div class="section" style="text-align: center; color: var(--text-light);">
+<p>精读完成 | 论文: arXiv:2506.16029</p>
+</div>
+</div>
+</body>
+</html>

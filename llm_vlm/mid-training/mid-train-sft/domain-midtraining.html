@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Domain-Specific Mid-Training | 领域适配实践</title>
+<style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --highlight: #fef3c7;
+            --code-bg: #f1f5f9;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .paper-header {
+            background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+        .paper-header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 12px; }
+        .paper-header .meta { font-size: 0.85rem; opacity: 0.9; }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.2);
+        }
+        .section {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .section h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+        .section h3 {
+            font-size: 1.1rem;
+            color: var(--text);
+            margin: 20px 0 12px;
+        }
+        .highlight-box {
+            background: var(--highlight);
+            border-left: 4px solid #f59e0b;
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .key-point {
+            background: #eff6ff;
+            border-left: 4px solid var(--primary);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .success-box {
+            background: #f0fdf4;
+            border-left: 4px solid var(--success);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background: var(--code-bg);
+            font-weight: 600;
+            color: var(--text);
+        }
+        tr:hover { background: #f8fafc; }
+        .metric { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+        .up { color: var(--success); }
+        .domain-card {
+            background: var(--code-bg);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 12px 0;
+            border-left: 4px solid var(--danger);
+        }
+        .domain-card h4 {
+            color: var(--danger);
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+<!-- Header -->
+<div class="paper-header">
+<span class="badge">实践汇总</span>
+<span class="badge">领域适配</span>
+<h1>Domain-Specific Mid-Training<br/>领域持续预训练实践</h1>
+<div class="meta">医疗、法律、金融领域的中期训练案例总结</div>
+</div>
+<!-- TL;DR -->
+<div class="section">
+<h2>📌 概述</h2>
+<div class="highlight-box">
+<strong>Mid-training的价值：</strong>在通用预训练模型基础上，通过领域特定的中期训练，可以在保持通用能力的同时获得专业的领域知识。
+            </div>
+<div class="key-point">
+<strong>关键发现：</strong>
+            <ul>
+<li>领域模型在中期训练后显著超越通用模型</li>
+<li>数据质量和领域覆盖率比数量更重要</li>
+<li>需要平衡领域专业化和通用能力保持</li>
+<li>不同领域有不同的最佳实践</li>
+</ul>
+</div>
+</div>
+<!-- 医疗领域 -->
+<div class="section">
+<h2>🏥 医疗领域</h2>
+<div class="domain-card">
+<h4>代表模型：PMC-LLaMA / HuatuoGPT / Meditron</h4>
+<p><strong>数据：</strong></p>
+<ul>
+<li>PubMed Central (PMC) 全文文献</li>
+<li>医学教材和百科全书</li>
+<li>临床指南和诊疗规范</li>
+<li>医患对话数据（用于对齐）</li>
+</ul>
+<p><strong>规模：</strong>通常 50B-200B tokens 医学文本</p>
+<p><strong>最佳实践：</strong></p>
+<ul>
+<li>混合10-20%通用数据防止遗忘</li>
+<li>学习率：Pre-training的10-15%</li>
+<li>重点：医学术语、疾病知识、诊疗逻辑</li>
+</ul>
+</div>
+<h3>性能提升</h3>
+<table>
+<tr>
+<th>基准</th>
+<th>通用模型</th>
+<th>医学Mid-training后</th>
+</tr>
+<tr>
+<td>USMLE</td>
+<td>~40%</td>
+<td class="metric up">~60%</td>
+</tr>
+<tr>
+<td>PubMedQA</td>
+<td>~50%</td>
+<td class="metric up">~75%</td>
+</tr>
+<tr>
+<td>MedMCQA</td>
+<td>~35%</td>
+<td class="metric up">~55%</td>
+</tr>
+</table>
+</div>
+<!-- 法律领域 -->
+<div class="section">
+<h2>⚖️ 法律领域</h2>
+<div class="domain-card">
+<h4>代表模型：SaulLM / Lawyer LLaMA / ChatLaw</h4>
+<p><strong>数据：</strong></p>
+<ul>
+<li>法律法规条文</li>
+<li>判决书和裁定书</li>
+<li>法律教材和论文</li>
+<li>法律问答数据</li>
+</ul>
+<p><strong>规模：</strong>通常 30B-100B tokens 法律文本</p>
+<p><strong>最佳实践：</strong></p>
+<ul>
+<li>不同法域（民法/刑法/商法）分别处理</li>
+<li>重视判例推理链</li>
+<li>法条引用格式规范化</li>
+</ul>
+</div>
+<h3>性能提升</h3>
+<table>
+<tr>
+<th>基准</th>
+<th>通用模型</th>
+<th>法律Mid-training后</th>
+</tr>
+<tr>
+<td>Legal Bench</td>
+<td>~45%</td>
+<td class="metric up">~70%</td>
+</tr>
+<tr>
+<td>Case Prediction</td>
+<td>~50%</td>
+<td class="metric up">~75%</td>
+</tr>
+</table>
+</div>
+<!-- 金融领域 -->
+<div class="section">
+<h2>💰 金融领域</h2>
+<div class="domain-card">
+<h4>代表模型：BloombergGPT / FinGPT / XuanYuan</h4>
+<p><strong>数据：</strong></p>
+<ul>
+<li>财报和审计报告</li>
+<li>金融新闻和市场分析</li>
+<li>证券研究报告</li>
+<li>金融教材和论文</li>
+</ul>
+<p><strong>规模：</strong>通常 100B-500B tokens 金融文本</p>
+<p><strong>最佳实践：</strong></p>
+<ul>
+<li>数值计算能力特别重要</li>
+<li>时序数据（股价、指标）处理</li>
+<li>多语言金融文本（中英文）</li>
+<li>实时数据更新机制</li>
+</ul>
+</div>
+<h3>性能提升</h3>
+<table>
+<tr>
+<th>基准</th>
+<th>通用模型</th>
+<th>金融Mid-training后</th>
+</tr>
+<tr>
+<td>FinQA</td>
+<td>~35%</td>
+<td class="metric up">~65%</td>
+</tr>
+<tr>
+<td>Financial NER</td>
+<td>~60%</td>
+<td class="metric up">~85%</td>
+</tr>
+<tr>
+<td>Sentiment Analysis</td>
+<td>~70%</td>
+<td class="metric up">~88%</td>
+</tr>
+</table>
+</div>
+<!-- 共同模式 -->
+<div class="section">
+<h2>🔍 跨领域共同模式</h2>
+<h3>成功因素</h3>
+<div class="success-box">
+<strong>1. 数据质量 &gt; 数量</strong>
+            <ul>
+<li>精选高质量领域文本</li>
+<li>去重和清洗至关重要</li>
+<li>领域专家参与数据审核</li>
+</ul>
+</div>
+<div class="success-box">
+<strong>2. 混合策略</strong>
+            <ul>
+<li>领域数据：70-80%</li>
+<li>通用数据：20-30%（防止遗忘）</li>
+<li>动态混合优于静态混合</li>
+</ul>
+</div>
+<div class="success-box">
+<strong>3. 学习率配置</strong>
+            <ul>
+<li>Peak LR：Pre-training的10-20%</li>
+<li>Warmup：较短（5% steps）</li>
+<li>Decay：Cosine decay到1% peak</li>
+</ul>
+</div>
+<h3>常见陷阱</h3>
+<div class="highlight-box">
+<strong>需要避免：</strong>
+            <ol>
+<li><strong>过度专业化：</strong>领域数据比例过高导致通用能力严重下降</li>
+<li><strong>数据污染：</strong>测试集数据混入训练集</li>
+<li><strong>领域过窄：</strong>只覆盖领域的一部分子领域</li>
+<li><strong>忽视对齐：</strong>Mid-training后需要专门的Post-training对齐</li>
+</ol>
+</div>
+</div>
+<!-- 实施建议 -->
+<div class="section">
+<h2>🛠️ 领域Mid-training实施建议</h2>
+<div class="key-point">
+<strong>步骤清单：</strong>
+            <ol>
+<li><strong>需求分析：</strong>明确目标领域和评估基准</li>
+<li><strong>数据收集：</strong>构建高质量领域语料库</li>
+<li><strong>数据清洗：</strong>去重、过滤低质量内容</li>
+<li><strong>混合策略：</strong>确定领域/通用数据比例</li>
+<li><strong>超参配置：</strong>学习率、batch size、训练步数</li>
+<li><strong>监控训练：</strong>同时跟踪领域和通用能力</li>
+<li><strong>Early Stopping：</strong>选择最佳checkpoint</li>
+<li><strong>Post-training：</strong>指令微调和RL对齐</li>
+<li><strong>评估验证：</strong>全面评估性能和安全性</li>
+</ol>
+            </div>
+</div>
+<div class="section" style="text-align: center; color: var(--text-light);">
+<p>实践汇总 | 领域Mid-training案例总结</p>
+<p>涵盖医疗、法律、金融三大垂直领域</p>
+</div>
+</div>
+</body>
+</html>

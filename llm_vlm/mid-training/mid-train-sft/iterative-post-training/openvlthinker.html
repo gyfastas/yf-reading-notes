@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OpenVLThinker | 精读笔记</title>
+<style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --highlight: #fef3c7;
+            --code-bg: #f1f5f9;
+            --success: #10b981;
+            --purple: #8b5cf6;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .paper-header {
+            background: linear-gradient(135deg, var(--purple) 0%, #7c3aed 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+        .paper-header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 12px; }
+        .paper-header .meta { font-size: 0.85rem; opacity: 0.9; }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.2);
+        }
+        .section {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .section h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+        .section h3 {
+            font-size: 1.1rem;
+            color: var(--text);
+            margin: 20px 0 12px;
+        }
+        .highlight-box {
+            background: var(--highlight);
+            border-left: 4px solid #f59e0b;
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .key-point {
+            background: #eff6ff;
+            border-left: 4px solid var(--primary);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background: var(--code-bg);
+            font-weight: 600;
+            color: var(--text);
+        }
+        tr:hover { background: #f8fafc; }
+        .metric { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+        .iteration {
+            background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+            border: 1px solid #c4b5fd;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 12px 0;
+        }
+        .iteration h4 { color: #7c3aed; margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+<div class="container">
+<!-- Header -->
+<div class="paper-header">
+<span class="badge">arXiv:2503.17352</span>
+<span class="badge">VLM Reasoning</span>
+<h1>OpenVLThinker:<br/>Complex Vision-Language Reasoning<br/>via Iterative SFT-RL Cycles</h1>
+<div class="meta">UCLA | Qwen2.5-VL-7B | 迭代SFT-RL自我改进</div>
+</div>
+<!-- TL;DR -->
+<div class="section">
+<h2>📌 TL;DR 核心贡献</h2>
+<div class="highlight-box">
+<strong>问题：</strong>VLM的复杂视觉推理需要长CoT，但<strong>SFT单独</strong>会损失视觉信息，<strong>RL单独</strong>搜索空间太大。
+            </div>
+<div class="key-point">
+<strong>解决方案：</strong><strong>Iterative SFT-RL Cycles</strong>
+<ul>
+<li>SFT作为<strong>归纳先验</strong>展示推理行为</li>
+<li>RL缩小搜索空间并<strong>实际提升性能</strong>
+</li>
+<li>迭代过程中<strong>数据质量自我进化</strong>
+</li>
+</ul>
+</div>
+<div class="highlight-box">
+<strong>效果：</strong>Qwen2.5-VL-7B在MathVista等基准上超越GPT-4o，证明<span class="metric">7B模型</span>可实现R1级多模态推理。
+            </div>
+</div>
+<!-- 迭代流程 -->
+<div class="section">
+<h2>🔄 迭代SFT-RL流程</h2>
+<div class="iteration">
+<h4>🚀 Iteration 0: 冷启动</h4>
+<ul>
+<li>使用<strong>DeepSeek-R1</strong>的文本CoT数据</li>
+<li>通过图像caption将视觉信息转为文本</li>
+<li>SFT训练获得基础推理能力</li>
+<li>数据量：约3K-5K样本</li>
+</ul>
+</div>
+<div style="text-align: center; color: var(--text-light); margin: 8px 0;">↓</div>
+<div class="iteration">
+<h4>⚡ Iteration 1: 第一轮RL</h4>
+<ul>
+<li>使用<strong>GRPO</strong>进行强化学习</li>
+<li>Binary reward（答案正确性）</li>
+<li>Curriculum learning：从简单到复杂</li>
+<li>模型性能开始超越SFT版本</li>
+</ul>
+</div>
+<div style="text-align: center; color: var(--text-light); margin: 8px 0;">↓</div>
+<div class="iteration">
+<h4>📈 Iteration 2+: 自我进化</h4>
+<ul>
+<li>用RL改进后的模型<strong>生成新的SFT数据</strong>
+</li>
+<li>数据质量提升（更准确的推理路径）</li>
+<li>增加更具挑战性的问题（Geometry3K等）</li>
+<li>轻量级SFT → RL循环</li>
+</ul>
+</div>
+</div>
+<!-- 核心设计 -->
+<div class="section">
+<h2>🔧 核心设计决策</h2>
+<h3>1. 为什么需要SFT作为先验？</h3>
+<div class="key-point">
+<strong>SFT的作用：</strong>
+<ul>
+<li>展示<strong>推理关键词</strong>："wait", "first", "check", "verify", "alternatively"</li>
+<li>为RL提供<strong>归纳偏置</strong>，缩小搜索空间</li>
+<li>避免RL在庞大搜索空间中随机探索</li>
+</ul>
+<strong>局限：</strong>图像→caption转换会<strong>损失视觉细节</strong>，仅靠SFT性能有限。
+            </div>
+<h3>2. 为什么需要RL？</h3>
+<div class="key-point">
+<strong>RL的作用：</strong>
+<ul>
+<li><strong>实际性能提升</strong>：SFT-only常导致性能退化</li>
+<li><strong>视觉 grounding</strong>：直接处理图像而非caption</li>
+<li><strong>自我验证</strong>：学习验证和修正推理路径</li>
+</ul>
+<strong>局限：</strong>无先验时搜索空间太大，7B模型难以收敛。
+            </div>
+<h3>3. 为什么需要迭代？</h3>
+<div class="highlight-box">
+<strong>迭代的飞轮效应：</strong>
+<ol>
+<li>RL改进模型 → 生成更高质量数据</li>
+<li>高质量数据 → SFT获得更强先验</li>
+<li>更强先验 → RL收敛更快、性能更好</li>
+<li>循环往复，能力持续提升</li>
+</ol>
+            </div>
+</div>
+<!-- 实验结果 -->
+<div class="section">
+<h2>📊 实验结果</h2>
+<h3>主要基准测试</h3>
+<table>
+<tr>
+<th>Benchmark</th>
+<th>Qwen2.5-VL-7B</th>
+<th>OpenVLThinker-7B</th>
+<th>提升</th>
+</tr>
+<tr>
+<td>MathVista</td>
+<td>68.5%</td>
+<td>70.2%</td>
+<td class="metric">+1.7%</td>
+</tr>
+<tr>
+<td>MathVerse</td>
+<td>46.8%</td>
+<td>47.9%</td>
+<td class="metric">+1.1%</td>
+</tr>
+<tr>
+<td>MathVision (testmini)</td>
+<td>27.6%</td>
+<td>29.6%</td>
+<td class="metric">+2.0%</td>
+</tr>
+<tr>
+<td>MathVision (full)</td>
+<td>24.0%</td>
+<td>25.3%</td>
+<td class="metric">+1.3%</td>
+</tr>
+<tr>
+<td>EMMA</td>
+<td>-</td>
+<td>-</td>
+<td class="metric">+2.4%</td>
+</tr>
+<tr>
+<td>HallusionBench</td>
+<td>-</td>
+<td>-</td>
+<td class="metric">+1.6%</td>
+</tr>
+</table>
+<h3>与GPT-4o对比</h3>
+<div class="key-point">
+                OpenVLThinker-7B在多个基准上<strong>匹配或超越GPT-4o</strong>，证明7B VLM通过iterative SFT-RL可实现R1级推理能力。
+            </div>
+</div>
+<!-- 对比同期工作 -->
+<div class="section">
+<h2>🔬 与同期VLM推理工作对比</h2>
+<table>
+<tr>
+<th>模型</th>
+<th>方法</th>
+<th>vs OpenVLThinker</th>
+</tr>
+<tr>
+<td>R1-OneVision-7B</td>
+<td>Cold-start → RL</td>
+<td>单阶段，无迭代</td>
+</tr>
+<tr>
+<td>VLAA-Thinker-7B</td>
+<td>Direct RL on curated data</td>
+<td>直接RL，无SFT冷启动</td>
+</tr>
+<tr>
+<td>MM-Eureka-Qwen-7B</td>
+<td>Rule-based RL + online filtering</td>
+<td>类似但数据策略不同</td>
+</tr>
+<tr>
+<td>R1-VL-7B</td>
+<td>StepGRPO with dense rewards</td>
+<td>密集奖励vs稀疏奖励</td>
+</tr>
+<tr>
+<td><strong>OpenVLThinker</strong></td>
+<td><strong>Iterative SFT-RL</strong></td>
+<td><strong>迭代自我进化</strong></td>
+</tr>
+</table>
+</div>
+<!-- 实践启示 -->
+<div class="section">
+<h2>🛠️ 实践启示</h2>
+<h3>迭代SFT-RL实施要点</h3>
+<table>
+<tr>
+<th>组件</th>
+<th>配置</th>
+<th>说明</th>
+</tr>
+<tr>
+<td>Base Model</td>
+<td>Qwen2.5-VL-7B</td>
+<td>强视觉基础模型</td>
+</tr>
+<tr>
+<td>RL算法</td>
+<td>GRPO</td>
+<td>组相对策略优化</td>
+</tr>
+<tr>
+<td>Reward</td>
+<td>Binary (正确/错误)</td>
+<td>答案精确匹配</td>
+</tr>
+<tr>
+<td>SFT数据/轮</td>
+<td>3K-5K样本</td>
+<td>轻量级，高质量</td>
+</tr>
+<tr>
+<td>迭代次数</td>
+<td>2-4轮</td>
+<td>收益递减</td>
+</tr>
+</table>
+<h3>关键成功因素</h3>
+<div class="key-point">
+<ol>
+<li><strong>强文本推理Teacher</strong>：DeepSeek-R1提供高质量CoT</li>
+<li><strong>视觉-语言对齐</strong>：caption转换虽损失信息但提供起点</li>
+<li><strong>课程学习</strong>：从简单问题逐步增加难度</li>
+<li><strong>自我进化数据</strong>：每轮用改进模型生成新数据</li>
+</ol>
+            </div>
+</div>
+<div class="section" style="text-align: center; color: var(--text-light);">
+<p>精读完成 | 论文: OpenVLThinker (arXiv:2503.17352)</p>
+<p>GitHub: https://github.com/yihedeng9/OpenVLThinker</p>
+</div>
+</div>
+</body>
+</html>

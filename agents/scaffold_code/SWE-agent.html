@@ -1,0 +1,2085 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SWE-agent · 精读笔记</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0c0a08;
+  --s0:       #12100c;
+  --s1:       #1a1610;
+  --s2:       #22201a;
+  --border:   #29251e;
+  --border2:  #352f24;
+  --text:     #cec8b8;
+  --muted:    #706048;
+  --muted2:   #524a38;
+  --head:     #e8e0d0;
+  --green:    #6dbb84;
+  --red:      #d9736a;
+  --amber:    #c8a04a;
+  --blue:     #5ea8c0;
+  --purple:   #8878b8;
+  --teal:     #d4944a;
+  --teal2:    #b07830;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; font-size:15px; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 300;
+  line-height: 1.8;
+}
+
+/* --- layout --- */
+.layout { display:flex; min-height:100vh; }
+
+aside {
+  position: fixed;
+  top: 0; left: 0;
+  width: 210px;
+  height: 100vh;
+  background: var(--s0);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  z-index: 200;
+}
+
+.aside-head {
+  padding: 26px 20px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.back-link {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+  transition: color .2s;
+}
+.back-link:hover { color: var(--teal); }
+.aside-title {
+  font-family: 'Lora', serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--head);
+  line-height: 1.4;
+}
+.aside-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  margin-top: 5px;
+  letter-spacing: .06em;
+}
+
+nav { padding: 14px 0; flex: 1; }
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 20px;
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color .2s, background .2s;
+  border-left: 2px solid transparent;
+}
+.nav-item:hover { color: var(--text); background: rgba(255,255,255,.02); }
+.nav-item.active { color: var(--teal); border-left-color: var(--teal); background: rgba(212,148,74,.05); }
+.nav-item .n {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted2);
+  min-width: 16px;
+}
+
+.aside-foot {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted2);
+  line-height: 1.8;
+}
+
+/* --- main --- */
+main {
+  margin-left: 210px;
+  flex: 1;
+  max-width: 820px;
+  padding: 52px 48px 100px;
+}
+
+/* --- hero --- */
+.hero { margin-bottom: 52px; }
+.hero-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 14px;
+}
+.hero h1 {
+  font-family: 'Lora', serif;
+  font-size: 36px;
+  font-weight: 500;
+  color: var(--head);
+  line-height: 1.2;
+  margin-bottom: 6px;
+  letter-spacing: -.02em;
+}
+.hero h1 em { font-style: italic; color: var(--teal); }
+.hero-sub {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 16px;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+.hero-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 3px;
+  text-decoration: none;
+  transition: opacity .15s;
+}
+.chip:hover { opacity: .75; }
+.chip-arxiv { background:rgba(94,168,192,.12);  color:var(--blue);   border:1px solid rgba(94,168,192,.22); }
+.chip-gh    { background:rgba(255,255,255,.04); color:var(--muted);  border:1px solid var(--border2); }
+.chip-venue { background:rgba(212,148,74,.10);  color:var(--teal);   border:1px solid rgba(212,148,74,.2); }
+.chip-docs  { background:rgba(136,120,184,.10); color:var(--purple); border:1px solid rgba(136,120,184,.2); }
+
+.hero-abstract {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--teal);
+  border-radius: 0 8px 8px 0;
+  padding: 16px 20px;
+  font-size: 13.5px;
+  color: #9c9080;
+  line-height: 1.75;
+}
+.hero-abstract strong { color: var(--text); }
+
+/* --- section --- */
+.sec { margin-bottom: 56px; }
+.sec-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.sec-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted2);
+  letter-spacing: .08em;
+  min-width: 24px;
+}
+.sec-line { width: 3px; height: 20px; border-radius: 2px; flex-shrink: 0; }
+.sec-title {
+  font-family: 'Lora', serif;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--head);
+}
+
+/* --- prose --- */
+p { margin-bottom: 12px; font-size: 13.5px; }
+p:last-child { margin-bottom: 0; }
+strong { color: var(--head); font-weight: 500; }
+em { color: var(--amber); font-style: italic; }
+
+/* --- arch diagram --- */
+.arch-diagram {
+  background: var(--s0);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 24px;
+  margin: 16px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  line-height: 1.9;
+  color: #5a5040;
+  overflow-x: auto;
+}
+.arch-diagram .layer-label {
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted2);
+  margin-bottom: 4px;
+}
+.arch-box {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+.arch-box.agent  { background:rgba(212,148,74,.14); color:var(--teal); border:1px solid rgba(212,148,74,.3); }
+.arch-box.ctrl   { background:rgba(94,168,192,.12);  color:var(--blue); border:1px solid rgba(94,168,192,.25); }
+.arch-box.llm    { background:rgba(200,160,74,.10);  color:var(--amber); border:1px solid rgba(200,160,74,.2); }
+.arch-box.rt     { background:rgba(136,120,184,.12); color:var(--purple); border:1px solid rgba(136,120,184,.25); }
+.arch-box.event  { background:rgba(109,187,132,.10); color:var(--green); border:1px solid rgba(109,187,132,.2); }
+.arch-arrow { color: var(--muted2); }
+
+/* --- component grid --- */
+.comp-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 16px 0;
+}
+.comp-card {
+  background: var(--s1);
+  padding: 16px 18px;
+  transition: background .2s;
+}
+.comp-card:hover { background: var(--s2); }
+.comp-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+.comp-name {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--head);
+  margin-bottom: 7px;
+}
+.comp-body { font-size: 12.5px; color: var(--muted); line-height: 1.65; }
+.comp-body strong { color: var(--text); }
+.comp-body code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--purple); padding:1px 5px; border-radius:3px; }
+
+/* --- action table --- */
+.action-list { display:flex; flex-direction:column; gap:2px; margin:14px 0; }
+.action-item {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.action-item:hover { border-color: var(--border2); }
+.action-name {
+  padding: 10px 14px;
+  background: var(--s0);
+  border-right: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  color: var(--teal);
+  display: flex;
+  align-items: center;
+}
+.action-desc {
+  padding: 10px 14px;
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.6;
+  display: flex;
+  align-items: center;
+}
+.action-desc strong { color: var(--text); }
+.action-desc code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--purple); padding:1px 5px; border-radius:3px; }
+
+/* --- agent cards --- */
+.agent-cards { display:flex; flex-direction:column; gap:10px; margin:14px 0; }
+.agent-card {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 18px;
+  border-left: 3px solid transparent;
+  transition: border-color .2s, background .2s;
+}
+.agent-card:hover { background: var(--s2); }
+.agent-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.agent-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 3px;
+}
+.agent-card-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--head);
+}
+.agent-card-body { font-size: 12.5px; color: var(--muted); line-height: 1.65; }
+.agent-card-body strong { color: var(--text); }
+.agent-card-body code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--purple); padding:1px 5px; border-radius:3px; }
+
+/* --- pipeline --- */
+.pipeline { display: flex; flex-direction: column; gap: 2px; margin-bottom: 20px; }
+.pipeline-step {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.pipeline-step:hover { border-color: var(--border2); }
+.step-gutter {
+  background: var(--s0);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 16px 0 0;
+  border-right: 1px solid var(--border);
+}
+.step-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 500;
+  color: var(--teal);
+  letter-spacing: .06em;
+}
+.step-inner { padding: 14px 18px; }
+.step-h {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--head);
+  margin-bottom: 6px;
+}
+.step-p { font-size: 12.5px; color: var(--muted); line-height: 1.65; }
+.step-p code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--purple); padding:1px 5px; border-radius:3px; }
+.step-p strong { color: var(--text); }
+
+/* --- codeblock --- */
+.codeblock {
+  background: var(--s0);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 14px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  line-height: 1.75;
+}
+.codeblock-head {
+  background: var(--s1);
+  border-bottom: 1px solid var(--border);
+  padding: 7px 16px;
+  font-size: 9.5px;
+  color: var(--muted);
+  letter-spacing: .1em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.codeblock-head .dot { width:8px;height:8px;border-radius:50%; }
+.codeblock pre {
+  padding: 14px 18px;
+  white-space: pre;
+  overflow-x: auto;
+  color: #706850;
+}
+.tok-comment { color: #3d3528; }
+.tok-key     { color: var(--purple); }
+.tok-str     { color: var(--amber); }
+.tok-num     { color: var(--teal); }
+.tok-cmd     { color: var(--blue); }
+.tok-role    { color: var(--green); }
+.tok-em      { color: var(--red); }
+
+/* --- callout --- */
+.callout {
+  border-radius: 7px;
+  padding: 13px 16px;
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 14px 0;
+  display: flex;
+  gap: 12px;
+}
+.callout-icon { font-size: 14px; flex-shrink: 0; padding-top: 1px; }
+.callout-body { flex: 1; }
+.callout-body strong { font-weight: 500; }
+.callout.warn  { background:rgba(200,160,74,.08);  border:1px solid rgba(200,160,74,.18);  color:#a89060; }
+.callout.info  { background:rgba(94,168,192,.08);  border:1px solid rgba(94,168,192,.18);  color:#6898a8; }
+.callout.good  { background:rgba(212,148,74,.08);  border:1px solid rgba(212,148,74,.18);  color:#b08850; }
+.callout.key   { background:rgba(136,120,184,.08); border:1px solid rgba(136,120,184,.18); color:#8878b0; }
+
+/* --- stat grid --- */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 16px 0;
+}
+.stat-cell {
+  background: var(--s1);
+  padding: 16px 18px;
+}
+.stat-val {
+  font-family: 'Lora', serif;
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--head);
+  margin-bottom: 3px;
+  line-height: 1.1;
+}
+.stat-val .unit { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); font-weight:400; }
+.stat-label { font-size: 11.5px; color: var(--muted); }
+
+/* --- bench table --- */
+.bench-table { width:100%; border-collapse:collapse; font-size:13px; margin:16px 0; }
+.bench-table th {
+  font-family:'JetBrains Mono',monospace;
+  font-size:9.5px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--muted2);
+  padding:9px 14px;
+  text-align:left;
+  background:var(--s0);
+  border-bottom:1px solid var(--border);
+}
+.bench-table td {
+  padding:10px 14px;
+  border-bottom:1px solid var(--border);
+  color:var(--muted);
+  vertical-align:middle;
+}
+.bench-table tr:last-child td { border-bottom:none; }
+.bench-table td:first-child { color:var(--head); font-weight:500; }
+.bench-table .highlight { color:var(--teal); font-weight:500; font-family:'JetBrains Mono',monospace; }
+.bench-table .best { color:var(--green); }
+.bench-table .note { font-size:11px; color:var(--muted2); }
+.bench-table tr:hover td { background:rgba(255,255,255,.01); }
+
+/* --- bar rows --- */
+.bar-row { display:grid; grid-template-columns:160px 1fr 60px; align-items:center; gap:12px; margin:8px 0; font-size:12.5px; }
+.bar-track { background:var(--border); height:5px; border-radius:3px; overflow:hidden; }
+.bar-fill  { height:100%; border-radius:3px; background:var(--teal); }
+.bar-val   { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--teal); text-align:right; }
+
+/* --- insight cards --- */
+.insight-cards { display:flex; flex-direction:column; gap:10px; }
+.insight-card {
+  display: grid;
+  grid-template-columns: 3px 1fr;
+  gap: 14px;
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  overflow: hidden;
+  padding: 14px 16px;
+  transition: border-color .2s;
+}
+.insight-card:hover { border-color: var(--border2); }
+.insight-stripe { border-radius: 2px; }
+.insight-title { font-size: 13.5px; font-weight:500; color:var(--head); margin-bottom:5px; }
+.insight-body  { font-size: 12.5px; color:var(--muted); line-height:1.65; }
+.insight-body strong { color:var(--text); }
+.insight-body code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--purple); padding:1px 5px; border-radius:3px; }
+
+/* --- tag row --- */
+.tag-row { display:flex; flex-wrap:wrap; gap:6px; margin:10px 0; }
+.tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 2px 9px;
+  border-radius: 3px;
+  background: var(--s1);
+  border: 1px solid var(--border2);
+  color: var(--teal);
+}
+.tag.blue  { color:var(--blue);  background:rgba(94,168,192,.06);  border-color:rgba(94,168,192,.2); }
+.tag.amber { color:var(--amber); background:rgba(200,160,74,.06);  border-color:rgba(200,160,74,.2); }
+.tag.purple{ color:var(--purple);background:rgba(136,120,184,.06); border-color:rgba(136,120,184,.2); }
+
+/* --- event chain --- */
+.event-chain {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 16px 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.event-row {
+  display: grid;
+  grid-template-columns: 36px 180px 90px 1fr;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 11.5px;
+  transition: background .15s;
+}
+.event-row:last-child { border-bottom: none; }
+.event-row:hover { background: rgba(255,255,255,.015); }
+.event-row.head {
+  background: var(--s0);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted2);
+}
+.ev-id {
+  padding: 9px 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  color: var(--muted2);
+  border-right: 1px solid var(--border);
+  text-align: center;
+  align-self: center;
+}
+.ev-type {
+  padding: 9px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  border-right: 1px solid var(--border);
+  align-self: center;
+}
+.ev-src {
+  padding: 9px 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  border-right: 1px solid var(--border);
+  align-self: center;
+  text-align: center;
+}
+.ev-body {
+  padding: 9px 14px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+  align-self: center;
+}
+.ev-body strong { color: var(--text); }
+.ev-body code { font-family:'JetBrains Mono',monospace; font-size:10px; background:var(--bg); color:var(--purple); padding:1px 4px; border-radius:3px; }
+.ev-body .cause-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  background: rgba(200,160,74,.1);
+  color: var(--amber);
+  border: 1px solid rgba(200,160,74,.2);
+  padding: 0 5px;
+  border-radius: 3px;
+  margin-left: 6px;
+}
+.src-agent  { color: var(--teal); }
+.src-user   { color: var(--blue); }
+.src-env    { color: var(--amber); }
+
+/* --- two-col compare --- */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 14px 0;
+}
+.two-col-card {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 14px 16px;
+}
+.two-col-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted2);
+  margin-bottom: 8px;
+}
+.two-col-body { font-size: 12px; color: var(--muted); line-height: 1.7; }
+.two-col-body strong { color: var(--text); }
+.two-col-body code { font-family:'JetBrains Mono',monospace; font-size:10px; background:var(--bg); color:var(--purple); padding:1px 4px; border-radius:3px; }
+
+/* --- scrollbar --- */
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+/* --- divider --- */
+.divider { border:none; border-top:1px solid var(--border); margin:28px 0; }
+
+@media (max-width:700px) {
+  aside { display:none; }
+  main  { margin-left:0; padding:28px 18px 60px; }
+  .comp-grid { grid-template-columns:1fr; }
+  .stat-grid { grid-template-columns:1fr 1fr; }
+  .action-item { grid-template-columns:1fr; }
+  .action-name { border-right:none; border-bottom:1px solid var(--border); }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- --- Sidebar --- -->
+<aside>
+  <div class="aside-head">
+    <a href="../../Reference.html" class="back-link">&larr; 返回 Reference</a>
+    <div class="aside-title">SWE-agent</div>
+    <div class="aside-sub">精读笔记 · 2024.05</div>
+  </div>
+  <nav>
+    <a class="nav-item active" href="#overview"><span class="n">00</span>概览</a>
+    <a class="nav-item" href="#aci"><span class="n">01</span>ACI 设计</a>
+    <a class="nav-item" href="#architecture"><span class="n">02</span>系统架构</a>
+    <a class="nav-item" href="#agentloop"><span class="n">03</span>Agent 循环</a>
+    <a class="nav-item" href="#trajectory"><span class="n">04</span>轨迹格式</a>
+    <a class="nav-item" href="#codestructure"><span class="n">05</span>代码结构</a>
+    <a class="nav-item" href="#tools"><span class="n">06</span>Tools Bundle 设计</a>
+    <a class="nav-item" href="#prompt"><span class="n">07</span>Prompt 注入机制</a>
+    <a class="nav-item" href="#history"><span class="n">08</span>History 管理机制</a>
+    <a class="nav-item" href="#comparison"><span class="n">09</span>与其他 Scaffold 比较</a>
+    <a class="nav-item" href="#takeaways"><span class="n">10</span>对本研究的启发</a>
+  </nav>
+  <div class="aside-foot">
+    arXiv:2405.15793<br>
+    Princeton NLP · 2024.05<br>
+    maintenance mode<br>
+    github: princeton-nlp/SWE-agent
+  </div>
+</aside>
+
+<!-- --- Main --- -->
+<main>
+
+<!-- --- Hero --- -->
+<div class="hero" id="overview">
+  <div class="hero-eyebrow">Framework Deep-Dive &middot; arXiv:2405.15793</div>
+  <h1>SWE-<em>agent</em></h1>
+  <div class="hero-sub">Agent-Computer Interfaces Enable Automated Software Engineering</div>
+  <div class="hero-chips">
+    <a href="https://arxiv.org/abs/2405.15793" target="_blank" class="chip chip-arxiv">&nearr; arXiv:2405.15793</a>
+    <a href="https://github.com/princeton-nlp/SWE-agent" target="_blank" class="chip chip-gh">&cong; princeton-nlp/SWE-agent</a>
+    <span class="chip chip-venue">Yang et al. &middot; Princeton NLP &middot; 2024.05</span>
+  </div>
+  <div class="hero-abstract">
+    <strong>SWE-agent</strong> 是 Princeton NLP 推出的 scaffold 框架，其核心创新在于 <strong>Agent-Computer Interface (ACI)</strong> 设计——为 LLM 定制一套自定义 shell 命令，替代原始 bash，使代码导航和编辑对 agent 更加友好。SWE-agent 在 Docker 容器中安装这些命令作为 bash 函数，提供文件浏览器（100 行窗口）、结构化搜索、带 lint 检查的编辑命令等。<strong>SWE-bench Lite: 12.5%</strong>（GPT-4，原始发布）。目前项目已进入<strong>维护模式（maintenance mode）</strong>，由更精简的 <strong>mini-swe-agent</strong> 接替。ACI 设计的核心思想是：<em>好的接口设计比更强的模型更能提升 agent 性能</em>。
+  </div>
+</div>
+
+<!-- --- 01 ACI 设计 --- -->
+<section class="sec" id="aci">
+  <div class="sec-header">
+    <span class="sec-num">01</span>
+    <div class="sec-line" style="background:var(--teal)"></div>
+    <h2 class="sec-title">ACI 设计 (Agent-Computer Interface)</h2>
+  </div>
+
+  <p>ACI 是 SWE-agent 的核心创新——<strong>不改变 LLM，而改变 LLM 与计算机交互的界面</strong>。设计哲学类比 HCI（Human-Computer Interface）：正如好的 UI 让人类更高效地使用计算机，好的 ACI 让 agent 更高效地操作代码。所有自定义命令以 bash 函数的形式安装在 Docker 容器中。</p>
+
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:20px 0 10px">1.1 &nbsp;自定义命令列表</div>
+
+  <div class="action-list">
+    <div class="action-item">
+      <div class="action-name">open &lt;file&gt; [line]</div>
+      <div class="action-desc">打开文件，显示以 <code>[line]</code> 为中心的 <strong>100 行窗口</strong>。默认 line=1。这是文件浏览的基础——agent 不直接 <code>cat</code> 文件，而是通过 open 获得带行号的结构化视图。</div>
+    </div>
+    <div class="action-item">
+      <div class="action-name">scroll_up / scroll_down</div>
+      <div class="action-desc">在当前打开的文件中<strong>上翻/下翻 100 行</strong>。保持文件浏览器的窗口概念，避免 agent 看到整个文件的 token 爆炸。</div>
+    </div>
+    <div class="action-item">
+      <div class="action-name">goto &lt;line&gt;</div>
+      <div class="action-desc">跳转到指定行号，显示以该行为中心的 100 行窗口。用于 agent 已知目标行号（如 search 结果）后的精确导航。</div>
+    </div>
+    <div class="action-item">
+      <div class="action-name">search_file &lt;pattern&gt; [file]</div>
+      <div class="action-desc">在指定文件（默认当前文件）中搜索正则表达式 pattern，返回<strong>匹配行号列表</strong>。输出紧凑，不展示匹配内容的完整上下文。</div>
+    </div>
+    <div class="action-item">
+      <div class="action-name">search_dir &lt;pattern&gt; [dir]</div>
+      <div class="action-desc">在目录中跨文件搜索，<strong>只返回匹配的文件名列表</strong>，不显示匹配行内容。这是关键的 ACI 设计：避免搜索结果过长淹没 context window。</div>
+    </div>
+    <div class="action-item">
+      <div class="action-name">find_file &lt;name&gt; [dir]</div>
+      <div class="action-desc">按文件名（支持 glob）在目录树中查找文件。返回匹配路径列表。等价于 <code>find</code> 但输出更简洁。</div>
+    </div>
+    <div class="action-item">
+      <div class="action-name">edit &lt;start&gt;:&lt;end&gt;<br>&lt;&lt;EOF ... EOF</div>
+      <div class="action-desc"><strong>核心编辑命令</strong>。替换 start 到 end 行（含）的内容。使用 heredoc 语法指定新内容。<strong>每次编辑后自动运行 lint 检查</strong>——若新代码语法错误，编辑被拒绝并回滚，agent 收到 lint error 提示。</div>
+    </div>
+    <div class="action-item">
+      <div class="action-name">create &lt;file&gt;</div>
+      <div class="action-desc">创建新文件并打开空编辑器。自动设置为当前活跃文件，后续可直接 <code>edit</code>。</div>
+    </div>
+    <div class="action-item">
+      <div class="action-name">submit</div>
+      <div class="action-desc">生成 <code>git diff</code> 作为最终 patch 并提交。标志 agent 认为任务完成。</div>
+    </div>
+  </div>
+
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:24px 0 10px">1.2 &nbsp;关键设计原则</div>
+
+  <div class="comp-grid">
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--teal)">Design Principle</div>
+      <div class="comp-name">Lint-then-Retry</div>
+      <div class="comp-body">
+        每次 <code>edit</code> 命令执行后，<strong>自动对修改文件运行 linter</strong>（如 <code>flake8</code>）。若检测到语法错误，<strong>立即回滚修改</strong>并向 agent 返回详细的 lint error 消息。agent 看到错误后可在下一步修正。这使得轨迹中不会出现"累积语法错误"的脏状态。
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--blue)">Design Principle</div>
+      <div class="comp-name">Compact Search Results</div>
+      <div class="comp-body">
+        <code>search_dir</code> <strong>只返回文件名</strong>而不显示匹配行的上下文。这是与原始 <code>grep</code> 的核心差异——避免搜索大型代码库时结果淹没 context window。agent 需先搜索定位文件，再 <code>open</code> 查看具体内容，形成<strong>两步定位模式</strong>。
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--green)">Design Principle</div>
+      <div class="comp-name">Explicit Feedback</div>
+      <div class="comp-body">
+        对于<strong>没有自然输出的命令</strong>（如成功的 <code>edit</code>），系统显式返回确认消息（如 "File edited successfully. Here's the result of running `cat -n` on the edited snippet..."）。避免 agent 因没有 observation 而陷入困惑。
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--purple)">Design Principle</div>
+      <div class="comp-name">Windowed Viewing</div>
+      <div class="comp-body">
+        文件浏览器始终维持 <strong>100 行窗口</strong>，而非一次展示整个文件。这是 ACI 的关键约束——强制 agent 以人类浏览代码的方式（翻页、跳转）探索代码，而非一次性消耗大量 token 读取完整文件。
+      </div>
+    </div>
+  </div>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:#d9736a"></span>
+      <span class="dot" style="background:#c8a04a"></span>
+      <span class="dot" style="background:#6dbb84"></span>
+      edit 命令的完整交互示例
+    </div>
+    <pre><span class="tok-comment"># Agent 发出 edit 命令</span>
+<span class="tok-cmd">edit</span> <span class="tok-num">42</span>:<span class="tok-num">45</span> &lt;&lt;<span class="tok-str">'EOF'</span>
+<span class="tok-key">def</span> authenticate(user, pwd):
+    <span class="tok-key">if</span> <span class="tok-key">not</span> user <span class="tok-key">or</span> <span class="tok-key">not</span> pwd:
+        <span class="tok-key">raise</span> ValueError(<span class="tok-str">"Both user and pwd are required"</span>)
+    <span class="tok-key">return</span> _do_auth(user, pwd)
+<span class="tok-str">EOF</span>
+
+<span class="tok-comment"># ✓ Lint 通过 → 返回确认</span>
+<span class="tok-role">[File: /repo/src/auth.py (120 lines total)]
+(40 more lines above)
+42:def authenticate(user, pwd):
+43:    if not user or not pwd:
+44:        raise ValueError("Both user and pwd are required")
+45:    return _do_auth(user, pwd)
+(75 more lines below)
+File updated. Please review the changes.</span>
+
+<span class="tok-comment"># ✗ 若 lint 失败 → 回滚并报错</span>
+<span class="tok-em">Your proposed edit has introduced new syntax errors.
+Please understand the errors and retry your edit command.
+ERRORS:
+/repo/src/auth.py:44: E999 SyntaxError: invalid syntax
+Edit was not applied.</span></pre>
+  </div>
+
+  <div class="callout good">
+    <div class="callout-icon">&#9670;</div>
+    <div class="callout-body">
+      <strong>ACI 的实验验证</strong>：论文的消融实验表明，从 raw bash 切换到 ACI 命令集，GPT-4 在 SWE-bench Lite 上的 resolve rate 从 <strong>1.7% 提升到 12.5%</strong>（+10.8 个百分点，7x 提升）。这证明<em>接口设计</em>对 agent 性能的贡献甚至大于模型选择。
+    </div>
+  </div>
+</section>
+
+<!-- --- 02 系统架构 --- -->
+<section class="sec" id="architecture">
+  <div class="sec-header">
+    <span class="sec-num">02</span>
+    <div class="sec-line" style="background:var(--blue)"></div>
+    <h2 class="sec-title">系统架构</h2>
+  </div>
+
+  <p>SWE-agent 的架构围绕四个核心模块：<strong>SWEEnv</strong>（环境管理）、<strong>Agent</strong>（推理循环）、<strong>HistoryProcessors</strong>（上下文管理）、<strong>Tool Bundle</strong>（命令注册）。整体通过 YAML 配置驱动。</p>
+
+  <div class="arch-diagram">
+    <div class="layer-label">整体分层架构</div>
+    <div style="line-height:2.4">
+      <span class="arch-box llm">LLM Backend</span> <span style="color:var(--muted2);font-size:10px">(GPT-4 / Claude / open-source...)</span>
+      <br><span style="color:var(--muted2)">        &darr; prompt / completion</span>
+      <br><span class="arch-box agent">Agent</span> <span style="color:var(--muted2);font-size:10px">(DefaultAgent / RetryAgent, configured via YAML)</span>
+      <br><span style="color:var(--muted2)">        &darr; forward() &rarr; parse action &rarr; handle_action()</span>
+      <br><span class="arch-box ctrl">HistoryProcessors</span> <span style="color:var(--muted2);font-size:10px">(7 processors, context window management)</span>
+      <br><span style="color:var(--muted2)">        &darr; filtered history &rarr; prompt assembly</span>
+      <br><span class="arch-box event">Tool Bundle</span> <span style="color:var(--muted2);font-size:10px">(ACI commands, loaded from config, installed via install.sh)</span>
+      <br><span style="color:var(--muted2)">        &darr; execute in container</span>
+      <br><span class="arch-box rt">SWEEnv (SWE-ReX)</span> <span style="color:var(--muted2);font-size:10px">(Docker container management, bash execution)</span>
+    </div>
+  </div>
+
+  <div class="comp-grid">
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--teal)">Core Component</div>
+      <div class="comp-name">SWEEnv</div>
+      <div class="comp-body">
+        环境包装层，基于 <strong>SWE-ReX</strong>（SWE-agent 团队的 Docker 容器管理库）。负责启动 Docker 容器、安装 Tool Bundle（ACI 命令）、管理 repo 状态（git clone/checkout）、执行 bash 命令并收集输出。每个实例对应一个隔离的 Docker 环境。
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--blue)">Core Component</div>
+      <div class="comp-name">Agent (YAML Configured)</div>
+      <div class="comp-body">
+        通过 YAML 文件配置的推理引擎。核心方法 <code>forward()</code> 将历史组装成 prompt、调用 LLM、解析响应中的 action。支持 <strong>DefaultAgent</strong>（单次尝试）和 <strong>RetryAgent</strong>（多次尝试 + review）两种模式。
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--purple)">Core Component</div>
+      <div class="comp-name">HistoryProcessors</div>
+      <div class="comp-body">
+        <strong>7 种处理器</strong>，串行应用于 agent 的历史记录，用于管理 context window。包括截断旧 observation、替换过期文件视图、优化 prompt caching、正则过滤等。是 SWE-agent 的上下文管理核心。
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--green)">Core Component</div>
+      <div class="comp-name">Tool Bundle</div>
+      <div class="comp-body">
+        ACI 命令集的加载和安装机制。命令定义在配置文件中，通过 <code>install.sh</code> 脚本安装到 Docker 容器（作为 bash 函数），安装后用 <code>which</code> 验证命令可用性。支持模块化扩展。
+      </div>
+    </div>
+  </div>
+
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:24px 0 10px">2.1 &nbsp;HistoryProcessors 详解</div>
+
+  <p>HistoryProcessors 是 SWE-agent 管理上下文长度的核心机制，每个 processor 按顺序对历史记录进行变换。</p>
+
+  <div class="agent-cards">
+    <div class="agent-card" style="border-left-color:var(--teal)">
+      <div class="agent-card-head">
+        <span class="agent-badge" style="background:rgba(212,148,74,.14);color:var(--teal);border:1px solid rgba(212,148,74,.3)">KEY</span>
+        <div class="agent-card-title">LastNObservations</div>
+      </div>
+      <div class="agent-card-body">
+        <strong>最常用的 processor</strong>。保留最近 N 条 observation 的完整内容，将更早的 observation 替换为省略摘要（如 <code>"[output elided]"</code>）。<strong>action 部分始终保留</strong>，只压缩 observation。这确保 agent 记得自己做过什么，但不被旧的冗长输出淹没。
+      </div>
+    </div>
+    <div class="agent-card" style="border-left-color:var(--blue)">
+      <div class="agent-card-head">
+        <span class="agent-badge" style="background:rgba(94,168,192,.12);color:var(--blue);border:1px solid rgba(94,168,192,.25)">CONTEXT</span>
+        <div class="agent-card-title">ClosedWindowHistoryProcessor</div>
+      </div>
+      <div class="agent-card-body">
+        专门处理<strong>文件浏览器窗口状态</strong>。当 agent 打开了新文件或滚动了窗口，旧的文件视图（<code>open</code>/<code>scroll</code> 产生的输出）不再反映当前状态。此 processor 将过期的文件视图替换为简短摘要（如 <code>"[File view closed]"</code>），避免 agent 被过时的文件内容误导。
+      </div>
+    </div>
+    <div class="agent-card" style="border-left-color:var(--purple)">
+      <div class="agent-card-head">
+        <span class="agent-badge" style="background:rgba(136,120,184,.12);color:var(--purple);border:1px solid rgba(136,120,184,.25)">CACHE</span>
+        <div class="agent-card-title">CacheControlHistoryProcessor</div>
+      </div>
+      <div class="agent-card-body">
+        针对 <strong>Anthropic Claude</strong> 的 prompt caching 优化。在历史记录中的适当位置插入 cache control markers，使 Claude 可以缓存不变的 prompt 前缀，减少 API 调用中的 token 费用。
+      </div>
+    </div>
+    <div class="agent-card" style="border-left-color:var(--amber)">
+      <div class="agent-card-head">
+        <span class="agent-badge" style="background:rgba(200,160,74,.12);color:var(--amber);border:1px solid rgba(200,160,74,.25)">FILTER</span>
+        <div class="agent-card-title">RemoveRegex</div>
+      </div>
+      <div class="agent-card-body">
+        用正则表达式从历史中<strong>剥离指定模式的文本</strong>。典型用途：移除 Python traceback 中冗长的 site-packages 路径、去除颜色转义码等噪音文本。保持 observation 语义完整的前提下缩减 token 数。
+      </div>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-icon">&#8505;</div>
+    <div class="callout-body">
+      <strong>与 OpenHands Condenser 的对比</strong>：SWE-agent 的 HistoryProcessors 是<strong>规则驱动</strong>的（截断、替换、过滤），不涉及 LLM 调用；OpenHands 的 Condenser 则有 <code>LLMSummarizingCondenser</code>，用 LLM 生成历史摘要。SWE-agent 的方式更轻量、零延迟，但信息压缩质量依赖规则设计。
+    </div>
+  </div>
+</section>
+
+<!-- --- 03 Agent 循环 --- -->
+<section class="sec" id="agentloop">
+  <div class="sec-header">
+    <span class="sec-num">03</span>
+    <div class="sec-line" style="background:var(--teal)"></div>
+    <h2 class="sec-title">Agent 循环 (Agent Loop)</h2>
+  </div>
+
+  <p>SWE-agent 的推理循环实现在 <code>agents.py</code> 中，核心是 <strong>step() &rarr; forward_with_handling() &rarr; forward() &rarr; parse action &rarr; handle_action() &rarr; execute</strong> 的流程。</p>
+
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:20px 0 10px">3.1 &nbsp;DefaultAgent 单步流程</div>
+
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge" style="color:var(--teal)">&oplus;</span></div>
+      <div class="step-inner">
+        <div class="step-h">step() &mdash; 入口</div>
+        <div class="step-p">主循环调用入口。检查是否达到 <code>max_iterations</code>，若是则触发 <code>submit</code>。否则调用 <code>forward_with_handling()</code>。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge" style="color:var(--blue)">&oplus;</span></div>
+      <div class="step-inner">
+        <div class="step-h">forward_with_handling() &mdash; 错误处理封装</div>
+        <div class="step-p">包装 <code>forward()</code>，捕获两类可恢复错误：<strong>FormatError</strong>（LLM 输出格式不符合预期） &rarr; 将错误消息追加到历史，重新调用 LLM；<strong>BashSyntaxError</strong>（bash 命令语法错误） &rarr; 同样追加错误提示重试。最多重试 N 次，超限则触发 terminal error。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge" style="color:var(--teal)">&oplus;</span></div>
+      <div class="step-inner">
+        <div class="step-h">forward() &mdash; 核心推理</div>
+        <div class="step-p">① 对历史记录应用全部 <strong>HistoryProcessors</strong>（按序处理），得到压缩后的历史；② 将压缩历史 + system prompt + 当前任务组装成 LLM messages；③ 调用 LLM，获取 completion；④ 从 completion 中<strong>解析 action</strong>（提取 bash 命令块）。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge" style="color:var(--amber)">&oplus;</span></div>
+      <div class="step-inner">
+        <div class="step-h">handle_action() &mdash; 执行 action</div>
+        <div class="step-p">将解析出的 action（如 <code>edit 42:45 &lt;&lt;'EOF' ... EOF</code>）发送到 Docker 容器执行。收集 stdout/stderr 作为 observation。对 <code>submit</code> action 特殊处理：生成 diff、结束 session。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge" style="color:var(--green)">&oplus;</span></div>
+      <div class="step-inner">
+        <div class="step-h">记录 &mdash; 追加到 history + trajectory</div>
+        <div class="step-p">将 (action_text, observation_output, model_response, execution_time) 作为一个 <strong>TrajectoryStep</strong> 追加到内存中的 trajectory 列表和 agent 的 history。下一步 <code>forward()</code> 将看到更新后的历史。</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:24px 0 10px">3.2 &nbsp;RetryAgent &mdash; 多次尝试 + Review</div>
+
+  <div class="two-col">
+    <div class="two-col-card" style="border-left:3px solid var(--teal)">
+      <div class="two-col-label" style="color:var(--teal)">DefaultAgent (单次)</div>
+      <div class="two-col-body">
+        执行一次完整的 agent 循环直到 <code>submit</code> 或达到 <code>max_iterations</code>。<br><br>
+        产出一条轨迹和一个 patch。<br><br>
+        <strong>适用</strong>：标准评测、轨迹采集。
+      </div>
+    </div>
+    <div class="two-col-card" style="border-left:3px solid var(--purple)">
+      <div class="two-col-label" style="color:var(--purple)">RetryAgent (多次)</div>
+      <div class="two-col-body">
+        包装多个 <strong>DefaultAgent 实例</strong>，按序执行。<br><br>
+        每次尝试结束后可运行 <strong>review loop</strong>：检查 patch 质量，决定是否重试。<br><br>
+        最终 <code>.traj</code> 文件包含所有尝试的元数据，选择最优 submission。
+      </div>
+    </div>
+  </div>
+
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:24px 0 10px">3.3 &nbsp;被阻止的命令 (Blocked Commands)</div>
+
+  <p>SWE-agent 显式阻止一系列<strong>交互式命令</strong>，因为 LLM 无法处理需要持续交互的程序：</p>
+
+  <div class="tag-row" style="margin:12px 0">
+    <span class="tag" style="color:var(--red);border-color:rgba(217,115,106,.3);background:rgba(217,115,106,.06)">vim</span>
+    <span class="tag" style="color:var(--red);border-color:rgba(217,115,106,.3);background:rgba(217,115,106,.06)">nano</span>
+    <span class="tag" style="color:var(--red);border-color:rgba(217,115,106,.3);background:rgba(217,115,106,.06)">python (interactive)</span>
+    <span class="tag" style="color:var(--red);border-color:rgba(217,115,106,.3);background:rgba(217,115,106,.06)">ipython</span>
+    <span class="tag" style="color:var(--red);border-color:rgba(217,115,106,.3);background:rgba(217,115,106,.06)">less</span>
+    <span class="tag" style="color:var(--red);border-color:rgba(217,115,106,.3);background:rgba(217,115,106,.06)">more</span>
+  </div>
+
+  <p>当 agent 尝试使用被阻止的命令时，系统返回错误提示并建议使用 ACI 替代命令（如用 <code>edit</code> 替代 <code>vim</code>）。这是 ACI 设计的一部分——<strong>限制 action space 以减少 agent 出错的可能性</strong>。</p>
+
+  <div class="callout warn">
+    <div class="callout-icon">&oast;</div>
+    <div class="callout-body">
+      <strong>Terminal Error 处理</strong>：当发生不可恢复的错误（如 Docker 容器崩溃、LLM API 连续失败），agent 会自动执行 <code>submit</code> 提交当前状态的 patch（可能为空 diff），而非直接中断。这保证每个实例都有输出，方便批量评测统计。
+    </div>
+  </div>
+</section>
+
+<!-- --- 04 轨迹格式 --- -->
+<section class="sec" id="trajectory">
+  <div class="sec-header">
+    <span class="sec-num">04</span>
+    <div class="sec-line" style="background:var(--purple)"></div>
+    <h2 class="sec-title">轨迹格式 (Trajectory Format)</h2>
+  </div>
+
+  <p>SWE-agent 的轨迹以 <code>.traj</code> JSON 文件保存，每个文件记录一次完整的 agent session。</p>
+
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:20px 0 10px">4.1 &nbsp;TrajectoryStep 数据结构</div>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:#d9736a"></span>
+      <span class="dot" style="background:#c8a04a"></span>
+      <span class="dot" style="background:#6dbb84"></span>
+      .traj JSON &middot; 单步结构 (TrajectoryStep)
+    </div>
+    <pre>{
+  <span class="tok-key">"action"</span>: <span class="tok-str">"edit 42:45 &lt;&lt;'EOF'\ndef authenticate(user, pwd):\n    ...\nEOF"</span>,
+  <span class="tok-key">"observation"</span>: <span class="tok-str">"[File: /repo/src/auth.py (120 lines total)]\n(40 more lines above)\n42:def authenticate..."</span>,
+  <span class="tok-key">"response"</span>: <span class="tok-str">"I'll fix the authenticate function by adding proper validation...\n\n```bash\nedit 42:45 &lt;&lt;'EOF'\n..."</span>,
+  <span class="tok-key">"execution_time"</span>: <span class="tok-num">1.24</span>,
+  <span class="tok-key">"state"</span>: {
+    <span class="tok-key">"open_file"</span>: <span class="tok-str">"/repo/src/auth.py"</span>,
+    <span class="tok-key">"working_dir"</span>: <span class="tok-str">"/repo"</span>,
+    <span class="tok-key">"window_start"</span>: <span class="tok-num">40</span>,
+    <span class="tok-key">"window_end"</span>: <span class="tok-num">140</span>
+  }
+}</pre>
+  </div>
+
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:24px 0 10px">4.2 &nbsp;完整 .traj 文件结构</div>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:#d9736a"></span>
+      <span class="dot" style="background:#c8a04a"></span>
+      <span class="dot" style="background:#6dbb84"></span>
+      .traj JSON &middot; 顶层结构
+    </div>
+    <pre>{
+  <span class="tok-key">"trajectory"</span>: [
+    { <span class="tok-comment">/* TrajectoryStep 0 */</span> },
+    { <span class="tok-comment">/* TrajectoryStep 1 */</span> },
+    <span class="tok-comment">...</span>
+    { <span class="tok-comment">/* TrajectoryStep N — 最后一步通常是 submit */</span> }
+  ],
+  <span class="tok-key">"history"</span>: [
+    <span class="tok-comment">/* 完整的 LLM message 历史，含 system/user/assistant 角色 */</span>
+  ],
+  <span class="tok-key">"info"</span>: {
+    <span class="tok-key">"model"</span>: <span class="tok-str">"gpt-4-1106-preview"</span>,
+    <span class="tok-key">"model_stats"</span>: {
+      <span class="tok-key">"total_cost"</span>: <span class="tok-num">0.42</span>,
+      <span class="tok-key">"input_tokens"</span>: <span class="tok-num">28500</span>,
+      <span class="tok-key">"output_tokens"</span>: <span class="tok-num">3200</span>,
+      <span class="tok-key">"api_calls"</span>: <span class="tok-num">12</span>
+    },
+    <span class="tok-key">"exit_status"</span>: <span class="tok-str">"submitted"</span>,
+    <span class="tok-key">"submission"</span>: <span class="tok-str">"diff --git a/src/auth.py b/src/auth.py\n..."</span>
+  }
+}</pre>
+  </div>
+
+  <p><strong>RetryAgent</strong> 的 <code>.traj</code> 文件额外包含：所有尝试（attempts）的独立轨迹、每次尝试的 review 结果、以及最终选定的 best submission 索引。</p>
+
+  <div class="callout key">
+    <div class="callout-icon">&#9670;</div>
+    <div class="callout-body">
+      <strong>轨迹格式特点</strong>：与 OpenHands 的 Event Stream 相比，SWE-agent 的轨迹更简单直接——每步就是 <code>(action, observation, response, state)</code> 四元组，没有 event ID、cause 链接等复杂的因果追踪。这使得轨迹<strong>解析和训练数据转换更简单</strong>，但缺少 OpenHands 那种精细的因果绑定信息。<code>state</code> 字段记录了 ACI 特有的环境状态（当前打开的文件、窗口位置等）。
+    </div>
+  </div>
+</section>
+
+<!-- --- 05 代码结构 --- -->
+<section class="sec" id="codestructure">
+  <div class="sec-header">
+    <span class="sec-num">05</span>
+    <div class="sec-line" style="background:var(--green)"></div>
+    <h2 class="sec-title">代码结构 (Code Structure)</h2>
+  </div>
+
+  <p>SWE-agent 的代码库结构清晰，核心逻辑集中在 <code>sweagent/</code> 包中。</p>
+
+  <table class="bench-table">
+    <thead>
+      <tr>
+        <th>文件路径</th>
+        <th>职责</th>
+        <th>关键类 / 函数</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>sweagent/agent/agents.py</code></td>
+        <td style="color:var(--muted)">Agent 实现</td>
+        <td style="color:var(--muted)"><code>AbstractAgent</code>, <code>DefaultAgent</code>, <code>RetryAgent</code> &mdash; 推理循环核心</td>
+      </tr>
+      <tr>
+        <td><code>sweagent/agent/history_processors.py</code></td>
+        <td style="color:var(--muted)">上下文管理</td>
+        <td style="color:var(--muted)">7 种 processor 类：<code>LastNObservations</code>, <code>ClosedWindowHistoryProcessor</code>, <code>CacheControlHistoryProcessor</code>, <code>RemoveRegex</code> 等</td>
+      </tr>
+      <tr>
+        <td><code>sweagent/agent/models.py</code></td>
+        <td style="color:var(--muted)">LLM 集成</td>
+        <td style="color:var(--muted)">统一 LLM 后端接口，支持 OpenAI / Anthropic / open-source 模型</td>
+      </tr>
+      <tr>
+        <td><code>sweagent/agent/action_sampler.py</code></td>
+        <td style="color:var(--muted)">Action 采样</td>
+        <td style="color:var(--muted)">从 LLM completion 中解析和采样 action 的逻辑</td>
+      </tr>
+      <tr>
+        <td><code>sweagent/tools/tools.py</code></td>
+        <td style="color:var(--muted)">Tool 管理</td>
+        <td style="color:var(--muted)"><code>ToolHandler</code>, <code>ToolBundle</code> &mdash; 命令注册、安装、验证</td>
+      </tr>
+      <tr>
+        <td><code>sweagent/tools/commands.py</code></td>
+        <td style="color:var(--muted)">命令定义</td>
+        <td style="color:var(--muted)">ACI 命令的 Python 侧定义框架（与容器内 bash 函数对应）</td>
+      </tr>
+      <tr>
+        <td><code>config/</code></td>
+        <td style="color:var(--muted)">配置文件</td>
+        <td style="color:var(--muted)">YAML agent 配置、tool bundle 配置、prompt 模板</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:#d9736a"></span>
+      <span class="dot" style="background:#c8a04a"></span>
+      <span class="dot" style="background:#6dbb84"></span>
+      YAML agent 配置示例（简化）
+    </div>
+    <pre><span class="tok-key">agent</span>:
+  <span class="tok-key">class</span>: <span class="tok-str">DefaultAgent</span>
+  <span class="tok-key">model</span>:
+    <span class="tok-key">name</span>: <span class="tok-str">gpt-4-1106-preview</span>
+    <span class="tok-key">temperature</span>: <span class="tok-num">0.0</span>
+    <span class="tok-key">top_p</span>: <span class="tok-num">0.95</span>
+  <span class="tok-key">max_iterations</span>: <span class="tok-num">30</span>
+
+  <span class="tok-key">history_processors</span>:
+    - <span class="tok-key">class</span>: <span class="tok-str">LastNObservations</span>
+      <span class="tok-key">n</span>: <span class="tok-num">5</span>
+    - <span class="tok-key">class</span>: <span class="tok-str">ClosedWindowHistoryProcessor</span>
+    - <span class="tok-key">class</span>: <span class="tok-str">RemoveRegex</span>
+      <span class="tok-key">pattern</span>: <span class="tok-str">"\\x1b\\[[0-9;]*m"</span>  <span class="tok-comment"># 去除 ANSI 颜色码</span>
+
+<span class="tok-key">tools</span>:
+  <span class="tok-key">bundles</span>:
+    - <span class="tok-str">default</span>    <span class="tok-comment"># open, scroll, goto, search_file, search_dir, find_file, edit, create, submit</span>
+  <span class="tok-key">blocked_commands</span>:
+    - <span class="tok-str">vim</span>
+    - <span class="tok-str">nano</span>
+    - <span class="tok-str">python -i</span></pre>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-icon">&#8505;</div>
+    <div class="callout-body">
+      <strong>YAML 驱动的设计哲学</strong>：SWE-agent 的所有行为——agent 类型、模型参数、history processor 链、tool bundle 组合、blocked commands——都通过 YAML 配置，不需要修改 Python 代码。这使得<strong>实验迭代极快</strong>：换一个 YAML 文件就是一个新的 agent 配置，非常适合消融实验。
+    </div>
+  </div>
+</section>
+
+<!-- --- 06 Tools Bundle 设计 --- -->
+<section class="sec" id="tools">
+  <div class="sec-header">
+    <span class="sec-num">06</span>
+    <div class="sec-line" style="background:var(--purple)"></div>
+    <h2 class="sec-title">Tools Bundle 设计详解</h2>
+  </div>
+
+  <p>SWE-agent 的 ACI 命令并非硬编码，而是通过 <strong>Tool Bundle</strong> 机制动态组装。每个 bundle 是一个自包含的目录，包含命令脚本、配置文件和辅助库。</p>
+
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:24px 0 10px">6.1 &nbsp;Bundle 目录结构</div>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:var(--purple)"></span>
+      <span class="dot" style="background:var(--blue)"></span>
+      <span class="dot" style="background:var(--green)"></span>
+      tools/windowed_edit_replace/ 示例结构
+    </div>
+    <pre>tools/windowed_edit_replace/
+├── bin/                          # 可执行命令脚本
+│   ├── edit                      # Python 脚本：search-replace 编辑
+│   └── insert                    # Python 脚本：插入文本
+├── lib/                          # 辅助库（可选）
+│   └── windowed_file.py          # WindowedFile 类实现
+└── config.yaml                   # 命令配置（signature + docstring）</pre>
+  </div>
+
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:24px 0 10px">6.2 &nbsp;config.yaml 配置详解</div>
+
+  <p>每个 bundle 的 <code>config.yaml</code> 定义了命令的签名、文档字符串和参数，这些信息会被自动提取并注入到 system prompt 中。</p>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:var(--c2)"></span>
+      <span class="dot" style="background:var(--c3)"></span>
+      <span class="dot" style="background:var(--c1)"></span>
+      windowed_edit_replace/config.yaml
+    </div>
+    <pre><span class="tok-key">tools</span>:
+  <span class="tok-key">edit</span>:
+    <span class="tok-key">signature</span>: |
+      edit &lt;search&gt; &lt;replace&gt; [&lt;replace-all&gt;]
+    <span class="tok-key">docstring</span>: &gt;
+      Replace first occurrence of &lt;search&gt; with &lt;replace&gt; in the currently displayed lines.
+      If replace-all is True, replace all occurrences of &lt;search&gt; with &lt;replace&gt;.
+
+      For example, if you are looking at this file:
+
+      def fct():
+          print("Hello world")
+
+      and you want to edit the file to read:
+
+      def fct():
+          print("Hello")
+          print("world")
+
+      you can search for `Hello world` and replace with `"Hello"\n    print("world")`
+      (note the extra spaces before the print statement!).
+
+      Tips:
+      1. Always include proper whitespace/indentation
+      2. When you are adding an if/with/try statement, you need to INDENT the block
+    <span class="tok-key">arguments</span>:
+      - <span class="tok-key">name</span>: search
+        <span class="tok-key">type</span>: string
+        <span class="tok-key">description</span>: "the text to search for"
+        <span class="tok-key">required</span>: true
+      - <span class="tok-key">name</span>: replace
+        <span class="tok-key">type</span>: string
+        <span class="tok-key">description</span>: "the text to replace with"
+        <span class="tok-key">required</span>: true
+      - <span class="tok-key">name</span>: replace-all
+        <span class="tok-key">type</span>: boolean
+        <span class="tok-key">description</span>: "replace all occurrences"
+        <span class="tok-key">required</span>: false</pre>
+  </div>
+
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:24px 0 10px">6.3 &nbsp;核心命令实现：edit</div>
+
+  <p><strong>重要修正：</strong>SWE-agent 的 edit 命令并非简单的"行号替换"，而是实现了 <strong>search-replace + lint-on-edit</strong> 的智能编辑。</p>
+
+  <div class="action-list">
+    <div class="action-item">
+      <div class="action-name">edit &lt;search&gt; &lt;replace&gt;</div>
+      <div class="action-desc">
+        <strong>search-replace 编辑</strong>。在<strong>当前显示的窗口</strong>内搜索 <code>search</code> 文本并替换为 <code>replace</code>。
+        如果窗口内找到多个匹配，会报错要求更精确的搜索字符串。编辑后<strong>自动运行 flake8 lint 检查</strong>——
+        如果引入语法错误，修改会被<strong>自动回滚</strong>，并返回错误信息给 agent。
+      </div>
+    </div>
+  </div>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:#d9736a"></span>
+      <span class="dot" style="background:#c8a04a"></span>
+      <span class="dot" style="background:#6dbb84"></span>
+      tools/windowed_edit_replace/bin/edit 核心逻辑
+    </div>
+    <pre><span class="tok-key">def</span> <span class="tok-fn">main</span>(search: str, replace: str, replace_all: bool):
+    wf = WindowedFile(exit_on_exception=False)
+    pre_edit_lint = flake8(wf.path)  <span class="tok-comment"># 编辑前 lint</span>
+
+    <span class="tok-key">if</span> <span class="tok-key">not</span> replace_all:
+        window_text = wf.get_window_text()
+        <span class="tok-key">if</span> window_text.count(search) > 1:
+            <span class="tok-cmt"># 多个匹配 → 要求更精确的搜索字符串</span>
+            print(_MULTIPLE_OCCURRENCES_MSG.format(search=search))
+            exit(4)
+        replacement_info = wf.replace_in_window(search, replace)
+
+    post_edit_lint = flake8(wf.path)  <span class="tok-comment"># 编辑后 lint</span>
+
+    <span class="tok-key">if</span> new_flake8_output:
+        <span class="tok-cmt"># 引入新错误 → 回滚！</span>
+        wf.undo_edit()
+        print(_LINT_ERROR_TEMPLATE.format(
+            errors=new_flake8_output,
+            window_applied=with_edits,
+            window_original=without_edits,
+        ))
+        exit(4)</pre>
+  </div>
+
+  <div class="callout warn">
+    <div class="callout-icon">⚠</div>
+    <div class="callout-body">
+      <strong>Multiple Occurrences Check</strong>：如果当前窗口内 <code>search</code> 出现多次，
+      edit 命令会<strong>拒绝执行</strong>，要求 agent 使用更具体的搜索字符串（包含更多上下文）。
+      这避免了"不小心替换了错误位置"的风险，但也要求 agent 具备更精确的编辑意图表达。
+    </div>
+  </div>
+
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:24px 0 10px">6.4 &nbsp;Bundle 组合与安装</div>
+
+  <p>Agent 配置通过 YAML 指定使用哪些 tool bundles，系统会自动安装并组装命令。</p>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:var(--c1)"></span>
+      <span class="dot" style="background:var(--c2)"></span>
+      config/exotic/windowed_replace.yaml
+    </div>
+    <pre><span class="tok-key">agent</span>:
+  <span class="tok-key">tools</span>:
+    <span class="tok-key">bundles</span>:
+      - <span class="tok-key">path</span>: tools/registry        <span class="tok-comment"># 基础环境变量管理</span>
+      - <span class="tok-key">path</span>: tools/windowed         <span class="tok-comment"># open, goto, scroll</span>
+      - <span class="tok-key">path</span>: tools/search           <span class="tok-comment"># search_file, search_dir</span>
+      - <span class="tok-key">path</span>: tools/windowed_edit_replace  <span class="tok-comment"># edit (search-replace)</span>
+      - <span class="tok-key">path</span>: tools/submit           <span class="tok-comment"># submit</span>
+    <span class="tok-key">enable_bash_tool</span>: true           <span class="tok-comment"># 同时启用原始 bash</span>
+    <span class="tok-key">parse_function</span>:
+      <span class="tok-key">type</span>: function_calling           <span class="tok-comment"># 使用 function calling 解析</span></pre>
+  </div>
+
+  <table class="bench-table" style="margin-top:24px">
+    <thead>
+      <tr>
+        <th>Bundle 名称</th>
+        <th>提供的命令</th>
+        <th>实现语言</th>
+        <th>核心特点</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>windowed</code></td>
+        <td>open, goto, scroll_up/down, create</td>
+        <td>Python</td>
+        <td>100行窗口浏览，状态保存在环境变量</td>
+      </tr>
+      <tr>
+        <td><code>windowed_edit_replace</code></td>
+        <td>edit, insert</td>
+        <td>Python</td>
+        <td>search-replace + 自动 lint + 错误回滚</td>
+      </tr>
+      <tr>
+        <td><code>windowed_edit_rewrite</code></td>
+        <td>edit (行号版本)</td>
+        <td>Python</td>
+        <td>基于行号范围的整块替换</td>
+      </tr>
+      <tr>
+        <td><code>search</code></td>
+        <td>search_file, search_dir, find_file</td>
+        <td>Bash</td>
+        <td>限制输出行数，防止 context window 爆炸</td>
+      </tr>
+      <tr>
+        <td><code>submit</code></td>
+        <td>submit</td>
+        <td>Bash</td>
+        <td>生成 git diff 并结束 session</td>
+      </tr>
+      <tr>
+        <td><code>edit_anthropic</code></td>
+        <td>view, str_replace</td>
+        <td>Python</td>
+        <td>Anthropic computer use 风格的 ACI</td>
+      </tr>
+    </tbody>
+  </table>
+
+</section>
+
+<!-- --- 07 Prompt 注入机制 --- -->
+<section class="sec" id="prompt">
+  <div class="sec-header">
+    <span class="sec-num">07</span>
+    <div class="sec-line" style="background:var(--amber)"></div>
+    <h2 class="sec-title">Prompt 模板与 command_docs 注入</h2>
+  </div>
+
+  <p>SWE-agent 的 system prompt 不是静态文本，而是通过 <strong>Jinja2 模板 + 动态变量</strong>渲染生成。核心机制是将 tool bundle 中定义的命令文档自动聚合并注入。</p>
+
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:24px 0 10px">7.1 &nbsp;command_docs 生成流程</div>
+
+  <div class="arch-diagram" style="margin:20px 0">
+    <div style="line-height:2.4;font-size:12px">
+      <span class="arch-box llm" style="background:rgba(136,120,184,.15);color:var(--purple)">Tool Config YAML</span>
+      <span style="color:var(--muted2)"> → parse → </span>
+      <span class="arch-box agent" style="background:rgba(94,168,192,.15);color:var(--c3)">Command 对象列表</span>
+      <span style="color:var(--muted2)"> → generate_command_docs() → </span>
+      <span class="arch-box event" style="background:rgba(212,148,74,.15);color:var(--c2)">command_docs 字符串</span>
+      <span style="color:var(--muted2)"> → Jinja2 render → </span>
+      <span class="arch-box ctrl" style="background:rgba(109,187,132,.15);color:var(--c1)">完整 system prompt</span>
+    </div>
+  </div>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:var(--c3)"></span>
+      <span class="dot" style="background:var(--c2)"></span>
+      <span class="dot" style="background:var(--c1)"></span>
+      sweagent/tools/utils.py：generate_command_docs()
+    </div>
+    <pre><span class="tok-key">def</span> <span class="tok-fn">generate_command_docs</span>(commands: list[Command], subroutine_types, **kwargs) -> str:
+    <span class="tok-str">"""将命令列表格式化为文档字符串"""</span>
+    docs = <span class="tok-str">""</span>
+    <span class="tok-key">for</span> cmd <span class="tok-key">in</span> commands + subroutine_types:
+        docs += <span class="tok-str">f"{cmd.name}:\n"</span>
+        <span class="tok-key">if</span> cmd.docstring:
+            docs += <span class="tok-str">f"  docstring: {cmd.docstring.format(**kwargs)}\n"</span>
+        <span class="tok-key">if</span> cmd.signature:
+            docs += <span class="tok-str">f"  signature: {cmd.signature}\n"</span>
+        <span class="tok-key">if</span> cmd.arguments:
+            docs += <span class="tok-str">"  arguments:\n"</span>
+            <span class="tok-key">for</span> arg <span class="tok-key">in</span> cmd.arguments:
+                req = <span class="tok-str">"required"</span> <span class="tok-key">if</span> arg.required <span class="tok-key">else</span> <span class="tok-str">"optional"</span>
+                docs += <span class="tok-str">f"    - {arg.name} ({arg.type}, {req})\n"</span>
+    <span class="tok-key">return</span> docs</pre>
+  </div>
+
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:24px 0 10px">7.2 &nbsp;模板变量与渲染</div>
+
+  <p>system_template 通过 Jinja2 渲染，可用的变量由 <code>_get_format_dict()</code> 提供。</p>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:#d9736a"></span>
+      <span class="dot" style="background:#c8a04a"></span>
+      <span class="dot" style="background:#6dbb84"></span>
+      sweagent/agent/agents.py：模板渲染流程
+    </div>
+    <pre><span class="tok-key">def</span> <span class="tok-fn">add_system_message_to_history</span>(self) -> None:
+    <span class="tok-str">"""渲染并添加 system message"""</span>
+    system_msg = Template(self.templates.system_template).render(
+        **self._get_format_dict()
+    )
+    self._append_history({
+        <span class="tok-str">"role"</span>: <span class="tok-str">"system"</span>,
+        <span class="tok-str">"content"</span>: system_msg,
+        <span class="tok-str">"agent"</span>: self.name,
+        <span class="tok-str">"message_type"</span>: <span class="tok-str">"system_prompt"</span>
+    })
+
+<span class="tok-key">def</span> <span class="tok-fn">_get_format_dict</span>(self, **kwargs) -> dict[str, Any]:
+    <span class="tok-str">"""提供模板渲染所需的变量"""</span>
+    <span class="tok-key">return</span> dict(
+        <span class="tok-cmt"># 核心：自动生成的命令文档</span>
+        command_docs=self.tools.config.command_docs,
+        <span class="tok-cmt"># 环境变量（如 WINDOW=100）</span>
+        **self.tools.config.env_variables,
+        <span class="tok-cmt"># PR 描述</span>
+        problem_statement=self._problem_statement.get_problem_statement(),
+        <span class="tok-cmt"># 仓库名</span>
+        repo=self._env.repo.repo_name <span class="tok-key">if</span> self._env.repo <span class="tok-key">else</span> <span class="tok-str">""</span>,
+        **kwargs
+    )</pre>
+  </div>
+
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:24px 0 10px">7.3 &nbsp;完整 system_template 示例</div>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:var(--c2)"></span>
+      <span class="dot" style="background:var(--c3)"></span>
+      <span class="dot" style="background:var(--c1)"></span>
+      config/exotic/windowed_replace.yaml
+    </div>
+    <pre><span class="tok-key">agent</span>:
+  <span class="tok-key">templates</span>:
+    <span class="tok-key">system_template</span>: |-
+      SETTING: You are an autonomous programmer working in the command line
+      with a special interface.
+
+      The special interface consists of a file editor that shows you {{WINDOW}}
+      lines of a file at a time.
+      <span class="tok-cmt"># ↑ 使用 {{WINDOW}} 环境变量（值为 100）</span>
+
+      In addition to typical bash commands, you can also use specific commands
+      to help you navigate and edit files. To call a command, you need to invoke
+      it with a function call/tool call.
+
+      Please note that THE EDIT COMMAND REQUIRES PROPER INDENTATION.
+
+      For example, if you are looking at this file:
+
+      def fct():
+          print("Hello world")
+
+      and you want to edit the file to read:
+
+      def fct():
+          print("Hello")
+          print("world")
+
+      you search string should be `Hello world` and your replace string should
+      be `"Hello"\n    print("world")` (note the extra spaces!).
+
+      {{command_docs}}
+      <span class="tok-cmt"># ↑ 这里注入自动生成的命令文档！</span>
+
+      RESPONSE FORMAT:
+      Your shell prompt is formatted as follows:
+      (Open file: {{open_file}})
+      (Current directory: {{working_dir}})
+      bash-$
+
+      First, you should _always_ include a general thought about what you're
+      going to do next. Then, for every response, you must include exactly
+      _ONE_ tool call/function call.</pre>
+  </div>
+
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:24px 0 10px">7.4 &nbsp;生成的 command_docs 示例</div>
+
+  <p>最终注入 LLM 的 command_docs 是这样的格式：</p>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:var(--purple)"></span>
+      <span class="dot" style="background:var(--blue)"></span>
+      <span class="dot" style="background:var(--green)"></span>
+      实际注入的 command_docs（片段）
+    </div>
+    <pre>open:
+  docstring: Open a file and display it starting from line 1, or return to an already opened file.
+  signature: open <path> [<line_number>]
+  arguments:
+    - path (string, required)
+    - line_number (integer, optional)
+
+edit:
+  docstring: Replace first occurrence of <search> with <replace> in the currently displayed lines...
+  signature: edit <search> <replace> [<replace-all>]
+  arguments:
+    - search (string, required)
+    - replace (string, required)
+    - replace-all (boolean, optional)
+
+scroll_down:
+  docstring: Scroll down the window by one page ({{WINDOW}} lines)
+  signature: scroll_down
+  arguments:
+
+search_file:
+  docstring: Search for a term in a file. If file is not provided, searches the current open file.
+  signature: search_file <search_term> [<file>]
+  arguments:
+    - search_term (string, required)
+    - file (string, optional)</pre>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-icon">&#8505;</div>
+    <div class="callout-body">
+      <strong>Prompt 工程的关键设计</strong>：
+      (1) <strong>动态变量</strong>：{{WINDOW}}, {{working_dir}} 等使 prompt 能反映实际环境状态；
+      (2) <strong>自动文档</strong>：command_docs 自动从 tool config 生成，保证 prompt 与实际可用命令同步；
+      (3) <strong>示例驱动</strong>：system_template 中包含具体的 edit 示例，展示正确的 indentation 处理方式；
+      (4) <strong>格式约束</strong>：明确声明 "exactly _ONE_ tool call"，减少解析歧义。
+    </div>
+  </div>
+
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:24px 0 10px">7.5 &nbsp;instance_template：任务注入</div>
+
+  <p>除 system prompt 外，每个 task instance 还有 <strong>instance_template</strong>，用于注入 PR 描述和初始指令。</p>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:var(--c2)"></span>
+      <span class="dot" style="background:var(--c3)"></span>
+      <span class="dot" style="background:var(--c1)"></span>
+      instance_template 结构
+    </div>
+    <pre>We're currently solving the following issue within our repository.
+Here's the issue text:
+
+ISSUE:
+{{problem_statement}}
+
+INSTRUCTIONS:
+Now, you're going to solve this issue on your own. Your terminal session has
+started and you're in the repository's root directory...
+
+(Open file: {{open_file}})
+(Current directory: {{working_dir}})
+bash-$</pre>
+  </div>
+
+  <p><strong>关键机制</strong>：<code>(Open file: ...)</code> 和 <code>bash-$</code> 是<strong>状态提示符</strong>，
+  每轮交互后通过 <code>next_step_template</code> 更新，让 LLM 始终知道当前打开的文件和工作目录。</p>
+
+</section>
+
+<!-- --- 08 History 管理机制 --- -->
+<section class="sec" id="history">
+  <div class="sec-header">
+    <span class="sec-num">08</span>
+    <div class="sec-line" style="background:var(--c5)"></div>
+    <h2 class="sec-title">History 管理与 History Processors</h2>
+  </div>
+
+  <p>SWE-agent 维护两个核心数据结构：<strong>history</strong>（LLM 对话历史）和 <strong>trajectory</strong>（执行轨迹）。两者分离的设计让系统可以灵活控制 LLM 看到的上下文，同时保留完整的执行记录。</p>
+
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:24px 0 10px">8.1 &nbsp;History vs Trajectory：分离设计</div>
+
+  <table class="bench-table">
+    <thead>
+      <tr>
+        <th>维度</th>
+        <th>History</th>
+        <th>Trajectory</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>用途</strong></td>
+        <td>发送给 LLM 的对话上下文</td>
+        <td>记录完整的执行过程（用于保存、回放、训练）</td>
+      </tr>
+      <tr>
+        <td><strong>内容</strong></td>
+        <td>经过 HistoryProcessors 处理的子集</td>
+        <td>所有 action + observation + state 的完整记录</td>
+      </tr>
+      <tr>
+        <td><strong>格式</strong></td>
+        <td>OpenAI message format (<code>role, content</code>)</td>
+        <td>自定义 <code>TrajectoryStep</code> 结构</td>
+      </tr>
+      <tr>
+        <td><strong>持久化</strong></td>
+        <td>保存在 <code>.traj</code> 文件的 <code>history</code> 字段</td>
+        <td>保存在 <code>.traj</code> 文件的 <code>trajectory</code> 字段</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:var(--c3)"></span>
+      <span class="dot" style="background:var(--c2)"></span>
+      <span class="dot" style="background:var(--c1)"></span>
+      sweagent/types.py：核心类型定义
+    </div>
+    <pre><span class="tok-key">class</span> <span class="tok-fn">HistoryItem</span>(TypedDict):
+    <span class="tok-cmt"># 发送给 LLM 的消息格式</span>
+    role: str  <span class="tok-cmt"># "system" | "user" | "assistant" | "tool"</span>
+    content: str | list[dict]  <span class="tok-cmt"># 消息内容（支持多模态）</span>
+    message_type: str  <span class="tok-cmt"># "system_prompt" | "thought" | "action" | "observation"</span>
+    <span class="tok-cmt"># 可选字段</span>
+    agent: str  <span class="tok-cmt"># agent 名称（支持多 agent）</span>
+    thought: str  <span class="tok-cmt"># 模型思考过程</span>
+    action: str  <span class="tok-cmt"># 执行的动作</span>
+    tool_calls: list[dict]  <span class="tok-cmt"># function calling 信息</span>
+    tags: list[str]  <span class="tok-cmt"># 用于 HistoryProcessor 的特殊标记</span>
+
+<span class="tok-key">class</span> <span class="tok-fn">TrajectoryStep</span>(TypedDict):
+    <span class="tok-cmt"># 完整的执行记录（用于回放和训练）</span>
+    action: str
+    observation: str
+    response: str  <span class="tok-cmt"># 完整模型输出</span>
+    thought: str
+    state: dict[str, str]  <span class="tok-cmt"># 环境状态（如当前目录、打开的文件）</span>
+    execution_time: float
+    query: list[dict]  <span class="tok-cmt"># 当时发送给模型的完整 history</span>
+    extra_info: dict[str, Any]</span></pre>
+  </div>
+
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:24px 0 10px">8.2 &nbsp;History 的生命周期</div>
+
+  <div class="arch-diagram" style="margin:20px 0">
+    <div style="line-height:2.4;font-size:12px">
+      <span class="arch-box llm" style="background:rgba(109,187,132,.15);color:var(--c1)">1. 初始化</span>
+      <span style="color:var(--muted2)"> → </span>
+      <span class="arch-box agent" style="background:rgba(94,168,192,.15);color:var(--c3)">2. 追加记录</span>
+      <span style="color:var(--muted2)"> → </span>
+      <span class="arch-box event" style="background:rgba(212,148,74,.15);color:var(--c2)">3. Processors 处理</span>
+      <span style="color:var(--muted2)"> → </span>
+      <span class="arch-box ctrl" style="background:rgba(136,120,184,.15);color:var(--purple)">4. 发送给 LLM</span>
+      <span style="color:var(--muted2)"> → </span>
+      <span class="arch-box rt" style="background:rgba(109,187,132,.15);color:var(--c1)">5. 循环</span>
+    </div>
+  </div>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:#d9736a"></span>
+      <span class="dot" style="background:#c8a04a"></span>
+      <span class="dot" style="background:#6dbb84"></span>
+      sweagent/agent/agents.py：History 管理核心流程
+    </div>
+    <pre><span class="tok-cmt"># 1. 初始化：添加 system message 和 demonstrations</span>
+<span class="tok-key">def</span> <span class="tok-fn">setup</span>(self, env, problem_statement):
+    self.history = []  <span class="tok-cmt"># 重置 history</span>
+    self.add_system_message_to_history()  <span class="tok-cmt"># system prompt</span>
+    self.add_demonstrations_to_history()  <span class="tok-cmt"># few-shot demo（可选）</span>
+    self.add_instance_template_to_history(state)  <span class="tok-cmt"># task 描述</span>
+
+<span class="tok-cmt"># 2. 每轮追加 action 和 observation</span>
+<span class="tok-key">def</span> <span class="tok-fn">add_step_to_history</span>(self, step: StepOutput):
+    <span class="tok-cmt"># 添加 assistant 消息（包含 thought + action）</span>
+    self._append_history({
+        <span class="tok-str">"role"</span>: <span class="tok-str">"assistant"</span>,
+        <span class="tok-str">"content"</span>: step.output,
+        <span class="tok-str">"thought"</span>: step.thought,
+        <span class="tok-str">"action"</span>: step.action,
+        <span class="tok-str">"message_type"</span>: <span class="tok-str">"action"</span>,
+    })
+    <span class="tok-cmt"># 添加 user 消息（observation）</span>
+    self._add_templated_messages_to_history(
+        templates=[self.templates.next_step_template],
+        observation=step.observation,
+        **step.state,
+    )
+
+<span class="tok-cmt"># 3. 获取处理后的 history 发送给 LLM</span>
+<span class="tok-key">@property</span>
+<span class="tok-key">def</span> <span class="tok-fn">messages</span>(self) -> list[dict]:
+    <span class="tok-cmt">"""返回经过 HistoryProcessors 处理后的 history"""</span>
+    <span class="tok-cmt"># 过滤：只保留当前 agent 的消息（支持多 agent）</span>
+    filtered = [e <span class="tok-key">for</span> e <span class="tok-key">in</span> self.history <span class="tok-key">if</span> e[<span class="tok-str">"agent"</span>] == self.name]
+    <span class="tok-cmt"># 链式处理：依次应用所有 HistoryProcessors</span>
+    messages = filtered
+    <span class="tok-key">for</span> processor <span class="tok-key">in</span> self.history_processors:
+        messages = processor(messages)
+    <span class="tok-key">return</span> messages
+
+<span class="tok-cmt"># 4. Step 循环</span>
+<span class="tok-key">def</span> <span class="tok-fn">step</span>(self) -> StepOutput:
+    step_output = self.forward_with_handling(self.messages)  <span class="tok-cmt"># 使用处理后的 history</span>
+    self.add_step_to_history(step_output)  <span class="tok-cmt"># 追加到完整 history</span>
+    self.add_step_to_trajectory(step_output)  <span class="tok-cmt"># 同时记录到 trajectory</span></span></pre>
+  </div>
+
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:24px 0 10px">8.3 &nbsp;History Processors：上下文压缩策略</div>
+
+  <p>SWE-agent 的杀手级设计：<strong>History Processors 链</strong>。在将 history 发送给 LLM 之前，可以通过一系列处理器对 history 进行变换，解决 context window 限制问题。</p>
+
+  <table class="bench-table">
+    <thead>
+      <tr>
+        <th>Processor</th>
+        <th>功能</th>
+        <th>使用场景</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>LastNObservations</code></td>
+        <td>只保留最后 N 个 observation，旧的替换为 "(n lines omitted)"</td>
+        <td>原始论文配置（n=5），防止 context window 溢出</td>
+      </tr>
+      <tr>
+        <td><code>ClosedWindowHistoryProcessor</code></td>
+        <td>倒序遍历 history，移除已关闭文件的旧内容</td>
+        <td>减少文件浏览历史的冗余</td>
+      </tr>
+      <tr>
+        <td><code>CacheControlHistoryProcessor</code></td>
+        <td>为 Anthropic 模型添加 cache_control 标记</td>
+        <td>使用 Claude 的 prompt caching 降低延迟和成本</td>
+      </tr>
+      <tr>
+        <td><code>RemoveRegex</code></td>
+        <td>用正则表达式移除匹配内容（如 ANSI 颜色码）</td>
+        <td>清理 observation 中的噪声</td>
+      </tr>
+      <tr>
+        <td><code>DefaultHistoryProcessor</code></td>
+        <td>不做任何处理，原样返回</td>
+        <td>现代大模型 context window 足够大时</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:var(--c2)"></span>
+      <span class="dot" style="background:var(--c3)"></span>
+      <span class="dot" style="background:var(--c1)"></span>
+      LastNObservations 实现原理
+    </div>
+    <pre><span class="tok-key">class</span> <span class="tok-fn">LastNObservations</span>(BaseModel):
+    n: int  <span class="tok-cmt"># 保留最后 n 个 observation</span>
+    polling: int = 1  <span class="tok-cmt"># 轮询间隔（用于 caching 优化）</span>
+
+    <span class="tok-key">def</span> <span class="tok-fn">__call__</span>(self, history: History) -> History:
+        <span class="tok-cmt"># 找出所有 observation 的索引</span>
+        observation_indices = [
+            idx <span class="tok-key">for</span> idx, entry <span class="tok-key">in</span> enumerate(history)
+            <span class="tok-key">if</span> entry.get(<span class="tok-str">"message_type"</span>) == <span class="tok-str">"observation"</span>
+        ]
+        <span class="tok-cmt"># 计算要省略的索引（保留最后 n 个）</span>
+        n_observations_to_keep = min(self.n, len(observation_indices))
+        <span class="tok-cmt"># polling 机制：每隔 polling 步才更新一次</span>
+        n_observations_to_keep += (len(observation_indices) - n_observations_to_keep) % self.polling
+        omit_indices = set(observation_indices[:-n_observations_to_keep])
+
+        new_history = []
+        <span class="tok-key">for</span> idx, entry <span class="tok-key">in</span> enumerate(history):
+            <span class="tok-key">if</span> idx <span class="tok-key">in</span> omit_indices:
+                <span class="tok-cmt"># 用占位符替换旧的 observation</span>
+                new_history.append({
+                    <span class="tok-str">"role"</span>: <span class="tok-str">"user"</span>,
+                    <span class="tok-str">"content"</span>: <span class="tok-str">"Old environment output: (n lines omitted)"</span>,
+                    <span class="tok-str">"message_type"</span>: <span class="tok-str">"observation"</span>,
+                })
+            <span class="tok-key">else</span>:
+                new_history.append(entry)
+        <span class="tok-key">return</span> new_history</pre>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-icon">ℹ</div>
+    <div class="callout-body">
+      <strong>polling 机制</strong>：LastNObservations 的 <code>polling</code> 参数是为了优化
+      <a href="https://www.anthropic.com/news/prompt-caching" target="_blank">Anthropic prompt caching</a>。
+      如果不使用 polling，每轮新的 observation 都会导致被保留的 observation 集合变化，从而破坏 cache。
+      使用 polling=5 时，每 5 步才更新一次保留范围，中间 4 步可以复用缓存的前缀。
+    </div>
+  </div>
+
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:24px 0 10px">8.4 &nbsp;配置示例</div>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:var(--c1)"></span>
+      <span class="dot" style="background:var(--c2)"></span>
+      <span class="dot" style="background:var(--c3)"></span>
+      config/sweagent_0_7/07.yaml（原始论文配置）
+    </div>
+    <pre><span class="tok-key">agent</span>:
+  <span class="tok-key">history_processors</span>:
+    - <span class="tok-key">type</span>: last_n_observations
+      <span class="tok-key">n</span>: 5  <span class="tok-cmt"># 只保留最后 5 个 observation</span>
+    - <span class="tok-key">type</span>: closed_window  <span class="tok-cmt"># 清理已关闭文件的浏览记录</span>
+    - <span class="tok-key">type</span>: remove_regex
+      <span class="tok-key">pattern</span>: <span class="tok-str">"\\x1b\\[[0-9;]*m"</span>  <span class="tok-cmt"># 移除 ANSI 颜色码</span></pre>
+  </div>
+
+  <div class="callout warn">
+    <div class="callout-icon">⚠</div>
+    <div class="callout-body">
+      <strong>训练数据 vs 推理时的 history 差异</strong>：
+      保存的 trajectory 包含完整的 history，但 LLM 实际看到的是经过 HistoryProcessors 处理后的版本。
+      如果用 trajectory 做训练，需要明确选择：① 用完整 history 训练 → 模型需要学会处理长上下文；
+      ② 用 processed history 训练 → 需要在推理时使用相同的 processors，否则会出现分布偏移。
+    </div>
+  </div>
+
+</section>
+
+<!-- --- 09 与其他 Scaffold 比较 --- -->
+<section class="sec" id="comparison">
+  <div class="sec-header">
+    <span class="sec-num">06</span>
+    <div class="sec-line" style="background:var(--amber)"></div>
+    <h2 class="sec-title">与其他 Scaffold 的比较</h2>
+  </div>
+
+  <p>SWE-agent、OpenHands、Agentless 代表了三种截然不同的 code agent 框架设计理念。以下从多个维度对比。</p>
+
+  <table class="bench-table">
+    <thead>
+      <tr>
+        <th>维度</th>
+        <th style="color:var(--teal)">SWE-agent</th>
+        <th style="color:var(--green)">OpenHands</th>
+        <th style="color:var(--blue)">Agentless</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Action Space</td>
+        <td><span style="color:var(--teal)">Custom ACI（shell 命令）</span></td>
+        <td style="color:var(--muted)">CodeAct（Python/Bash）</td>
+        <td style="color:var(--muted)">No agent loop</td>
+      </tr>
+      <tr>
+        <td>文件导航</td>
+        <td><span style="color:var(--teal)">Built-in viewer（100 行窗口）</span></td>
+        <td style="color:var(--muted)">Raw file system</td>
+        <td style="color:var(--muted)">LLM-based localization</td>
+      </tr>
+      <tr>
+        <td>编辑方式</td>
+        <td><span style="color:var(--teal)">Heredoc edit 命令</span></td>
+        <td style="color:var(--muted)">Direct file write</td>
+        <td style="color:var(--muted)">Diff / SEARCH-REPLACE</td>
+      </tr>
+      <tr>
+        <td>Error Recovery</td>
+        <td><span style="color:var(--teal)">Lint-then-retry</span></td>
+        <td style="color:var(--muted)">Observation feedback</td>
+        <td style="color:var(--muted)">Sample-then-rerank</td>
+      </tr>
+      <tr>
+        <td>上下文管理</td>
+        <td><span style="color:var(--teal)">HistoryProcessors（规则驱动）</span></td>
+        <td style="color:var(--muted)">Condenser（可含 LLM 摘要）</td>
+        <td style="color:var(--muted)">Single-pass（无历史）</td>
+      </tr>
+      <tr>
+        <td>Agent 复杂度</td>
+        <td><span style="color:var(--teal)">中等（单 agent + retry）</span></td>
+        <td style="color:var(--muted)">高（多 agent 委派、event stream）</td>
+        <td style="color:var(--muted)">无（pipeline，非 agent）</td>
+      </tr>
+      <tr>
+        <td>Vision 支持</td>
+        <td><span style="color:var(--red)">无</span></td>
+        <td style="color:var(--muted)"><span style="color:var(--green)">有（BrowsingAgent + 截图）</span></td>
+        <td style="color:var(--muted)"><span style="color:var(--red)">无</span></td>
+      </tr>
+      <tr>
+        <td>配置方式</td>
+        <td><span style="color:var(--teal)">YAML 文件</span></td>
+        <td style="color:var(--muted)">TOML + Python</td>
+        <td style="color:var(--muted)">Python scripts</td>
+      </tr>
+      <tr>
+        <td>轨迹格式</td>
+        <td><span style="color:var(--teal)">.traj JSON（简洁四元组）</span></td>
+        <td style="color:var(--muted)">Event Stream JSON（含 cause 链）</td>
+        <td style="color:var(--muted)">无持久轨迹</td>
+      </tr>
+      <tr>
+        <td>项目状态</td>
+        <td><span style="color:var(--amber)">Maintenance mode</span></td>
+        <td style="color:var(--muted)"><span style="color:var(--green)">Active（40k+ stars）</span></td>
+        <td style="color:var(--muted)"><span style="color:var(--green)">Active</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="two-col" style="margin-top:20px">
+    <div class="two-col-card" style="border-top:2px solid var(--teal)">
+      <div class="two-col-label" style="color:var(--teal)">SWE-agent 的优势</div>
+      <div class="two-col-body">
+        <strong>ACI 设计精巧</strong>：100 行窗口 + lint-on-edit + compact search 三件套形成了一个<em>对 LLM 认知友好</em>的代码操作界面。<br><br>
+        <strong>轻量简洁</strong>：没有 event stream、没有多 agent、没有 browser 引擎，代码量小，易于理解和修改。<br><br>
+        <strong>YAML 配置驱动</strong>：实验迭代极快，换配置即换 agent。
+      </div>
+    </div>
+    <div class="two-col-card" style="border-top:2px solid var(--red)">
+      <div class="two-col-label" style="color:var(--red)">SWE-agent 的局限</div>
+      <div class="two-col-body">
+        <strong>无 vision 路径</strong>：不支持截图作为 observation，无法评测 VLM 的视觉理解能力。<br><br>
+        <strong>单 agent 限制</strong>：没有多 agent 委派机制，无法将子任务分给专门的 agent。<br><br>
+        <strong>维护模式</strong>：核心团队精力转向 mini-swe-agent，主仓库功能冻结。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- --- 07 对本研究的启发 --- -->
+<section class="sec" id="takeaways">
+  <div class="sec-header">
+    <span class="sec-num">10</span>
+    <div class="sec-line" style="background:var(--teal)"></div>
+    <h2 class="sec-title">对本研究的启发</h2>
+  </div>
+
+  <div class="insight-cards">
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--teal)"></div>
+      <div>
+        <div class="insight-title">ACI 设计对轨迹质量的影响大于 agent 复杂度</div>
+        <div class="insight-body">
+          SWE-agent 的核心发现是：<strong>interface 设计（ACI）比 agent 架构更重要</strong>。从 raw bash 到 ACI，resolve rate 提升 7x，但 agent 本身只是简单的 single-agent loop。对 agentic midtrain 而言，这意味着采集训练轨迹时，<em>scaffold 的命令设计</em>直接决定轨迹中 action 的质量和可学习性。粗糙的 bash 命令产出的轨迹，即使数量多，训练价值也远低于结构化 ACI 命令产出的轨迹。
+        </div>
+      </div>
+    </div>
+
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--blue)"></div>
+      <div>
+        <div class="insight-title">Tool Bundle 可独立于 Agent 演化（Scaffold 协同进化）</div>
+        <div class="insight-body">
+          SWE-agent 的 Tool Bundle 机制表明，<strong>ACI 命令集和 agent 逻辑是正交的</strong>——可以固定 agent，只替换命令集来观察性能变化。这启发了一种"<strong>scaffold 协同进化</strong>"的思路：在 midtrain 数据采集中，可以先固定 base model，迭代优化 tool bundle，再用优化后的 scaffold 采集更高质量的轨迹训练下一版本的 model。
+        </div>
+      </div>
+    </div>
+
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--purple)"></div>
+      <div>
+        <div class="insight-title">HistoryProcessors 决定了轨迹中"经验"的形态</div>
+        <div class="insight-body">
+          HistoryProcessors 在 LLM 看到历史之前对其进行变换（截断、替换、过滤），这意味着 <strong>LLM 在每一步"看到"的上下文与磁盘上保存的完整轨迹是不同的</strong>。用轨迹做训练时，需要明确选择：① 用完整轨迹（包含所有 observation）训练 → 模型需学会处理长上下文；② 用 processed 后的历史训练 → 更接近推理时的真实输入，但需要在推理时配套相同的 processors。
+        </div>
+      </div>
+    </div>
+
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--amber)"></div>
+      <div>
+        <div class="insight-title">Maintenance mode + mini-swe-agent 暗示更简框架可能足够</div>
+        <div class="insight-body">
+          SWE-agent 团队将主仓库置于维护模式，转向更精简的 <strong>mini-swe-agent</strong>，这暗示了一个重要趋势：<em>随着 LLM 能力增强，scaffold 可以变简单</em>。复杂的 HistoryProcessors、RetryAgent 等机制可能正在被更强的模型能力所替代。对 midtrain 研究而言，<strong>简单 scaffold + 强 base model</strong> 可能比复杂 scaffold + 弱 model 是更可持续的路径。
+        </div>
+      </div>
+    </div>
+
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--c5)"></div>
+      <div>
+        <div class="insight-title">论文核心：ACI 设计的四大原则</div>
+        <div class="insight-body">
+          来自 SWE-agent 论文 Section 6 的设计原则总结：
+          <br><br>
+          <strong>1. Actions should be simple and easy to understand</strong> —— 避免 bash 命令 dozens of options 的复杂度，简洁命令减少 demonstration/fine-tuning 需求。
+          <br><br>
+          <strong>2. Actions should be compact and efficient</strong> —— 核心操作（文件导航、编辑）应合并为尽可能少的动作，避免需要多轮组合才能完成高阶操作。
+          <br><br>
+          <strong>3. Environment feedback should be informative but concise</strong> —— 高质量反馈提供实质性状态信息，但不包含不必要细节（如 edit 后显示修改后的文件内容）。
+          <br><br>
+          <strong>4. Guardrails mitigate error propagation and hasten recovery</strong> —— 内置 guardrails（如 lint 检查自动检测错误）帮助 agent 识别和快速纠正错误，类似人类的自我修正能力。
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+
+<script>
+  // Active nav on scroll
+  const sections = document.querySelectorAll('section.sec[id], .hero[id]');
+  const navItems = document.querySelectorAll('nav .nav-item');
+
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const id = e.target.id;
+        navItems.forEach(a => {
+          a.classList.toggle('active', a.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -65% 0px' });
+
+  sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>

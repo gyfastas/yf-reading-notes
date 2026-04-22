@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenDev · 精读笔记</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #090c0b;
+  --s0:       #0e1310;
+  --s1:       #141a17;
+  --s2:       #1a2220;
+  --border:   #1e2926;
+  --border2:  #28352f;
+  --text:     #c8cec4;
+  --muted:    #587060;
+  --muted2:   #40524a;
+  --head:     #dde8d8;
+  --green:    #6dbb84;
+  --red:      #d9736a;
+  --amber:    #c8a04a;
+  --blue:     #5ea8c0;
+  --purple:   #8878b8;
+  --teal:     #4db8a4;
+  --teal2:    #38907e;
+  --rust:     #c86a3a;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; font-size:15px; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 300;
+  line-height: 1.8;
+}
+
+/* ─── layout ─── */
+.layout { display:flex; min-height:100vh; }
+
+aside {
+  position: fixed;
+  top: 0; left: 0;
+  width: 210px;
+  height: 100vh;
+  background: var(--s0);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  z-index: 200;
+}
+
+.aside-head {
+  padding: 26px 20px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.back-link {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+  transition: color .2s;
+}
+.back-link:hover { color: var(--rust); }
+.aside-title {
+  font-family: 'Lora', serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--head);
+  line-height: 1.4;
+}
+.aside-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  margin-top: 5px;
+  letter-spacing: .06em;
+}
+
+nav { padding: 14px 0; flex: 1; }
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 20px;
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color .2s, background .2s;
+  border-left: 2px solid transparent;
+}
+.nav-item:hover { color: var(--text); background: rgba(255,255,255,.02); }
+.nav-item.active { color: var(--rust); border-left-color: var(--rust); background: rgba(200,106,58,.05); }
+.nav-item .n {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted2);
+  min-width: 16px;
+}
+
+.aside-foot {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted2);
+  line-height: 1.8;
+}
+
+/* ─── main ─── */
+main {
+  margin-left: 210px;
+  flex: 1;
+  max-width: 820px;
+  padding: 52px 48px 100px;
+}
+
+/* ─── hero ─── */
+.hero { margin-bottom: 52px; }
+.hero-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--rust);
+  margin-bottom: 14px;
+}
+.hero h1 {
+  font-family: 'Lora', serif;
+  font-size: 36px;
+  font-weight: 500;
+  color: var(--head);
+  line-height: 1.2;
+  margin-bottom: 6px;
+  letter-spacing: -.02em;
+}
+.hero h1 em { font-style: italic; color: var(--rust); }
+.hero-sub {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 16px;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+.hero-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 3px;
+  text-decoration: none;
+  transition: opacity .15s;
+}
+.chip:hover { opacity: .75; }
+.chip-gh    { background:rgba(255,255,255,.04); color:var(--muted);  border:1px solid var(--border2); }
+.chip-rust  { background:rgba(200,106,58,.12);  color:var(--rust);   border:1px solid rgba(200,106,58,.25); }
+.chip-vs    { background:rgba(94,168,192,.12);  color:var(--blue);   border:1px solid rgba(94,168,192,.22); }
+
+.hero-abstract {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--rust);
+  border-radius: 0 8px 8px 0;
+  padding: 16px 20px;
+  font-size: 13.5px;
+  color: #909c8c;
+  line-height: 1.75;
+}
+.hero-abstract strong { color: var(--text); }
+
+/* ─── section ─── */
+.sec { margin-bottom: 56px; }
+.sec-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.sec-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted2);
+  letter-spacing: .08em;
+  min-width: 24px;
+}
+.sec-line { width: 3px; height: 20px; border-radius: 2px; flex-shrink: 0; }
+.sec-title {
+  font-family: 'Lora', serif;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--head);
+}
+
+/* ─── prose ─── */
+p { margin-bottom: 12px; font-size: 13.5px; }
+p:last-child { margin-bottom: 0; }
+strong { color: var(--head); font-weight: 500; }
+em { color: var(--amber); font-style: italic; }
+
+/* ─── insight box ─── */
+.insight {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--amber);
+  border-radius: 0 8px 8px 0;
+  padding: 12px 18px;
+  margin: 14px 0;
+  font-size: 13px;
+  color: #9ca890;
+  line-height: 1.7;
+}
+.insight strong { color: var(--amber); }
+
+/* ─── arch diagram ─── */
+.arch-diagram {
+  background: var(--s0);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 24px;
+  margin: 16px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  line-height: 1.9;
+  color: #4a6058;
+  overflow-x: auto;
+}
+.arch-box {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+.arch-box.rust   { background:rgba(200,106,58,.14); color:var(--rust);   border:1px solid rgba(200,106,58,.3); }
+.arch-box.agent  { background:rgba(77,184,164,.14); color:var(--teal);   border:1px solid rgba(77,184,164,.3); }
+.arch-box.ctrl   { background:rgba(94,168,192,.12); color:var(--blue);   border:1px solid rgba(94,168,192,.25); }
+.arch-box.llm    { background:rgba(200,160,74,.10); color:var(--amber);  border:1px solid rgba(200,160,74,.2); }
+.arch-box.doom   { background:rgba(217,115,106,.12);color:var(--red);    border:1px solid rgba(217,115,106,.25); }
+.arch-box.sub    { background:rgba(136,120,184,.12);color:var(--purple); border:1px solid rgba(136,120,184,.25); }
+.arch-arrow { color: var(--muted2); }
+
+/* ─── component grid ─── */
+.comp-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 16px 0;
+}
+.comp-card {
+  background: var(--s1);
+  padding: 16px 18px;
+  transition: background .2s;
+}
+.comp-card:hover { background: var(--s2); }
+.comp-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+.comp-name {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--head);
+  margin-bottom: 7px;
+}
+.comp-body { font-size: 12.5px; color: var(--muted); line-height: 1.65; }
+.comp-body strong { color: var(--text); }
+.comp-body code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--purple); padding:1px 5px; border-radius:3px; }
+
+/* ─── pipeline ─── */
+.pipeline { display: flex; flex-direction: column; gap: 2px; margin-bottom: 20px; }
+.pipeline-step {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.pipeline-step:hover { border-color: var(--border2); }
+.step-gutter {
+  background: var(--s0);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 16px 0 0;
+  border-right: 1px solid var(--border);
+}
+.step-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 500;
+  color: var(--rust);
+  letter-spacing: .06em;
+}
+.step-inner { padding: 14px 18px; }
+.step-h {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--head);
+  margin-bottom: 6px;
+}
+.step-p { font-size: 12.5px; color: var(--muted); line-height: 1.65; }
+.step-p code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--purple); padding:1px 5px; border-radius:3px; }
+.step-p strong { color: var(--text); }
+
+/* ─── codeblock ─── */
+.codeblock {
+  background: var(--s0);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 14px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  line-height: 1.75;
+}
+.codeblock-head {
+  background: var(--s1);
+  border-bottom: 1px solid var(--border);
+  padding: 7px 16px;
+  font-size: 9.5px;
+  color: var(--muted);
+  letter-spacing: .1em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.codeblock pre {
+  padding: 14px 18px;
+  white-space: pre;
+  overflow-x: auto;
+  color: #607870;
+}
+.c-kw  { color: var(--rust); }
+.c-ty  { color: var(--amber); }
+.c-fn  { color: var(--teal); }
+.c-st  { color: var(--green); }
+.c-cm  { color: var(--muted2); font-style: italic; }
+.c-nu  { color: var(--purple); }
+.c-va  { color: var(--blue); }
+
+/* ─── escalation steps ─── */
+.escalation {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 16px 0;
+}
+.esc-cell {
+  background: var(--s1);
+  padding: 12px 14px;
+  text-align: center;
+}
+.esc-cell:hover { background: var(--s2); }
+.esc-level {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.esc-name {
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+.esc-desc { font-size: 11.5px; color: var(--muted); line-height: 1.5; }
+.esc-cell.l0 .esc-name { color: var(--green); }
+.esc-cell.l1 .esc-name { color: var(--amber); }
+.esc-cell.l2 .esc-name { color: var(--red); }
+.esc-cell.l3 .esc-name { color: #c84a4a; }
+
+/* ─── compaction stages ─── */
+.compact-stages {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 14px 0;
+}
+.compact-stage {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.stage-pct {
+  background: var(--s0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  border-right: 1px solid var(--border);
+}
+.stage-body { padding: 10px 14px; font-size: 12.5px; color: var(--muted); line-height: 1.6; }
+.stage-body strong { color: var(--text); }
+.pct-warn   { color: var(--amber); }
+.pct-mid    { color: #d49a4a; }
+.pct-high   { color: var(--red); }
+.pct-crit   { color: #c83a3a; }
+
+/* ─── comparison table ─── */
+.cmp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  margin: 16px 0;
+}
+.cmp-table th {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 400;
+  padding: 8px 14px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.cmp-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(30,41,38,.8);
+  vertical-align: top;
+  line-height: 1.6;
+}
+.cmp-table tr:last-child td { border-bottom: none; }
+.cmp-table tr:hover td { background: rgba(255,255,255,.012); }
+.cmp-table .dim { color: var(--muted); font-size: 12px; }
+.cmp-table .val-oh { color: var(--teal); }
+.cmp-table .val-od { color: var(--rust); }
+.cmp-table .badge-new {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  background: rgba(200,106,58,.15);
+  color: var(--rust);
+  border: 1px solid rgba(200,106,58,.3);
+  padding: 1px 6px;
+  border-radius: 3px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.cmp-table .badge-better {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  background: rgba(200,160,74,.12);
+  color: var(--amber);
+  border: 1px solid rgba(200,160,74,.25);
+  padding: 1px 6px;
+  border-radius: 3px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* ─── perm grid ─── */
+.perm-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 12px 0;
+}
+.perm-cell {
+  background: var(--s1);
+  padding: 12px 14px;
+  text-align: center;
+}
+.perm-cell:hover { background: var(--s2); }
+.perm-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.perm-desc { font-size: 11.5px; color: var(--muted); }
+.perm-allow .perm-label { color: var(--green); }
+.perm-deny  .perm-label { color: var(--red); }
+.perm-ask   .perm-label { color: var(--amber); }
+
+/* ─── trace flow ─── */
+.trace-flow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 14px 18px;
+  background: var(--s0);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin: 14px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+}
+.trace-node {
+  background: var(--s2);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 4px 10px;
+  color: var(--text);
+}
+.trace-arrow { color: var(--muted2); font-size: 13px; }
+
+/* ─── scrollbar ─── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+@media (max-width: 900px) {
+  aside { width: 170px; }
+  main { margin-left: 170px; padding: 40px 28px 80px; }
+}
+@media (max-width: 680px) {
+  aside { display: none; }
+  main { margin-left: 0; padding: 32px 20px 60px; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ─── sidebar ─── -->
+<aside>
+  <div class="aside-head">
+    <a href="../../Reference.html" class="back-link">← Reference</a>
+    <div class="aside-title">OpenDev<br>精读笔记</div>
+    <div class="aside-sub">RUST · AGENT SCAFFOLD<br>vs OpenHands</div>
+  </div>
+
+  <nav>
+    <a href="#sec-overview" class="nav-item">
+      <span class="n">01</span>系统概览
+    </a>
+    <a href="#sec-react" class="nav-item">
+      <span class="n">02</span>ReAct 主循环
+    </a>
+    <a href="#sec-toolexec" class="nav-item">
+      <span class="n">03</span>工具调用执行链
+    </a>
+    <a href="#sec-doom" class="nav-item">
+      <span class="n">04</span>DoomLoop 检测
+    </a>
+    <a href="#sec-compact" class="nav-item">
+      <span class="n">05</span>分级上下文压缩
+    </a>
+    <a href="#sec-subagent" class="nav-item">
+      <span class="n">06</span>Sub-Agent 系统
+    </a>
+    <a href="#sec-prompts" class="nav-item">
+      <span class="n">07</span>Prompt Composer
+    </a>
+    <a href="#sec-trace" class="nav-item">
+      <span class="n">08</span>Trace DAG 可视化
+    </a>
+    <a href="#sec-compare" class="nav-item">
+      <span class="n">09</span>对比 OpenHands
+    </a>
+  </nav>
+
+  <div class="aside-foot">
+    来源: github.com/opendev-to/opendev<br>
+    语言: Rust (Cargo workspace)<br>
+    对比: OpenHands (Python)
+  </div>
+</aside>
+
+<!-- ─── main ─── -->
+<main>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-eyebrow">Agent Scaffold · Deep Read · 2026</div>
+  <h1>OpenDev<br><em>Rust 原生 Agent</em> 脚手架</h1>
+  <div class="hero-sub">DoomLoop 检测 · 分级压缩 · Glob 权限系统 · Trace DAG</div>
+  <div class="hero-chips">
+    <a href="https://github.com/opendev-to/opendev" target="_blank" class="chip chip-gh">↗ github.com/opendev-to/opendev</a>
+    <span class="chip chip-rust">Rust / Cargo workspace</span>
+    <span class="chip chip-vs">vs OpenHands (Python)</span>
+  </div>
+  <div class="hero-abstract">
+    OpenDev 是一个 <strong>Rust 实现的 Agent 脚手架</strong>，核心创新在于：
+    (1) <strong>DoomLoopDetector</strong>——基于工具调用指纹哈希的循环检测，四级渐进式干预；
+    (2) <strong>分级上下文压缩</strong>——5 档阈值梯度策略（70%→99%），最后阶段 LLM 介入；
+    (3) <strong>Glob 权限系统</strong>——Per-subagent 粒度控制 Allow/Deny/Ask，特异性评分；
+    (4) <strong>79 个编译时内嵌模板</strong>——消除运行时文件系统依赖；
+    (5) <strong>Trace DAG</strong>——用图结构（非线性 EventStream）可视化轨迹。
+    相比 Python 版 OpenHands，设计更偏向<em>工程鲁棒性</em>，而非灵活性扩展。
+  </div>
+</div>
+
+<!-- ══ Section 1: 系统概览 ══ -->
+<section class="sec" id="sec-overview">
+  <div class="sec-header">
+    <span class="sec-num">01</span>
+    <div class="sec-line" style="background:var(--rust)"></div>
+    <h2 class="sec-title">系统概览</h2>
+  </div>
+
+  <p>OpenDev 是一个 <strong>Cargo workspace</strong>，主 agent 逻辑在 <code style="font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--s1);color:var(--purple);padding:1px 5px;border-radius:3px">crates/opendev-agents/</code>，另有若干辅助 crate（opendev-context、opendev-http、opendev-tools-core）。Python 版 OpenHands 采用 asyncio + Pydantic，OpenDev 则选择 Rust async（Tokio）+ serde_json，带来更强的类型安全和零成本抽象。</p>
+
+  <div class="arch-diagram">
+    <div style="color:var(--muted2);font-size:9px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px">Architecture · opendev-agents crate</div>
+    <div style="line-height:2.2">
+      <span class="arch-box rust">main_agent.rs</span>
+      <span class="arch-arrow"> ──▶ </span>
+      <span class="arch-box agent">ReactLoop</span>
+      <span class="arch-arrow"> ──▶ </span>
+      <span class="arch-box doom">DoomLoopDetector</span>
+      <br>
+      <span style="margin-left:120px;color:var(--muted2)">│</span>
+      <br>
+      <span style="margin-left:120px;color:var(--muted2)">├─</span>
+      <span class="arch-box ctrl">apply_staged_compaction()</span>
+      <span class="arch-arrow"> ──▶ </span>
+      <span class="arch-box llm">LLM (99% stage)</span>
+      <br>
+      <span style="margin-left:120px;color:var(--muted2)">├─</span>
+      <span class="arch-box sub">SubagentManager</span>
+      <span class="arch-arrow"> ──▶ </span>
+      <span class="arch-box ctrl">SimpleReactRunner / StandardReactRunner</span>
+      <br>
+      <span style="margin-left:120px;color:var(--muted2)">└─</span>
+      <span class="arch-box agent">PromptComposer</span>
+      <span class="arch-arrow"> ──▶ </span>
+      <span class="arch-box llm">79× embedded .md templates</span>
+    </div>
+  </div>
+
+  <div class="comp-grid">
+    <div class="comp-card">
+      <div class="comp-tag">语言 · 运行时</div>
+      <div class="comp-name">Rust + Tokio</div>
+      <div class="comp-body">编译时检查，零成本抽象。相比 Python 的运行时错误，Rust 在类型系统层面消除了大量 agent 状态错误。</div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag">模板系统</div>
+      <div class="comp-name">include_str! 编译时内嵌</div>
+      <div class="comp-body">79 个 <code>.md</code> 文件在编译时通过 <code>include_str!</code> 打包进二进制，消除运行时 filesystem 依赖，发布产物是单个可执行文件。</div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag">事件模型</div>
+      <div class="comp-name">Vec&lt;Value&gt; 消息列表</div>
+      <div class="comp-body">直接操作 JSON <code>Value</code> 数组，没有 OpenHands 的持久化 EventStream。更轻量，但失去跨组件订阅能力。</div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag">Sub-Agent</div>
+      <div class="comp-name">AgentMode 枚举 + 权限系统</div>
+      <div class="comp-body">每个子 agent 有独立的 <code>SubAgentSpec</code>（14 字段），含 glob 权限规则、模型覆盖、颜色标识和隐藏模式。</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ Section 2: ReAct 主循环 ══ -->
+<section class="sec" id="sec-react">
+  <div class="sec-header">
+    <span class="sec-num">02</span>
+    <div class="sec-line" style="background:var(--amber)"></div>
+    <h2 class="sec-title">ReAct 主循环架构</h2>
+  </div>
+
+  <p>主循环在 <code style="font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--s1);color:var(--purple);padding:1px 5px;border-radius:3px">react_loop/execution.rs</code>（约 1600 行），是整个系统最复杂的模块。每个迭代执行以下步骤：</p>
+
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">S1</span></div>
+      <div class="step-inner">
+        <div class="step-h">上下文压缩检查</div>
+        <div class="step-p">调用 <code>apply_staged_compaction()</code> 检查当前 context 使用率，按 5 档阈值决定是否执行压缩（见 §04）。99% 档会发起 LLM 调用并 await。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">S2</span></div>
+      <div class="step-inner">
+        <div class="step-h">LLM ���用 + 响应解析</div>
+        <div class="step-p">通过 <code>LlmCaller</code> 发起请求（含重试、provider 适配、cost 追踪）。解析 <code>tool_calls</code> 数组和 content 文本，提取 <code>IterationEmitter</code> 事件。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">S3</span></div>
+      <div class="step-inner">
+        <div class="step-h">DoomLoop 检测</div>
+        <div class="step-p">调用 <code>DoomLoopDetector.check(tool_calls)</code>，返回 <code>DoomLoopAction</code>：None / Redirect / Notify / <strong>ForceStop</strong>。ForceStop 会清空 recent 队列并强制触��上下文压缩（见 §03）。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">S4</span></div>
+      <div class="step-inner">
+        <div class="step-h">工具执行（可并行）</div>
+        <div class="step-p"><code>PARALLELIZABLE_TOOLS</code> 集合内的工具（read_file、glob、grep 等只读操作）允许并行批量执行。其他工具串行。执行后记录 <code>ArtifactIndex</code>（跨压缩存活）。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">S5</span></div>
+      <div class="step-inner">
+        <div class="step-h">停止条件判断 + Observation 续行</div>
+        <div class="step-p">若 LLM 返回无工具调用，进入 observation 续行逻辑：<strong>必须连续 2 次无工具调用才接受停止</strong>（防止过早退出）。第 1 次注入 continuation nudge，第 2 次才真正停止。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">S6</span></div>
+      <div class="step-inner">
+        <div class="step-h">最大轮次收尾 + Wind-Down Summary</div>
+        <div class="step-p">达到 <code>max_iterations</code> 时，发送 wind-down summary prompt，要求 LLM 汇总已完成工作，给出可执行的后续步骤列表后再退出。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight">
+    <strong>vs OpenHands AgentController</strong>：OpenHands 的每步通过 <code>EventStream</code> 分发事件，支持多组件订阅（Memory、Condenser 等独立订阅）。OpenDev 直接操作内存中的 <code>Vec&lt;Value&gt;</code>，更快但耦合度更高。OpenHands 有明确的 <code>AgentDelegate</code> 中断-恢复机制，OpenDev 的 sub-agent 通过 <code>SubagentManager</code> 独立管理，两者的并发模型不同。
+  </div>
+</section>
+
+<!-- ══ Section 3: 工具调用执行链 ══ -->
+<section class="sec" id="sec-toolexec">
+  <div class="sec-header">
+    <span class="sec-num">03</span>
+    <div class="sec-line" style="background:var(--teal)"></div>
+    <h2 class="sec-title">工具调用执行链 · 写代码全链路</h2>
+  </div>
+
+  <p>LLM 输出 <code style="font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--s1);color:var(--purple);padding:1px 5px;border-radius:3px">tool_calls</code> 数组后，OpenDev 通过三层结构处理每次工具执行：<strong>ParallelPolicy</strong> 分组 → <strong>ToolRegistry</strong> 10 步流水线 → <strong>DiagnosticProvider</strong> 回注 LSP 错误。以写代码场景（edit_file + run_command）为例，完整链路如下：</p>
+
+  <!-- 整体流程图 -->
+  <div class="trace-flow">
+    <div class="trace-node">LLM tool_calls 数组</div>
+    <span class="trace-arrow">→</span>
+    <div class="trace-node">ParallelPolicy::partition()</div>
+    <span class="trace-arrow">→</span>
+    <div class="trace-node">ToolRegistry::execute() ×N</div>
+    <span class="trace-arrow">→</span>
+    <div class="trace-node">DiagnosticProvider (LSP)</div>
+    <span class="trace-arrow">→</span>
+    <div class="trace-node">ArtifactIndex::record()</div>
+    <span class="trace-arrow">→</span>
+    <div class="trace-node">tool results → messages</div>
+  </div>
+
+  <!-- ParallelPolicy -->
+  <p style="margin-top:20px"><strong>① ParallelPolicy::partition()</strong>（<code style="font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--s1);color:var(--purple);padding:1px 5px;border-radius:3px">parallel.rs</code>）将本轮 tool_calls 分成有序执行组，组内并行，组间串行：</p>
+
+  <div class="codeblock">
+    <div class="codeblock-head">parallel.rs · 分组规则示例</div>
+    <pre><span class="c-cm">// 本轮 LLM 输出 4 个工具调用：</span>
+[read_file(<span class="c-st">"a.rs"</span>), read_file(<span class="c-st">"b.rs"</span>), edit_file(<span class="c-st">"c.rs"</span>), run_command(<span class="c-st">"cargo test"</span>)]
+
+<span class="c-cm">// partition() 结果：</span>
+Group 1 (并行): [read_file(<span class="c-st">"a.rs"</span>), read_file(<span class="c-st">"b.rs"</span>)]   <span class="c-cm">// 所有只读工具</span>
+Group 2 (并行): [edit_file(<span class="c-st">"c.rs"</span>)]                         <span class="c-cm">// 写不同文件可并行</span>
+Group 3 (串行): [run_command(<span class="c-st">"cargo test"</span>)]                  <span class="c-cm">// 无 file_path → 独立 group</span>
+
+<span class="c-cm">// 若两次 edit_file 写同一文件，则各占一个独立 group（串行）</span>
+<span class="c-cm">// MCP 工具（mcp__xxx__）也走串行，每个独立 group</span></pre>
+  </div>
+
+  <div class="comp-grid" style="margin-bottom:0">
+    <div class="comp-card">
+      <div class="comp-tag">只读工具（并行）</div>
+      <div class="comp-name">read_only_tools()</div>
+      <div class="comp-body"><code>read_file</code> / <code>list_files</code> / <code>search</code> / <code>find_symbol</code> / <code>find_referencing_symbols</code> / <code>analyze_image</code> / <code>fetch_url</code> / <code>web_search</code> / <code>memory_search</code> / <code>list_todos</code> / <code>list_agents</code> 等</div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag">写工具（同文件串行/异文件并行）</div>
+      <div class="comp-name">write_tools()</div>
+      <div class="comp-body"><code>write_file</code> / <code>edit_file</code> / <code>multi_edit</code> / <code>notebook_edit</code> / <code>insert_before_symbol</code> / <code>replace_symbol_body</code> / <code>apply_patch</code> / <code>memory_write</code> 等；<strong><code>run_command</code> 无 file_path → 始终串行</strong></div>
+    </div>
+  </div>
+
+  <!-- ToolRegistry 10步 -->
+  <p style="margin-top:24px"><strong>② ToolRegistry::execute() 10 步流水线</strong>（<code style="font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--s1);color:var(--purple);padding:1px 5px;border-radius:3px">registry/execution.rs</code>）：</p>
+
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">T1</span></div>
+      <div class="step-inner">
+        <div class="step-h">resolve_tool() · 模糊名称匹配</div>
+        <div class="step-p">精确匹配 → 大小写不敏感 → camelCase→snake_case 转换（如 <code>ReadFile</code>→<code>read_file</code>）。失败则用 Levenshtein 距离（≤3）生成 "Did you mean?" 建议，最多 5 条。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">T2</span></div>
+      <div class="step-inner">
+        <div class="step-h">normalize_params() · 参数标准化</div>
+        <div class="step-p">相对路径解析为绝对路径（以 <code>working_dir</code> 为基准），camelCase 参数 key 转 snake_case，修复常见 LLM 参数格式问题。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">T3</span></div>
+      <div class="step-inner">
+        <div class="step-h">Dedup 检查 · 同轮次去重</div>
+        <div class="step-p"><code>dedup_cache: Mutex&lt;HashMap&lt;String, ToolResult&gt;&gt;</code>，key = <code>"{tool_name}:{sorted_args_json_hash}"</code>。命中则直接返回缓存，工具不再执行。每轮 LLM 调用前调 <code>clear_dedup_cache()</code> 重置。<strong><code>spawn_subagent</code> 跳过去重</strong>（每次调用必须真实执行）。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">T4</span></div>
+      <div class="step-inner">
+        <div class="step-h">JSON Schema validate · 参数校验</div>
+        <div class="step-p">对照 <code>BaseTool::parameter_schema()</code> 验证必填字段、类型。工具可覆盖 <code>format_validation_error()</code> 返回定制化错误消息，帮助 LLM 精确定位问题（默认：通用格式）。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">T5</span></div>
+      <div class="step-inner">
+        <div class="step-h">middleware.before_execute() · 前置拦截</div>
+        <div class="step-p">权限中间件在此拦截。Glob 权限系统（Allow/Deny/Ask）的 <strong>Deny</strong> 在这里直接返回错误，<strong>Ask</strong> 暂停等待用户审批。任何中间件返回 <code>Err</code> 则整个调用失败（short-circuit）。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">T6</span></div>
+      <div class="step-inner">
+        <div class="step-h">注入 per-tool timeout config</div>
+        <div class="step-p">查 <code>tool_timeouts: RwLock&lt;HashMap&lt;String, ToolTimeoutConfig&gt;&gt;</code>，若该工具有独立超时配置（idle_timeout_secs / max_timeout_secs），覆盖 <code>exec_ctx</code> 中的全局配置后再传给工具。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">T7</span></div>
+      <div class="step-inner">
+        <div class="step-h">BaseTool::execute() · 实际执行</div>
+        <div class="step-p"><code>async fn execute(args: HashMap&lt;String, Value&gt;, ctx: &amp;ToolContext) -&gt; ToolResult</code>。工具实现读取 <code>ctx.working_dir</code>（路径基准）、<code>ctx.cancel_token</code>（UI 中断）、<code>ctx.diagnostic_provider</code>（LSP）、<code>ctx.shared_state</code>（跨迭代状态）。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">T8</span></div>
+      <div class="step-inner">
+        <div class="step-h">sanitizer · 输出截断</div>
+        <div class="step-p"><code>ToolResultSanitizer::sanitize_with_mcp_fallback()</code> 检测输出是否超过 inline 大小限制，超限则截断并附注 "output truncated"。大型工具输出可溢写到磁盘（<code>overflow_dir</code>），防止撑爆 LLM context。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">T9</span></div>
+      <div class="step-inner">
+        <div class="step-h">middleware.after_execute() · 后置 hook</div>
+        <div class="step-p">后置中间件错误只打日志（<code>warn!</code>），不改变工具结果——已完成的执行不可撤销，保证结果幂等性。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">T10</span></div>
+      <div class="step-inner">
+        <div class="step-h">dedup_cache.insert() · 缓存结果</div>
+        <div class="step-p">成功执行后将结果写入 dedup cache，同轮次内相同调用直接命中缓存。<code>duration_ms</code> 在此附加到 <code>ToolResult</code>（由 registry 计算，非工具自报）。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DiagnosticProvider -->
+  <p><strong>③ edit_file / write_file 后：DiagnosticProvider LSP 回注</strong>（OpenHands 无此机制）</p>
+
+  <div class="codeblock">
+    <div class="codeblock-head">traits.rs · DiagnosticProvider + ToolContext 携带</div>
+    <pre><span class="c-cm">// ToolContext 携带可选的 LSP 诊断 provider</span>
+<span class="c-kw">pub struct</span> <span class="c-ty">ToolContext</span> {
+    <span class="c-kw">pub</span> working_dir:          <span class="c-ty">PathBuf</span>,
+    <span class="c-kw">pub</span> cancel_token:         <span class="c-ty">Option</span>&lt;<span class="c-ty">CancellationToken</span>&gt;,  <span class="c-cm">// UI 中断</span>
+    <span class="c-kw">pub</span> diagnostic_provider:  <span class="c-ty">Option</span>&lt;<span class="c-ty">Arc</span>&lt;<span class="c-kw">dyn</span> <span class="c-ty">DiagnosticProvider</span>&gt;&gt;,
+    <span class="c-kw">pub</span> shared_state:         <span class="c-ty">Option</span>&lt;<span class="c-ty">Arc</span>&lt;<span class="c-ty">Mutex</span>&lt;<span class="c-ty">HashMap</span>&lt;<span class="c-ty">String</span>, <span class="c-ty">Value</span>&gt;&gt;&gt;&gt;,
+    <span class="c-cm">// ...</span>
+}
+
+<span class="c-cm">// edit_file 执行成功后，工具内部调用：</span>
+<span class="c-kw">if let</span> <span class="c-ty">Some</span>(provider) = &amp;ctx.diagnostic_provider {
+    <span class="c-kw">let</span> diags = provider
+        .<span class="c-fn">diagnostics_for_file</span>(&amp;file_path, max_severity=<span class="c-nu">1</span>, max_count=<span class="c-nu">10</span>)
+        .await;  <span class="c-cm">// severity 1 = Error only</span>
+    <span class="c-cm">// 将 LSP 错误直接拼入 tool result：</span>
+    <span class="c-cm">// "File modified. Diagnostics: ERROR [12:5] expected `;`"</span>
+}</pre>
+  </div>
+
+  <p>LSP 诊断在 <strong>同一次工具调用的返回值</strong> 中携带，LLM 在下一轮迭代开始前就能看到编译错误，<strong>无需额外发起 <code>run_command("cargo check")</code></strong>，节省 1 个完整 ReAct 轮次。<code>FileDiagnostic</code> 包含行号、列号、severity（1=Error / 2=Warn / 3=Info）和 message。</p>
+
+  <div class="insight">
+    <strong>三层设计的协同效果</strong>：ParallelPolicy 尽可能并发（读 N 个文件只算 1 轮）→ ToolRegistry 的 dedup 缓存避免同轮重复 IO → DiagnosticProvider 让编译错误反馈零延迟。对于 long-horizon 写代码任务，这三层协同可以显著减少「写→检查→修」循环的轮次数，也是 DoomLoopDetector（§04）能更早发现问题的前提之一。
+  </div>
+</section>
+
+<!-- ══ Section 4: DoomLoop 检测 ══ -->
+<section class="sec" id="sec-doom">
+  <div class="sec-header">
+    <span class="sec-num">04</span>
+    <div class="sec-line" style="background:var(--red)"></div>
+    <h2 class="sec-title">DoomLoopDetector <span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--muted);font-weight:400">（OpenHands 无此机制）</span></h2>
+  </div>
+
+  <p><strong>OpenDev 特有设计</strong>。<code style="font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--s1);color:var(--purple);padding:1px 5px;border-radius:3px">doom_loop.rs</code> 检测 agent 卡在重复工具调用的循环中，采用滑动窗口 + 指纹哈希，检测 1-步/2-步/3-步循环。</p>
+
+  <div class="codeblock">
+    <div class="codeblock-head">doom_loop.rs · 核心参数</div>
+    <pre><span class="c-cm">// 最大循环检测长度（检查 1/2/3 步循环）</span>
+<span class="c-kw">const</span> <span class="c-va">MAX_CYCLE_LEN</span>: <span class="c-ty">usize</span> = <span class="c-nu">3</span>;
+
+<span class="c-cm">// 判定循环所需的重复次数（3 次即触发）</span>
+<span class="c-kw">const</span> <span class="c-va">DOOM_LOOP_THRESHOLD</span>: <span class="c-ty">usize</span> = <span class="c-nu">3</span>;
+
+<span class="c-cm">// 滑动窗口最大保留指纹数</span>
+<span class="c-kw">const</span> <span class="c-va">MAX_RECENT</span>: <span class="c-ty">usize</span> = <span class="c-nu">20</span>;
+
+<span class="c-cm">// 指纹格式："{tool_name}:{args_hash:016x}"</span>
+<span class="c-kw">fn</span> <span class="c-fn">fingerprint</span>(tool_name: &amp;<span class="c-ty">str</span>, args_str: &amp;<span class="c-ty">str</span>) -&gt; <span class="c-ty">String</span> {
+    <span class="c-kw">let mut</span> hasher = DefaultHasher::new();
+    args_str.<span class="c-fn">hash</span>(&amp;<span class="c-kw">mut</span> hasher);
+    <span class="c-kw">let</span> h = hasher.<span class="c-fn">finish</span>();
+    <span class="c-fn">format!</span>(<span class="c-st">"{tool_name}:{h:016x}"</span>)
+}</pre>
+  </div>
+
+  <p>触发条件：检测到某长度为 <em>L</em> 的 tool call 序列在滑动窗口尾部重复了 3 次（即连续 <em>3×L</em> 个调用构成周期）。随后按 nudge 计数升级干预等级：</p>
+
+  <div class="escalation">
+    <div class="esc-cell l0">
+      <div class="esc-level">正常</div>
+      <div class="esc-name">None</div>
+      <div class="esc-desc">无循环<br>正常继续</div>
+    </div>
+    <div class="esc-cell l1">
+      <div class="esc-level">第 1 次</div>
+      <div class="esc-name">Redirect</div>
+      <div class="esc-desc">注入 nudge 消息<br>"STOP and try something different"</div>
+    </div>
+    <div class="esc-cell l2">
+      <div class="esc-level">第 2 次</div>
+      <div class="esc-name">Notify</div>
+      <div class="esc-desc">升级为 StepBack<br>"stuck in a loop"<br>通知用户</div>
+    </div>
+    <div class="esc-cell l3">
+      <div class="esc-level">第 3 次</div>
+      <div class="esc-name">ForceStop</div>
+      <div class="esc-desc">清空 recent 队列<br>强制触发上下文压缩<br>CompactContext</div>
+    </div>
+  </div>
+
+  <p><strong>检测支持并行工具调用批次</strong>——一次调用传入 <code>tool_calls: &amp;[Value]</code>，多条调用按顺序追加进窗口后再执行检测，批量中 3 个相同调用也能即时触发。</p>
+
+  <div class="insight">
+    <strong>为什么 OpenHands 没有这个？</strong> OpenHands 依赖 LLM 自己识别重复，没有程序级干预。OpenDev 通过哈希指纹在代码层精确检测，成本接近零，且不消耗 token。<strong>对 mid-training 的启示</strong>：循环行为是 agent 失效的重要特征，在轨迹数据里可以用类似 fingerprint 方法自动标记"卡循环轨迹"，辅助质量过滤。
+  </div>
+</section>
+
+<!-- ══ Section 5: 分级上下文压缩 ══ -->
+<section class="sec" id="sec-compact">
+  <div class="sec-header">
+    <span class="sec-num">05</span>
+    <div class="sec-line" style="background:var(--blue)"></div>
+    <h2 class="sec-title">分级上下文压缩</h2>
+  </div>
+
+  <p>代码在 <code style="font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--s1);color:var(--purple);padding:1px 5px;border-radius:3px">react_loop/compaction.rs</code>，通过 <code>OptimizationLevel</code> 枚举实现 5 档渐进策略，比 OpenHands 的"超过阈值 → 调用 LLM 压缩"两段式设计更精细。</p>
+
+  <div class="compact-stages">
+    <div class="compact-stage">
+      <div class="stage-pct pct-warn">70%</div>
+      <div class="stage-body"><strong>Warning</strong>——仅记录日志警告，不修改消息列表。给 agent 预留空间继续工作。</div>
+    </div>
+    <div class="compact-stage">
+      <div class="stage-pct pct-mid">80%</div>
+      <div class="stage-body"><strong>Mask</strong>——调用 <code>mask_old_observations()</code>，将较旧的工具输出替换为紧凑引用（保留最近若干条）。无 LLM 调用，纯文本截断。</div>
+    </div>
+    <div class="compact-stage">
+      <div class="stage-pct pct-mid">85%</div>
+      <div class="stage-body"><strong>Prune</strong>——在 Mask 基础上追加 <code>prune_old_tool_outputs()</code>，完全移除（而非截断）旧工具输出消息体。</div>
+    </div>
+    <div class="compact-stage">
+      <div class="stage-pct pct-high">90%</div>
+      <div class="stage-body"><strong>Aggressive</strong>——更激进的 Mask（<code>OptimizationLevel::Aggressive</code>），保留的近期结果更少，同时提前运行 <code>summarize_verbose_tool_outputs()</code>。</div>
+    </div>
+    <div class="compact-stage">
+      <div class="stage-pct pct-crit">99%</div>
+      <div class="stage-body"><strong>Compact（LLM 介入）</strong>——<code>build_compaction_payload()</code> 构建 payload，发起真实 LLM 调用（独立 compaction model）生成 summary，替换中间消息段。失败则 fallback 到基础文本压缩。</div>
+    </div>
+  </div>
+
+  <p><strong>ArtifactIndex 跨压缩存活</strong>：每次工具执行后调用 <code>record_artifact(file_path, operation, details)</code>，记录 read/write/edit 操作。压缩只影响 LLM 消息列表，ArtifactIndex 保持完整，agent 始终能知道自己操作过哪些文件。</p>
+
+  <div class="codeblock">
+    <div class="codeblock-head">compaction.rs · ArtifactIndex 记录</div>
+    <pre><span class="c-cm">// 工具成功执行后自动追踪文件操作</span>
+<span class="c-kw">match</span> tool_name {
+    <span class="c-st">"read_file"</span>  =&gt; (<span class="c-st">"read"</span>, <span class="c-fn">format!</span>(<span class="c-st">"{line_count} lines"</span>)),
+    <span class="c-st">"write_file"</span> =&gt; (<span class="c-st">"created"</span>, <span class="c-fn">format!</span>(<span class="c-st">"{line_count} lines"</span>)),
+    <span class="c-st">"edit_file"</span>  =&gt; (<span class="c-st">"modified"</span>, <span class="c-st">"edit"</span>.to_string()),
+    _             =&gt; <span class="c-kw">return</span>, <span class="c-cm">// 非文件操作跳过</span>
+}
+index.<span class="c-fn">record</span>(file_path, operation, &amp;details); <span class="c-cm">// 压缩后仍存活</span></pre>
+  </div>
+
+  <div class="insight">
+    <strong>vs OpenHands LLMSummarizingCondenser</strong>：OpenHands 用滑动窗口（head=1, tail=48，总预算=100 事件），超过阈值整体触发 LLM 压缩，只有两个状态（压缩/不压缩）。OpenDev 的 5 档设计允许在到达 LLM 压缩之前先做多轮低成本降级处理，更节约 token。
+  </div>
+</section>
+
+<!-- ══ Section 6: Sub-Agent 系统 ══ -->
+<section class="sec" id="sec-subagent">
+  <div class="sec-header">
+    <span class="sec-num">06</span>
+    <div class="sec-line" style="background:var(--purple)"></div>
+    <h2 class="sec-title">Sub-Agent 系统</h2>
+  </div>
+
+  <p>OpenDev 的 sub-agent 通过 <code style="font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--s1);color:var(--purple);padding:1px 5px;border-radius:3px">SubAgentSpec</code>（14 字段）和 <code>SubagentManager</code> 管理，设计比 OpenHands 的 <code>AgentDelegateAction</code> 更具结构化。</p>
+
+  <div class="comp-grid">
+    <div class="comp-card">
+      <div class="comp-tag">AgentMode 枚举</div>
+      <div class="comp-name">三种运行模式</div>
+      <div class="comp-body">
+        <code>Primary</code>：主 agent，完整 ReactLoop<br>
+        <code>Subagent</code>：降级模式，reasoning effort 从 high→medium<br>
+        <code>All</code>：不限制，主子 agent 共享配置
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag">SubAgentSpec · 14 字段</div>
+      <div class="comp-name">结构化 Agent 规格</div>
+      <div class="comp-body">包含：<code>name</code>、<code>description</code>、<code>system_prompt</code>、<code>model</code>（覆盖主模型）、<code>hidden</code>（不对用户展示）、<code>color</code>（UI 颜色标识）、<code>mode</code>、<code>permission</code> 等。</div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag">两种 Runner</div>
+      <div class="comp-name">SimpleReact vs Standard</div>
+      <div class="comp-body">
+        <strong>SimpleReactRunner</strong>：精简版，只读工具并行批量执行，跳过 doom loop/todo/压缩，适合 Explore 类子 agent<br>
+        <strong>StandardReactRunner</strong>：封装完整 ReactLoop，含所有检测机制
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag">项目结构自动探测</div>
+      <div class="comp-name">scan_project_structure()</div>
+      <div class="comp-body">递归 3 层，跳过 26 类噪音目录（<code>.git</code>/<code>node_modules</code>/<code>target</code> 等），最多捕获 100 条目。自动注入到 sub-agent system prompt。</div>
+    </div>
+  </div>
+
+  <p style="margin-top:20px"><strong>Glob 权限系统</strong>（<code>permissions.rs</code>）是 OpenDev 独有的精细化控制机制：</p>
+
+  <div class="perm-grid">
+    <div class="perm-cell perm-allow">
+      <div class="perm-label">Allow</div>
+      <div class="perm-desc">直接执行，无需用户审批</div>
+    </div>
+    <div class="perm-cell perm-deny">
+      <div class="perm-label">Deny</div>
+      <div class="perm-desc">拒绝工具调用，返回错误</div>
+    </div>
+    <div class="perm-cell perm-ask">
+      <div class="perm-label">Ask</div>
+      <div class="perm-desc">暂停并弹出用户审批请求</div>
+    </div>
+  </div>
+
+  <div class="codeblock">
+    <div class="codeblock-head">permissions.rs · 特异性评分 + Glob 匹配示例</div>
+    <pre><span class="c-cm">// 特异性规则：更具体的 pattern 优先</span>
+<span class="c-cm">// "*"         → specificity = 0</span>
+<span class="c-cm">// "git *"     → specificity = 4  (4 个非通配���字符)</span>
+<span class="c-cm">// "git status" → specificity = 10 (精确匹配)</span>
+
+<span class="c-cm">// 典型权限配置示例：</span>
+{
+  <span class="c-st">"bash"</span>: {
+    <span class="c-st">"*"</span>: <span class="c-st">"ask"</span>,         <span class="c-cm">// 默认需审批</span>
+    <span class="c-st">"git *"</span>: <span class="c-st">"allow"</span>,   <span class="c-cm">// git 命令允许</span>
+    <span class="c-st">"rm -rf *"</span>: <span class="c-st">"deny"</span> <span class="c-cm">// 破坏性操作拒绝</span>
+  },
+  <span class="c-st">"edit_file"</span>: <span class="c-st">"deny"</span>  <span class="c-cm">// 只读 agent 禁止编辑</span>
+}</pre>
+  </div>
+
+  <p><strong>Observation-based 续行</strong>（SimpleReactRunner）：连续 2 次无工具调用才真正停止——第 1 次发 continuation nudge，确保 agent 有充分机会表达最终结论，避免过早退出。</p>
+
+  <div class="insight">
+    <strong>vs OpenHands</strong>：OpenHands 的 sub-agent 通过 <code>AgentDelegateAction</code> 中断父 agent，结果以 <code>AgentDelegateObservation</code> 写回共享 EventStream——父子串行，事件交织。OpenDev 的子 agent 有独立消息列表和权限隔离，多个子 agent 可真正并发（取决于调用层面）。<strong>两种 Runner 的分离</strong>尤为实用：Explore 类任务用 SimpleReactRunner 跳过所有开销，效率更高。
+  </div>
+</section>
+
+<!-- ══ Section 7: Prompt Composer ══ -->
+<section class="sec" id="sec-prompts">
+  <div class="sec-header">
+    <span class="sec-num">07</span>
+    <div class="sec-line" style="background:var(--green)"></div>
+    <h2 class="sec-title">Prompt Composer · 编译时模板系统</h2>
+  </div>
+
+  <p>提示系统分两层：<strong>embedded.rs</strong>（compile-time 常量）+ <strong>composer/factories.rs</strong>（运行时条件组装）。</p>
+
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">L1</span></div>
+      <div class="step-inner">
+        <div class="step-h">79 个 include_str! 编译时常量</div>
+        <div class="step-p">所有 <code>.md</code> 模板在编译时通过 <code>include_str!("../../templates/...")</code> 打包入二进制。按目录分组：<code>system/</code>（main、init、compaction）、<code>system/main/</code>（action-safety、tools、code-quality…）、<code>subagents/</code>（code-explorer、planner、ask-user…）、<code>memory/</code>（sentiment、topic、update）、<code>generators/</code>（generator-agent/skill）等。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">L2</span></div>
+      <div class="step-inner">
+        <div class="step-h">PromptSection · 优先级 + 条件门控</div>
+        <div class="step-p">每个 prompt section 有 <strong>priority 值</strong>（8 个优先级档位）和条件过滤器（provider、model、mode）。<code>create_default_composer()</code> 注册约 20 个 section，按优先级排序后拼接成最终 system prompt。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">L3</span></div>
+      <div class="step-inner">
+        <div class="step-h">Cache-Aware 两段拆分</div>
+        <div class="step-p">Prompt 被拆分为两部分：<strong>静态头部</strong>（不随对话变化，可被 prompt caching 缓存）+ <strong>动态尾部</strong>（含当前任务、工具列表等）。最大化 provider-side prompt cache 命中率，降低每轮 LLM 调用成本。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">L4</span></div>
+      <div class="step-inner">
+        <div class="step-h">5-Part Sub-Agent System Prompt 组装</div>
+        <div class="step-p"><code>spawn.rs</code> 为每个子 agent 构建专属 system prompt：① 子 agent 角色定义 ② 项目结构（scan_project_structure 输出）③ 父 agent 提供的 context ④ 可用工具列表 ⑤ 子 agent 自定义 instructions（来自 SubAgentSpec.system_prompt）。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight">
+    <strong>vs OpenHands</strong>：OpenHands 的 LLMSummarizingCondenser prompt 硬编码在 Python 文件的多行字符串里（L72-118），无组合机制。OpenDev 的模板系统可在编译时组合不同模板，支持 provider-specific 差异化（如 Anthropic 和 OpenAI 格式差异），架构上更工程化。
+  </div>
+</section>
+
+<!-- ══ Section 8: Trace DAG ══ -->
+<section class="sec" id="sec-trace">
+  <div class="sec-header">
+    <span class="sec-num">08</span>
+    <div class="sec-line" style="background:var(--teal)"></div>
+    <h2 class="sec-title">Trace DAG 可视化</h2>
+  </div>
+
+  <p>Web UI（<code style="font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--s1);color:var(--purple);padding:1px 5px;border-radius:3px">web-ui/src/utils/trace/</code>）实现了一套完整的 DAG 流水线，把线性轨迹转化为有向无环图展示，揭示并行工具调用和 sub-agent 分叉关系。</p>
+
+  <div class="trace-flow">
+    <div class="trace-node">原始 Trace Events</div>
+    <span class="trace-arrow">→</span>
+    <div class="trace-node">buildGraph()</div>
+    <span class="trace-arrow">→</span>
+    <div class="trace-node">mergeToolCallNodes()</div>
+    <span class="trace-arrow">→</span>
+    <div class="trace-node">collapseGraph()</div>
+    <span class="trace-arrow">→</span>
+    <div class="trace-node">layoutGraph()</div>
+    <span class="trace-arrow">→</span>
+    <div class="trace-node">DAG 渲染</div>
+  </div>
+
+  <div class="comp-grid">
+    <div class="comp-card">
+      <div class="comp-tag">buildGraph()</div>
+      <div class="comp-name">事件 → 图节点</div>
+      <div class="comp-body">遍历 trace events，按依赖关系（tool_call_id、parent、cause）建立有向边。同一 LLM call 发出的多个工具调用会形成并行分支节点。</div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag">mergeToolCallNodes()</div>
+      <div class="comp-name">工具调用合并</div>
+      <div class="comp-body">将同批次并行执行的工具调用节点合并为一个 <code>ToolNode</code> 群组，减少视觉噪音，同时保留单独展开的能力。</div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag">collapseGraph()</div>
+      <div class="comp-name">子图折叠</div>
+      <div class="comp-body">Sub-agent 调用形成独立子图，默认折叠为 <code>CollapsedNode</code>，点击展开。支持 <code>TaskNode</code>（高层任务）和 <code>TraceNode</code>（细粒度操作）两种粒度。</div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag">layoutGraph()</div>
+      <div class="comp-name">自动布局</div>
+      <div class="comp-body">按 DAG 拓扑排序进行层级布局，时间轴从上到下，并行分支横向展开，使多工具并发关系一目了然。</div>
+    </div>
+  </div>
+
+  <div class="insight">
+    <strong>vs OpenHands</strong>：OpenHands 的 Web UI 显示线性 EventStream（时间线列表视图），没有 DAG 结构。OpenDev 的图结构揭示了并行工具调用之间的真实依赖关系，对于理解 agent 决策路径更直观。<strong>对 mid-training 的启示</strong>：如果我们的轨迹采集工具能输出 DAG 格式，可以更方便地识别"哪些步骤可以并行执行"，辅助数据质量分析。
+  </div>
+</section>
+
+<!-- ══ Section 9: 对比 OpenHands ══ -->
+<section class="sec" id="sec-compare">
+  <div class="sec-header">
+    <span class="sec-num">09</span>
+    <div class="sec-line" style="background:var(--amber)"></div>
+    <h2 class="sec-title">OpenDev vs OpenHands · 创新对比</h2>
+  </div>
+
+  <p>两者都是 ReAct 模式的 code agent 脚手架，目标相似但工程决策不同。下表聚焦 <strong>OpenDev 相对 OpenHands 的显著差异</strong>：</p>
+
+  <table class="cmp-table">
+    <thead>
+      <tr>
+        <th>维度</th>
+        <th class="val-oh">OpenHands (Python)</th>
+        <th class="val-od">OpenDev (Rust)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="dim">循环检测</td>
+        <td>❌ 无程序级检测，依赖 LLM 自行识别</td>
+        <td><span class="badge-new">NEW</span> DoomLoopDetector：fingerprint哈希 + 1/2/3步循环 + 4级升级干预</td>
+      </tr>
+      <tr>
+        <td class="dim">上下文压缩</td>
+        <td>LLMSummarizingCondenser：两段式（超过100事件 → 调用LLM压缩）</td>
+        <td><span class="badge-better">BETTER</span> 5档分级：70%警告→80%Mask→85%Prune→90%Aggressive→99%LLM</td>
+      </tr>
+      <tr>
+        <td class="dim">文件追踪</td>
+        <td>❌ 压缩后文件操作历史丢失</td>
+        <td><span class="badge-new">NEW</span> ArtifactIndex：跨压缩存活，始终保留 read/write/edit 记录</td>
+      </tr>
+      <tr>
+        <td class="dim">Sub-Agent 权限</td>
+        <td>❌ 无 per-agent 权限隔离，子 agent 与父共享能力</td>
+        <td><span class="badge-new">NEW</span> Glob 权限系统：Allow/Deny/Ask × tool × pattern，特异性评分</td>
+      </tr>
+      <tr>
+        <td class="dim">Sub-Agent Runner</td>
+        <td>单一 AgentController（含全部机制）</td>
+        <td><span class="badge-better">BETTER</span> 双 Runner：Simple（只读并行，无开销）/ Standard（完整ReactLoop）</td>
+      </tr>
+      <tr>
+        <td class="dim">项目感知</td>
+        <td>RepoMicroagent 通过 CLAUDE.md 注入</td>
+        <td><span class="badge-new">NEW</span> scan_project_structure()：运行时自动递归扫描项目结构注入子 agent</td>
+      </tr>
+      <tr>
+        <td class="dim">停止条件</td>
+        <td>LLM 首次返回无工具调用即可停止</td>
+        <td><span class="badge-better">BETTER</span> 连续 2 次无工具调用才停止（observation续行，防过早退出）</td>
+      </tr>
+      <tr>
+        <td class="dim">最大轮次收尾</td>
+        <td>超过 max_iterations 直接截断</td>
+        <td><span class="badge-better">BETTER</span> Wind-down summary：要求 LLM 汇总已完成工作并给出后续步骤</td>
+      </tr>
+      <tr>
+        <td class="dim">提示系统</td>
+        <td>硬编码 Python 字符串（LLMSummarizingCondenser L72-118），无组合机制</td>
+        <td><span class="badge-new">NEW</span> 79 个 include_str! 编译时内嵌 + priority 排序 + cache-aware 两段拆分</td>
+      </tr>
+      <tr>
+        <td class="dim">可视化</td>
+        <td>线性 EventStream 时间线列表</td>
+        <td><span class="badge-new">NEW</span> Trace DAG：buildGraph→merge→collapse→layout，揭示并行依赖关系</td>
+      </tr>
+      <tr>
+        <td class="dim">事件模型</td>
+        <td>持久化 EventStream（磁盘+内存），多组件订阅</td>
+        <td>Vec&lt;Value&gt; 内存列表，更轻量但无跨组件订阅</td>
+      </tr>
+      <tr>
+        <td class="dim">扩展性</td>
+        <td>Python 动态特性，易于插��化和运行时注入</td>
+        <td>Rust 编译时保障，扩展需重新编译，但运行时更安全</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="insight">
+    <strong>核心结论</strong>：OpenDev 的创新主要集中在<em>工程鲁棒性</em>维度——循环检测、分级压缩、权限隔离、停止条件强化。这些机制在 long-horizon agent ���务中能显著减少失效案例，代价是灵活性（Rust 的编译时约束）。对于 mid-training 轨迹采集，OpenDev 这套机制可以作为"质量过滤 Oracle"：在数据采集时用 DoomLoopDetector 标记循环轨迹，用 ArtifactIndex 验证文件操作完整性，从而提升训练数据质量。
+  </div>
+</section>
+
+</main>
+</div>
+
+<script>
+// Highlight active nav item on scroll
+const sections = document.querySelectorAll('section.sec[id]');
+const navItems = document.querySelectorAll('nav .nav-item');
+
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navItems.forEach(item => {
+        item.classList.remove('active');
+        if (item.getAttribute('href') === '#' + e.target.id) {
+          item.classList.add('active');
+        }
+      });
+    }
+  });
+}, { rootMargin: '-25% 0px -65% 0px' });
+
+sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>

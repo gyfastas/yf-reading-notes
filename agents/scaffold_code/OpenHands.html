@@ -1,0 +1,2437 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenHands · 精读笔记</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #090c0b;
+  --s0:       #0e1310;
+  --s1:       #141a17;
+  --s2:       #1a2220;
+  --border:   #1e2926;
+  --border2:  #28352f;
+  --text:     #c8cec4;
+  --muted:    #587060;
+  --muted2:   #40524a;
+  --head:     #dde8d8;
+  --green:    #6dbb84;
+  --red:      #d9736a;
+  --amber:    #c8a04a;
+  --blue:     #5ea8c0;
+  --purple:   #8878b8;
+  --teal:     #4db8a4;
+  --teal2:    #38907e;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; font-size:15px; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 300;
+  line-height: 1.8;
+}
+
+/* ─── layout ─── */
+.layout { display:flex; min-height:100vh; }
+
+aside {
+  position: fixed;
+  top: 0; left: 0;
+  width: 210px;
+  height: 100vh;
+  background: var(--s0);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  z-index: 200;
+}
+
+.aside-head {
+  padding: 26px 20px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.back-link {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+  transition: color .2s;
+}
+.back-link:hover { color: var(--teal); }
+.aside-title {
+  font-family: 'Lora', serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--head);
+  line-height: 1.4;
+}
+.aside-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  margin-top: 5px;
+  letter-spacing: .06em;
+}
+
+nav { padding: 14px 0; flex: 1; }
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 20px;
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color .2s, background .2s;
+  border-left: 2px solid transparent;
+}
+.nav-item:hover { color: var(--text); background: rgba(255,255,255,.02); }
+.nav-item.active { color: var(--teal); border-left-color: var(--teal); background: rgba(77,184,164,.05); }
+.nav-item .n {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted2);
+  min-width: 16px;
+}
+
+.aside-foot {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted2);
+  line-height: 1.8;
+}
+
+/* ─── main ─── */
+main {
+  margin-left: 210px;
+  flex: 1;
+  max-width: 820px;
+  padding: 52px 48px 100px;
+}
+
+/* ─── hero ─── */
+.hero { margin-bottom: 52px; }
+.hero-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 14px;
+}
+.hero h1 {
+  font-family: 'Lora', serif;
+  font-size: 36px;
+  font-weight: 500;
+  color: var(--head);
+  line-height: 1.2;
+  margin-bottom: 6px;
+  letter-spacing: -.02em;
+}
+.hero h1 em { font-style: italic; color: var(--teal); }
+.hero-sub {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 16px;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+.hero-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 3px;
+  text-decoration: none;
+  transition: opacity .15s;
+}
+.chip:hover { opacity: .75; }
+.chip-arxiv { background:rgba(94,168,192,.12);  color:var(--blue);   border:1px solid rgba(94,168,192,.22); }
+.chip-gh    { background:rgba(255,255,255,.04); color:var(--muted);  border:1px solid var(--border2); }
+.chip-venue { background:rgba(77,184,164,.10);  color:var(--teal);   border:1px solid rgba(77,184,164,.2); }
+.chip-docs  { background:rgba(136,120,184,.10); color:var(--purple); border:1px solid rgba(136,120,184,.2); }
+
+.hero-abstract {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--teal);
+  border-radius: 0 8px 8px 0;
+  padding: 16px 20px;
+  font-size: 13.5px;
+  color: #909c8c;
+  line-height: 1.75;
+}
+.hero-abstract strong { color: var(--text); }
+
+/* ─── section ─── */
+.sec { margin-bottom: 56px; }
+.sec-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.sec-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted2);
+  letter-spacing: .08em;
+  min-width: 24px;
+}
+.sec-line { width: 3px; height: 20px; border-radius: 2px; flex-shrink: 0; }
+.sec-title {
+  font-family: 'Lora', serif;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--head);
+}
+
+/* ─── prose ─── */
+p { margin-bottom: 12px; font-size: 13.5px; }
+p:last-child { margin-bottom: 0; }
+strong { color: var(--head); font-weight: 500; }
+em { color: var(--amber); font-style: italic; }
+
+/* ─── arch diagram ─── */
+.arch-diagram {
+  background: var(--s0);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 24px;
+  margin: 16px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  line-height: 1.9;
+  color: #4a6058;
+  overflow-x: auto;
+}
+.arch-diagram .layer-label {
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted2);
+  margin-bottom: 4px;
+}
+.arch-box {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+.arch-box.agent  { background:rgba(77,184,164,.14); color:var(--teal); border:1px solid rgba(77,184,164,.3); }
+.arch-box.ctrl   { background:rgba(94,168,192,.12);  color:var(--blue); border:1px solid rgba(94,168,192,.25); }
+.arch-box.llm    { background:rgba(200,160,74,.10);  color:var(--amber); border:1px solid rgba(200,160,74,.2); }
+.arch-box.rt     { background:rgba(136,120,184,.12); color:var(--purple); border:1px solid rgba(136,120,184,.25); }
+.arch-box.event  { background:rgba(109,187,132,.10); color:var(--green); border:1px solid rgba(109,187,132,.2); }
+.arch-arrow { color: var(--muted2); }
+
+/* ─── component grid ─── */
+.comp-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 16px 0;
+}
+.comp-card {
+  background: var(--s1);
+  padding: 16px 18px;
+  transition: background .2s;
+}
+.comp-card:hover { background: var(--s2); }
+.comp-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+.comp-name {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--head);
+  margin-bottom: 7px;
+}
+.comp-body { font-size: 12.5px; color: var(--muted); line-height: 1.65; }
+.comp-body strong { color: var(--text); }
+.comp-body code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--purple); padding:1px 5px; border-radius:3px; }
+
+/* ─── action table ─── */
+.action-list { display:flex; flex-direction:column; gap:2px; margin:14px 0; }
+.action-item {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.action-item:hover { border-color: var(--border2); }
+.action-name {
+  padding: 10px 14px;
+  background: var(--s0);
+  border-right: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  color: var(--purple);
+  display: flex;
+  align-items: center;
+}
+.action-desc {
+  padding: 10px 14px;
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.6;
+  display: flex;
+  align-items: center;
+}
+.action-desc strong { color: var(--text); }
+.action-desc code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--purple); padding:1px 5px; border-radius:3px; }
+
+/* ─── agent cards ─── */
+.agent-cards { display:flex; flex-direction:column; gap:10px; margin:14px 0; }
+.agent-card {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 18px;
+  border-left: 3px solid transparent;
+  transition: border-color .2s, background .2s;
+}
+.agent-card:hover { background: var(--s2); }
+.agent-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.agent-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 3px;
+}
+.agent-card-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--head);
+}
+.agent-card-body { font-size: 12.5px; color: var(--muted); line-height: 1.65; }
+.agent-card-body strong { color: var(--text); }
+.agent-card-body code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--purple); padding:1px 5px; border-radius:3px; }
+
+/* ─── pipeline ─── */
+.pipeline { display: flex; flex-direction: column; gap: 2px; margin-bottom: 20px; }
+.pipeline-step {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.pipeline-step:hover { border-color: var(--border2); }
+.step-gutter {
+  background: var(--s0);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 16px 0 0;
+  border-right: 1px solid var(--border);
+}
+.step-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 500;
+  color: var(--teal);
+  letter-spacing: .06em;
+}
+.step-inner { padding: 14px 18px; }
+.step-h {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--head);
+  margin-bottom: 6px;
+}
+.step-p { font-size: 12.5px; color: var(--muted); line-height: 1.65; }
+.step-p code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--purple); padding:1px 5px; border-radius:3px; }
+.step-p strong { color: var(--text); }
+
+/* ─── codeblock ─── */
+.codeblock {
+  background: var(--s0);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 14px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  line-height: 1.75;
+}
+.codeblock-head {
+  background: var(--s1);
+  border-bottom: 1px solid var(--border);
+  padding: 7px 16px;
+  font-size: 9.5px;
+  color: var(--muted);
+  letter-spacing: .1em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.codeblock-head .dot { width:8px;height:8px;border-radius:50%; }
+.codeblock pre {
+  padding: 14px 18px;
+  white-space: pre;
+  overflow-x: auto;
+  color: #607870;
+}
+.tok-comment { color: #2e3d38; }
+.tok-key     { color: var(--purple); }
+.tok-str     { color: var(--amber); }
+.tok-num     { color: var(--teal); }
+.tok-cmd     { color: var(--blue); }
+.tok-role    { color: var(--green); }
+.tok-em      { color: var(--red); }
+
+/* ─── callout ─── */
+.callout {
+  border-radius: 7px;
+  padding: 13px 16px;
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 14px 0;
+  display: flex;
+  gap: 12px;
+}
+.callout-icon { font-size: 14px; flex-shrink: 0; padding-top: 1px; }
+.callout-body { flex: 1; }
+.callout-body strong { font-weight: 500; }
+.callout.warn  { background:rgba(200,160,74,.08);  border:1px solid rgba(200,160,74,.18);  color:#a89060; }
+.callout.info  { background:rgba(94,168,192,.08);  border:1px solid rgba(94,168,192,.18);  color:#6898a8; }
+.callout.good  { background:rgba(77,184,164,.08);  border:1px solid rgba(77,184,164,.18);  color:#5a9e8c; }
+.callout.key   { background:rgba(136,120,184,.08); border:1px solid rgba(136,120,184,.18); color:#8878b0; }
+
+/* ─── stat grid ─── */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 16px 0;
+}
+.stat-cell {
+  background: var(--s1);
+  padding: 16px 18px;
+}
+.stat-val {
+  font-family: 'Lora', serif;
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--head);
+  margin-bottom: 3px;
+  line-height: 1.1;
+}
+.stat-val .unit { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); font-weight:400; }
+.stat-label { font-size: 11.5px; color: var(--muted); }
+
+/* ─── bench table ─── */
+.bench-table { width:100%; border-collapse:collapse; font-size:13px; margin:16px 0; }
+.bench-table th {
+  font-family:'JetBrains Mono',monospace;
+  font-size:9.5px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--muted2);
+  padding:9px 14px;
+  text-align:left;
+  background:var(--s0);
+  border-bottom:1px solid var(--border);
+}
+.bench-table td {
+  padding:10px 14px;
+  border-bottom:1px solid var(--border);
+  color:var(--muted);
+  vertical-align:middle;
+}
+.bench-table tr:last-child td { border-bottom:none; }
+.bench-table td:first-child { color:var(--head); font-weight:500; }
+.bench-table .highlight { color:var(--teal); font-weight:500; font-family:'JetBrains Mono',monospace; }
+.bench-table .best { color:var(--green); }
+.bench-table .note { font-size:11px; color:var(--muted2); }
+.bench-table tr:hover td { background:rgba(255,255,255,.01); }
+
+/* ─── bar rows ─── */
+.bar-row { display:grid; grid-template-columns:160px 1fr 60px; align-items:center; gap:12px; margin:8px 0; font-size:12.5px; }
+.bar-track { background:var(--border); height:5px; border-radius:3px; overflow:hidden; }
+.bar-fill  { height:100%; border-radius:3px; background:var(--teal); }
+.bar-val   { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--teal); text-align:right; }
+
+/* ─── insight cards ─── */
+.insight-cards { display:flex; flex-direction:column; gap:10px; }
+.insight-card {
+  display: grid;
+  grid-template-columns: 3px 1fr;
+  gap: 14px;
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  overflow: hidden;
+  padding: 14px 16px;
+  transition: border-color .2s;
+}
+.insight-card:hover { border-color: var(--border2); }
+.insight-stripe { border-radius: 2px; }
+.insight-title { font-size: 13.5px; font-weight:500; color:var(--head); margin-bottom:5px; }
+.insight-body  { font-size: 12.5px; color:var(--muted); line-height:1.65; }
+.insight-body strong { color:var(--text); }
+.insight-body code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--purple); padding:1px 5px; border-radius:3px; }
+
+/* ─── tag row ─── */
+.tag-row { display:flex; flex-wrap:wrap; gap:6px; margin:10px 0; }
+.tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 2px 9px;
+  border-radius: 3px;
+  background: var(--s1);
+  border: 1px solid var(--border2);
+  color: var(--teal);
+}
+.tag.blue  { color:var(--blue);  background:rgba(94,168,192,.06);  border-color:rgba(94,168,192,.2); }
+.tag.amber { color:var(--amber); background:rgba(200,160,74,.06);  border-color:rgba(200,160,74,.2); }
+.tag.purple{ color:var(--purple);background:rgba(136,120,184,.06); border-color:rgba(136,120,184,.2); }
+
+/* ─── event chain ─── */
+.event-chain {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 16px 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.event-row {
+  display: grid;
+  grid-template-columns: 36px 180px 90px 1fr;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 11.5px;
+  transition: background .15s;
+}
+.event-row:last-child { border-bottom: none; }
+.event-row:hover { background: rgba(255,255,255,.015); }
+.event-row.head {
+  background: var(--s0);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted2);
+}
+.ev-id {
+  padding: 9px 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  color: var(--muted2);
+  border-right: 1px solid var(--border);
+  text-align: center;
+  align-self: center;
+}
+.ev-type {
+  padding: 9px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  border-right: 1px solid var(--border);
+  align-self: center;
+}
+.ev-src {
+  padding: 9px 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  border-right: 1px solid var(--border);
+  align-self: center;
+  text-align: center;
+}
+.ev-body {
+  padding: 9px 14px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+  align-self: center;
+}
+.ev-body strong { color: var(--text); }
+.ev-body code { font-family:'JetBrains Mono',monospace; font-size:10px; background:var(--bg); color:var(--purple); padding:1px 4px; border-radius:3px; }
+.ev-body .cause-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  background: rgba(200,160,74,.1);
+  color: var(--amber);
+  border: 1px solid rgba(200,160,74,.2);
+  padding: 0 5px;
+  border-radius: 3px;
+  margin-left: 6px;
+}
+.src-agent  { color: var(--teal); }
+.src-user   { color: var(--blue); }
+.src-env    { color: var(--amber); }
+
+/* ─── two-col compare ─── */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 14px 0;
+}
+.two-col-card {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 14px 16px;
+}
+.two-col-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted2);
+  margin-bottom: 8px;
+}
+.two-col-body { font-size: 12px; color: var(--muted); line-height: 1.7; }
+.two-col-body strong { color: var(--text); }
+.two-col-body code { font-family:'JetBrains Mono',monospace; font-size:10px; background:var(--bg); color:var(--purple); padding:1px 4px; border-radius:3px; }
+
+/* ─── scrollbar ─── */
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+/* ─── divider ─── */
+.divider { border:none; border-top:1px solid var(--border); margin:28px 0; }
+
+@media (max-width:700px) {
+  aside { display:none; }
+  main  { margin-left:0; padding:28px 18px 60px; }
+  .comp-grid { grid-template-columns:1fr; }
+  .stat-grid { grid-template-columns:1fr 1fr; }
+  .action-item { grid-template-columns:1fr; }
+  .action-name { border-right:none; border-bottom:1px solid var(--border); }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ─── Sidebar ─── -->
+<aside>
+  <div class="aside-head">
+    <a href="../../Reference.html" class="back-link">← 返回 Reference</a>
+    <div class="aside-title">OpenHands</div>
+    <div class="aside-sub">精读笔记 · 2024.07</div>
+  </div>
+  <nav>
+    <a class="nav-item active" href="#overview"><span class="n">00</span>概览</a>
+    <a class="nav-item" href="#architecture"><span class="n">01</span>系统架构</a>
+    <a class="nav-item" href="#eventstream"><span class="n">02</span>Event Stream · 源码解析</a>
+    <a class="nav-item" href="#actions"><span class="n">03</span>Action Space</a>
+    <a class="nav-item" href="#agents"><span class="n">04</span>Agent 类型</a>
+    <a class="nav-item" href="#delegates"><span class="n">04b</span>Sub-Agent 管理</a>
+    <a class="nav-item" href="#memory"><span class="n">04c</span>Memory · 记忆机制</a>
+    <a class="nav-item" href="#runtime"><span class="n">05</span>沙箱 Runtime</a>
+    <a class="nav-item" href="#codeact"><span class="n">06</span>CodeAct 范式</a>
+    <a class="nav-item" href="#eval"><span class="n">07</span>评测基准与结果</a>
+    <a class="nav-item" href="#scaffold"><span class="n">08</span>作为 Scaffold</a>
+    <a class="nav-item" href="#takeaways"><span class="n">09</span>对本研究的启发</a>
+  </nav>
+  <div class="aside-foot">
+    arXiv:2407.16741<br>
+    All-Hands-AI · 2024.07<br>
+    formerly: OpenDevin<br>
+    github: All-Hands-AI/OpenHands
+  </div>
+</aside>
+
+<!-- ─── Main ─── -->
+<main>
+
+<!-- ─── Hero ─── -->
+<div class="hero" id="overview">
+  <div class="hero-eyebrow">Framework Deep-Dive · arXiv:2407.16741</div>
+  <h1>Open<em>Hands</em></h1>
+  <div class="hero-sub">An Open Platform for AI Software Agents</div>
+  <div class="hero-chips">
+    <a href="https://arxiv.org/abs/2407.16741" target="_blank" class="chip chip-arxiv">↗ arXiv:2407.16741</a>
+    <a href="https://github.com/All-Hands-AI/OpenHands" target="_blank" class="chip chip-gh">⌥ All-Hands-AI/OpenHands</a>
+    <a href="https://docs.all-hands.dev" target="_blank" class="chip chip-docs">📖 docs.all-hands.dev</a>
+    <span class="chip chip-venue">Wang et al. · 2024.07</span>
+  </div>
+  <div class="hero-abstract">
+    <strong>OpenHands</strong>（原名 OpenDevin）是目前最主流的开源 code agent 框架，由 UIUC、CMU 等多机构联合开发。它提供了一套完整的 <strong>AI 软件开发 agent 构建、评测、部署平台</strong>，核心设计围绕三个维度：(1) <strong>Event Stream 架构</strong>——actions 与 observations 通过统一事件流解耦通信；(2) <strong>可插拔 Runtime 沙箱</strong>——Docker 容器隔离执行环境，支持代码运行、文件操作、浏览器自动化；(3) <strong>CodeAct 范式</strong>——以可执行代码（而非文本指令）作为 action 载体，显著提升 agent 的工具使用能力。在 daVinci-Env 研究中，<strong>OpenHands 作为 scaffold</strong> 用于 difficulty-centric filtering（GLM-4.7 在 OpenHands 上采样轨迹），同时也是 Phase 2 VLM 评测的候选平台，因为它天然支持 multimodal 输入。
+  </div>
+</div>
+
+<!-- ─── 01 系统架构 ─── -->
+<section class="sec" id="architecture">
+  <div class="sec-header">
+    <span class="sec-num">01</span>
+    <div class="sec-line" style="background:var(--teal)"></div>
+    <h2 class="sec-title">系统架构总览</h2>
+  </div>
+
+  <p>OpenHands 采���分层解耦架构，将 LLM 推理、任务控制、环境执行三个关注点分离，通过 Event Stream 串联。</p>
+
+  <div class="arch-diagram">
+    <div class="layer-label">整体分层架构</div>
+    <div style="line-height:2.4">
+      <span class="arch-box llm">LLM Backend</span> <span style="color:var(--muted2);font-size:10px">(Claude / GPT / Llama / Qwen…)</span>
+      <br><span style="color:var(--muted2)">        ↕ prompt / completion</span>
+      <br><span class="arch-box agent">Agent</span> <span style="color:var(--muted2);font-size:10px">(CodeActAgent / BrowsingAgent / DelegatorAgent…)</span>
+      <br><span style="color:var(--muted2)">        ↕ Action / Observation</span>
+      <br><span class="arch-box event">Event Stream</span> <span style="color:var(--muted2);font-size:10px">(所有事件的统一总线)</span>
+      <br><span style="color:var(--muted2)">        ↕</span>
+      <br><span class="arch-box ctrl">AgentController</span> <span style="color:var(--muted2);font-size:10px">(主循环，驱动 action → execution → observation)</span>
+      <br><span style="color:var(--muted2)">        ↕ execute</span>
+      <br><span class="arch-box rt">Runtime Sandbox</span> <span style="color:var(--muted2);font-size:10px">(Docker 容器：Bash Shell + IPython Kernel + Browser)</span>
+    </div>
+  </div>
+
+  <div class="comp-grid">
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--teal)">Core Component</div>
+      <div class="comp-name">AgentController</div>
+      <div class="comp-body">
+        系统主循环。驱动 <strong>agent → action → runtime → observation</strong> 的迭代执行。管理最大步数限制、任务状态机（RUNNING / FINISHED / ERROR / PAUSED）、中断与恢复。每步更新 event stream。
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--blue)">Core Component</div>
+      <div class="comp-name">Event Stream</div>
+      <div class="comp-body">
+        所有 <strong>Action 和 Observation</strong> 的统一总线。Agent 向 stream 写入 action，runtime 将执行结果作为 observation 写回。支持 event 持久化（重放、调试、训练数据提取）。历史通过 stream replay 重建上下文。
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--amber)">Core Component</div>
+      <div class="comp-name">Runtime Sandbox</div>
+      <div class="comp-body">
+        <strong>Docker 容器</strong>提供隔离执行环境，内置 IPython kernel（Python 执行）、Bash shell（系统命令）、Playwright 浏览器（网页自动化）。支持文件系统读写、网络访问（可配置隔离）。
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--purple)">Core Component</div>
+      <div class="comp-name">LLM Abstraction</div>
+      <div class="comp-body">
+        通过 <code>litellm</code> 统一接入 100+ 种 LLM 后端，包括 Claude、GPT、Gemini、Llama、Qwen 等。支持 <strong>vision 输入</strong>（截图 → base64 → multimodal prompt），是 VLM 评测的关键特性。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── 02 Event Stream ─── -->
+<section class="sec" id="eventstream">
+  <div class="sec-header">
+    <span class="sec-num">02</span>
+    <div class="sec-line" style="background:var(--blue)"></div>
+    <h2 class="sec-title">Event Stream 深度解析</h2>
+  </div>
+
+  <p>Event Stream 是 OpenHands 最核心的设计决策——<strong>所有通信（Action + Observation）都以不可变事件的形式流经同一条总线</strong>，agent、controller、runtime 三方完全解耦，仅通过 stream 交互。</p>
+
+  <!-- ── 2.1 Event 数据结构 ── -->
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:20px 0 10px">2.1 &nbsp;Event 基础数据结构 &nbsp;·&nbsp; openhands/events/event.py</div>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:#d9736a"></span>
+      <span class="dot" style="background:#c8a04a"></span>
+      <span class="dot" style="background:#6dbb84"></span>
+      openhands/events/event.py &nbsp;·&nbsp; 核心字段
+    </div>
+    <pre><span class="tok-key">class</span> Event:
+    <span class="tok-comment"># 由 EventStream 在 add_event() 时分配，全局自增</span>
+    _id: <span class="tok-key">int</span>
+
+    <span class="tok-comment"># datetime.now().isoformat()，add_event() 时打入</span>
+    _timestamp: <span class="tok-key">str</span>
+
+    <span class="tok-comment"># AGENT | USER | ENVIRONMENT —— 谁发出这个事件</span>
+    _source: EventSource
+
+    <span class="tok-comment"># ★ 最关键字段：指向触发此 Observation 的 Action.id</span>
+    <span class="tok-comment">#   Action 本身 cause=None，Observation.cause = 对应 Action.id</span>
+    _cause: <span class="tok-key">int</span> | <span class="tok-key">None</span>
+
+    <span class="tok-comment"># LLM 费用追踪（token 数、cost）</span>
+    _llm_metrics: Metrics | <span class="tok-key">None</span>
+
+    <span class="tok-comment"># 关联的 tool call 元信息（tool_call_id、function name 等）</span>
+    _tool_call_metadata: ToolCallMetadata | <span class="tok-key">None</span></pre>
+  </div>
+
+  <p>所有 Action 和 Observation 都继承自 Event。<code>cause</code> 字段是整个架构的灵魂——它把每对 <strong>(Action, Observation)</strong> 显式绑定成因果链，无需额外对齐。</p>
+
+  <!-- ── 2.2 add_event 源码 ── -->
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:24px 0 10px">2.2 &nbsp;EventStream.add_event() &nbsp;·&nbsp; 三步写入流程</div>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:#d9736a"></span>
+      <span class="dot" style="background:#c8a04a"></span>
+      <span class="dot" style="background:#6dbb84"></span>
+      openhands/events/stream.py &nbsp;·&nbsp; add_event()（简化）
+    </div>
+    <pre><span class="tok-key">def</span> add_event(self, event: Event, source: EventSource) -> <span class="tok-key">None</span>:
+    <span class="tok-comment"># ① 分配全局递增 ID + 打时间戳 + 记录 source（线程安全锁内）</span>
+    <span class="tok-key">with</span> self._lock:
+        event._id        = self.cur_id
+        self.cur_id     += <span class="tok-num">1</span>
+        event._timestamp = datetime.now().isoformat()
+        event._source    = source
+
+    <span class="tok-comment"># ② 序列化为 JSON + secret 脱敏 + 写磁盘（先于通知 subscriber！）</span>
+    data = event_to_dict(event)
+    data = self._replace_secrets(data)       <span class="tok-comment"># token/密码替换为 ***</span>
+    self.file_store.write(filename, json.dumps(data))
+
+    <span class="tok-comment"># ③ 放入内存队列，异步通知所有 subscriber（非阻塞）</span>
+    self._queue.put(event)</pre>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-icon">ℹ</div>
+    <div class="callout-body">
+      <strong>写磁盘优先于通知</strong>：事件先持久化，再通知 subscriber。这意味着即使进程崩溃，已发生的轨迹也完整保存在磁盘。Session 可以从任意 event id 开始 replay，这正是训练数据采集的基础。
+    </div>
+  </div>
+
+  <!-- ── 2.3 _step 源码 ── -->
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:24px 0 10px">2.3 &nbsp;AgentController._step() &nbsp;·&nbsp; 单步推理循环</div>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:#d9736a"></span>
+      <span class="dot" style="background:#c8a04a"></span>
+      <span class="dot" style="background:#6dbb84"></span>
+      openhands/controller/agent_controller.py &nbsp;·&nbsp; _step()（简化）
+    </div>
+    <pre><span class="tok-key">async def</span> _step(self) -> <span class="tok-key">None</span>:
+    <span class="tok-comment"># 前置检查：state==RUNNING，且没有 pending action（等待 observation 中）</span>
+    <span class="tok-key">if</span> self.state.agent_state != AgentState.RUNNING: <span class="tok-key">return</span>
+    <span class="tok-key">if</span> self._pending_action <span class="tok-key">is not None</span>:    <span class="tok-key">return</span>
+
+    <span class="tok-comment"># 检查 stuck loop / 迭代次数上限 / budget 上限</span>
+    self._run_control_flags()
+
+    <span class="tok-comment"># ★ 核心：调用 agent.step()，内部把 event 历史转成 LLM messages，发请求</span>
+    action = self.agent.step(self.state)
+
+    <span class="tok-comment"># 安全检查（可配置的 security analyzer）</span>
+    <span class="tok-key">if</span> isinstance(action, BaseRunAction):
+        <span class="tok-key">await</span> self._handle_security_analyzer(action)
+
+    <span class="tok-comment"># 把 action 写入 EventStream —— 触发后续 observation 的到来</span>
+    self.event_stream.add_event(action, EventSource.AGENT)
+    self._pending_action = action     <span class="tok-comment"># 标记为 pending，等 observation 配对后清除</span></pre>
+  </div>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:#d9736a"></span>
+      <span class="dot" style="background:#c8a04a"></span>
+      <span class="dot" style="background:#6dbb84"></span>
+      openhands/controller/agent_controller.py &nbsp;·&nbsp; _handle_observation()（核心逻辑）
+    </div>
+    <pre><span class="tok-key">async def</span> _handle_observation(self, observation: Observation) -> <span class="tok-key">None</span>:
+    <span class="tok-comment"># observation.cause == pending_action.id → 配对成功，解除 pending 锁</span>
+    <span class="tok-key">if</span> self._pending_action <span class="tok-key">and</span> self._pending_action.id == observation.cause:
+        self._pending_action = <span class="tok-key">None</span>    <span class="tok-comment"># ← 清除后 _step() 才能继续</span>
+        <span class="tok-key">if</span> self.state.agent_state == AgentState.USER_CONFIRMED:
+            <span class="tok-key">await</span> self.set_agent_state_to(AgentState.RUNNING)
+        <span class="tok-key">return</span>
+    <span class="tok-comment"># cause 不匹配 → 可能是 delegate 子 agent 的 observation，忽略</span></pre>
+  </div>
+
+  <!-- ── 2.4 端到端例子 ── -->
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:28px 0 12px">2.4 &nbsp;端到端具体例子：修复一个 Bug</div>
+
+  <p>任务：<em>"Fix: <code>authenticate()</code> 返回 None，应该 raise ValueError"</em>。以下是完整的 event 序列，展示 EventStream 中实际发生的事情。</p>
+
+  <!-- 流程步骤 -->
+  <div class="pipeline" style="margin-bottom:20px">
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge" style="color:var(--blue)">①</span></div>
+      <div class="step-inner">
+        <div class="step-h">用户消息 → add_event(MessageAction, source=USER)</div>
+        <div class="step-p">分配 <strong>id=0</strong>，写磁盘，推入队列。AgentController 的 <code>on_event()</code> 回调触发，<code>should_step()=True</code>，进入 <code>_step()</code>。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge" style="color:var(--teal)">②</span></div>
+      <div class="step-inner">
+        <div class="step-h">agent.step(state) → LLM 推理，决定先 grep</div>
+        <div class="step-p"><code>CodeActAgent</code> 把 event 历史转成 messages，调 LLM，LLM 输出 <code>grep -rn 'def authenticate' src/</code>。产出 <strong>CmdRunAction</strong>，add_event 分配 <strong>id=1</strong>。同时设 <code>_pending_action=action(id=1)</code>，阻塞下一步。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge" style="color:var(--amber)">③</span></div>
+      <div class="step-inner">
+        <div class="step-h">Runtime（Docker 容器）执行 grep → CmdOutputObservation</div>
+        <div class="step-p">Runtime 订阅 EventStream，收到 id=1 的 CmdRunAction，在容器内执行，产出 <strong>CmdOutputObservation(cause=1)</strong>，add_event 分配 <strong>id=2</strong>。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge" style="color:var(--teal)">④</span></div>
+      <div class="step-inner">
+        <div class="step-h">_handle_observation：cause=1 配对 pending(id=1) → 清除 pending</div>
+        <div class="step-p"><code>observation.cause==1 == _pending_action.id==1</code> → <code>_pending_action=None</code>。<code>should_step()=True</code>，触发下一个 <code>_step()</code>。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge" style="color:var(--teal)">⑤⑥</span></div>
+      <div class="step-inner">
+        <div class="step-h">继续迭代：读文件 → 写 patch → 跑测试 → AgentFinishAction</div>
+        <div class="step-p">每次 <code>_step()</code> 把 stream 中所有历史 events replay 成 messages，LLM 看到完整上下文决策下一步，直到输出 <code>AgentFinishAction</code>。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- event 序列可视化 -->
+  <p style="font-size:12.5px;color:var(--muted);margin-bottom:10px">该 session 结束后 <strong>磁盘上的完整 event 序列</strong>（即可用于训练的轨迹）：</p>
+
+  <div class="event-chain">
+    <div class="event-row head">
+      <div class="ev-id">ID</div>
+      <div class="ev-type">Event Type</div>
+      <div class="ev-src">Source</div>
+      <div class="ev-body">内容摘要</div>
+    </div>
+    <div class="event-row">
+      <div class="ev-id">0</div>
+      <div class="ev-type" style="color:var(--blue)">MessageAction</div>
+      <div class="ev-src src-user">USER</div>
+      <div class="ev-body">"Fix: <code>authenticate()</code> 应该 raise ValueError"</div>
+    </div>
+    <div class="event-row">
+      <div class="ev-id">1</div>
+      <div class="ev-type" style="color:var(--teal)">CmdRunAction</div>
+      <div class="ev-src src-agent">AGENT</div>
+      <div class="ev-body"><code>grep -rn 'def authenticate' src/</code></div>
+    </div>
+    <div class="event-row">
+      <div class="ev-id">2</div>
+      <div class="ev-type" style="color:var(--amber)">CmdOutputObservation</div>
+      <div class="ev-src src-env">ENV</div>
+      <div class="ev-body">"src/auth.py:42:def authenticate…" <span class="cause-tag">cause=1</span></div>
+    </div>
+    <div class="event-row">
+      <div class="ev-id">3</div>
+      <div class="ev-type" style="color:var(--teal)">FileReadAction</div>
+      <div class="ev-src src-agent">AGENT</div>
+      <div class="ev-body"><code>path="src/auth.py", start=38, end=60</code></div>
+    </div>
+    <div class="event-row">
+      <div class="ev-id">4</div>
+      <div class="ev-type" style="color:var(--amber)">FileReadObservation</div>
+      <div class="ev-src src-env">ENV</div>
+      <div class="ev-body">文件内容（第 38–60 行） <span class="cause-tag">cause=3</span></div>
+    </div>
+    <div class="event-row">
+      <div class="ev-id">5</div>
+      <div class="ev-type" style="color:var(--teal)">FileEditAction</div>
+      <div class="ev-src src-agent">AGENT</div>
+      <div class="ev-body"><code>old="return None"</code> → <code>new="raise ValueError(...)"</code></div>
+    </div>
+    <div class="event-row">
+      <div class="ev-id">6</div>
+      <div class="ev-type" style="color:var(--amber)">FileEditObservation</div>
+      <div class="ev-src src-env">ENV</div>
+      <div class="ev-body">success=True, diff 摘要 <span class="cause-tag">cause=5</span></div>
+    </div>
+    <div class="event-row">
+      <div class="ev-id">7</div>
+      <div class="ev-type" style="color:var(--teal)">CmdRunAction</div>
+      <div class="ev-src src-agent">AGENT</div>
+      <div class="ev-body"><code>pytest tests/test_auth.py -x</code></div>
+    </div>
+    <div class="event-row">
+      <div class="ev-id">8</div>
+      <div class="ev-type" style="color:var(--amber)">CmdOutputObservation</div>
+      <div class="ev-src src-env">ENV</div>
+      <div class="ev-body">"PASSED 3 tests in 1.24s", exit_code=0 <span class="cause-tag">cause=7</span></div>
+    </div>
+    <div class="event-row">
+      <div class="ev-id">9</div>
+      <div class="ev-type" style="color:var(--green)">AgentFinishAction</div>
+      <div class="ev-src src-agent">AGENT</div>
+      <div class="ev-body">"Fixed: added ValueError raise in authenticate()"</div>
+    </div>
+  </div>
+
+  <p style="font-size:12px;color:var(--muted2);margin-top:6px">每个 Observation 通过 <code>cause</code> 字段与触发它的 Action 显式绑定。Action（奇数 id）和 Observation（偶数 id）严格交替出现，自然形成 <strong>(action, observation) pair 序列</strong>。</p>
+
+  <!-- ── 2.5 与 Claude Code 对应 ── -->
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:28px 0 12px">2.5 &nbsp;与 Claude Code 的机制对应</div>
+
+  <p>Claude Code 做的是完全相同的事情，只是用 Anthropic API 的 <code>tool_use</code> 格式实现：</p>
+
+  <div class="two-col">
+    <div class="two-col-card" style="border-left:3px solid var(--teal)">
+      <div class="two-col-label" style="color:var(--teal)">OpenHands · EventStream</div>
+      <div class="two-col-body">
+        <code>EventStream.add_event(action, AGENT)</code><br>
+        → 分配 <strong>id=5</strong>，写磁盘<br><br>
+        <code>CmdOutputObservation(<strong>cause=5</strong>)</strong></code><br>
+        → observation 通过 cause 字段绑定 action<br><br>
+        磁盘路径：<code>~/.openhands/sessions/{sid}/events/</code>
+      </div>
+    </div>
+    <div class="two-col-card" style="border-left:3px solid var(--blue)">
+      <div class="two-col-label" style="color:var(--blue)">Claude Code · tool_use</div>
+      <div class="two-col-body">
+        LLM 输出 <code>tool_use</code> block，携带 <strong>tool_use_id="toolu_abc"</strong><br><br>
+        Runtime 返回 <code>tool_result</code>，携带 <strong>tool_use_id="toolu_abc"</strong><br>
+        → 通过相同 id 绑定 action 与 observation<br><br>
+        磁盘路径：<code>~/.claude/projects/*/</code> session log
+      </div>
+    </div>
+  </div>
+
+  <div class="callout good">
+    <div class="callout-icon">✓</div>
+    <div class="callout-body">
+      <strong>本质等价</strong>：OpenHands 的 <code>cause</code> 字段 = Claude Code 的 <code>tool_use_id</code>。两者都是"action → observation 因果绑定"的实现，只是协议不同。这意味着从两种 scaffold 采集的轨迹可以转换到同一种训练格式，组合训练。
+    </div>
+  </div>
+
+  <!-- ── 2.6 Event 之间的关系 ── -->
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:28px 0 12px">2.6 &nbsp;Event 之间的关系：三个层次</div>
+
+  <p>Session 是按 id 排序的 event 序列，但 event 之间的关系不止"先后顺序"，共有三个层次：</p>
+
+  <div class="comp-grid" style="grid-template-columns:1fr 1fr 1fr">
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--muted)">Layer 1 · 时序</div>
+      <div class="comp-name" style="font-size:13px">id 单调递增</div>
+      <div class="comp-body">
+        <code>event.id</code> 由 EventStream 全局分配，严格单调递增。时序 = id 大小。这是唯一的全序关系，可直接按 id 排序还原 session。
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--amber)">Layer 2 · 因果</div>
+      <div class="comp-name" style="font-size:13px">cause 字段</div>
+      <div class="comp-body">
+        <code>observation.cause = action.id</code>。这是 <strong>EventStream 层面</strong>的因果追踪，用于 session replay、训练数据提取、<code>get_pairs_from_events()</code> 工具函数。<strong>不直接用于 prompt 组装</strong>。
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--blue)">Layer 3 · API 配对</div>
+      <div class="comp-name" style="font-size:13px">tool_call_id</div>
+      <div class="comp-body">
+        <code>tool_call_metadata.tool_call_id</code>，来自 LLM API 返回的 tool_call 对象中的 id 字段。<strong>这才是 prompt 组装时的匹配键</strong>，由 LLM 分配而非 EventStream。
+      </div>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <div class="callout-icon">⚠</div>
+    <div class="callout-body">
+      <strong>关键区分</strong>：<code>cause</code> 和 <code>tool_call_id</code> 是两套并行的绑定系统，追踪同一件事但服务于不同用途。<br>
+      · <code>cause</code>：EventStream 内部语义，用于轨迹分析和训练数据对��<br>
+      · <code>tool_call_id</code>：LLM API 协议要求，用于组装合法的 messages 列表<br>
+      源码中 <code>ConversationMemory.process_events()</code> 只用 <code>tool_call_id</code> 匹配，完全不读 <code>cause</code>。
+    </div>
+  </div>
+
+  <!-- ── 2.7 Events → LLM Prompt ── -->
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:28px 0 12px">2.7 &nbsp;Events → LLM Prompt &nbsp;·&nbsp; ConversationMemory.process_events()</div>
+
+  <p>负责转换的类是 <strong>ConversationMemory</strong>（<code>openhands/memory/conversation_memory.py</code>）。它做两件事：<em>① 遍历 event 序列，按类型转换成 Message；② 两阶段匹配，把 assistant tool_call 和 tool result 正确配对。</em></p>
+
+  <!-- 转换规则表 -->
+  <div style="margin:14px 0">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin-bottom:8px">Event → Message 转换规则</div>
+    <div class="event-chain">
+      <div class="event-row head">
+        <div class="ev-id" style="font-size:9px">Event</div>
+        <div class="ev-type" style="font-size:9px">类型 / Source</div>
+        <div class="ev-src" style="font-size:9px">→ role</div>
+        <div class="ev-body" style="font-size:9px">组装方式</div>
+      </div>
+      <div class="event-row">
+        <div class="ev-id" style="color:var(--muted2)">①</div>
+        <div class="ev-type" style="color:var(--blue)">SystemMessageAction</div>
+        <div class="ev-src" style="font-size:10px;color:var(--muted)">system</div>
+        <div class="ev-body">直接作为 system message 插入开头，全局唯一</div>
+      </div>
+      <div class="event-row">
+        <div class="ev-id" style="color:var(--muted2)">②</div>
+        <div class="ev-type" style="color:var(--blue)">MessageAction (USER)</div>
+        <div class="ev-src" style="font-size:10px;color:var(--muted)">user</div>
+        <div class="ev-body"><code>{"role":"user","content":[{"type":"text","text":"..."}]}</code></div>
+      </div>
+      <div class="event-row">
+        <div class="ev-id" style="color:var(--muted2)">③</div>
+        <div class="ev-type" style="color:var(--teal)">CmdRunAction (AGENT)</div>
+        <div class="ev-src" style="font-size:10px;color:var(--muted)">assistant</div>
+        <div class="ev-body">从 <code>tool_call_metadata.model_response</code> 还原原始 assistant message，含 <code>tool_calls</code> 列表。<strong>暂存，不立即输出</strong> → 等 observation 到来后一起配对</div>
+      </div>
+      <div class="event-row">
+        <div class="ev-id" style="color:var(--muted2)">④</div>
+        <div class="ev-type" style="color:var(--amber)">CmdOutputObservation</div>
+        <div class="ev-src" style="font-size:10px;color:var(--muted)">tool</div>
+        <div class="ev-body"><code>{"role":"tool","tool_call_id":"call_abc","name":"bash_tool","content":"stdout\n[exit_code 0]"}</code>。也<strong>暂存</strong> → 等配对</div>
+      </div>
+      <div class="event-row">
+        <div class="ev-id" style="color:var(--muted2)">⑤</div>
+        <div class="ev-type" style="color:var(--purple)">AgentThinkAction</div>
+        <div class="ev-src" style="font-size:10px;color:var(--muted)">assistant</div>
+        <div class="ev-body">同 CmdRunAction 处理——think 内容嵌在 tool_call 的 assistant message 里，没有独立的 "thought" message</div>
+      </div>
+      <div class="event-row">
+        <div class="ev-id" style="color:var(--muted2)">✕</div>
+        <div class="ev-type" style="color:var(--red)">LoopDetectionObservation</div>
+        <div class="ev-src" style="font-size:10px;color:var(--muted)">—</div>
+        <div class="ev-body">直接过滤，返回空列表，不进入 prompt</div>
+      </div>
+      <div class="event-row">
+        <div class="ev-id" style="color:var(--muted2)">✕</div>
+        <div class="ev-type" style="color:var(--red)">forgotten_event_ids</div>
+        <div class="ev-src" style="font-size:10px;color:var(--muted)">—</div>
+        <div class="ev-body">history condensation 后被标记为遗忘的 event，跳过不转换</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 两阶段匹配源码 -->
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:20px 0 8px">两阶段匹配逻辑（源码）</div>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:#d9736a"></span>
+      <span class="dot" style="background:#c8a04a"></span>
+      <span class="dot" style="background:#6dbb84"></span>
+      openhands/memory/conversation_memory.py &nbsp;·&nbsp; process_events()（简化）
+    </div>
+    <pre><span class="tok-comment"># 两个暂存字典</span>
+pending_tool_call_action_messages = {}   <span class="tok-comment"># response_id → Message(role='assistant', tool_calls=[...])</span>
+tool_call_id_to_message         = {}   <span class="tok-comment"># tool_call_id  → Message(role='tool', ...)</span>
+
+<span class="tok-comment"># ── 第一阶段：遍历所有 events，分别暂存 ──</span>
+<span class="tok-key">for</span> event <span class="tok-key">in</span> events:
+    <span class="tok-key">if</span> isinstance(event, Action):
+        <span class="tok-comment"># CmdRunAction/IPythonRunCellAction 等 → 提取 LLM 原始 response，暂存</span>
+        tool_metadata = event.tool_call_metadata
+        assistant_msg = tool_metadata.model_response.choices[<span class="tok-num">0</span>].message
+        pending_tool_call_action_messages[tool_metadata.model_response.id] = Message(
+            role=<span class="tok-str">'assistant'</span>,
+            tool_calls=assistant_msg.tool_calls,   <span class="tok-comment"># 含 tool_call_id</span>
+        )
+    <span class="tok-key">elif</span> isinstance(event, Observation):
+        <span class="tok-comment"># Observation → 格式化内容，以 tool_call_id 为键暂存</span>
+        tool_call_id_to_message[event.tool_call_metadata.tool_call_id] = Message(
+            role=<span class="tok-str">'tool'</span>,
+            tool_call_id=event.tool_call_metadata.tool_call_id,
+            content=event.to_agent_observation(),
+        )
+
+<span class="tok-comment"># ── 第二阶段：配对，按顺序输出 ──</span>
+<span class="tok-key">for</span> response_id, assistant_msg <span class="tok-key">in</span> pending_tool_call_action_messages.items():
+    <span class="tok-comment"># 只有该 assistant message 的所有 tool_calls 都有对应 result 才输出</span>
+    <span class="tok-key">if</span> all(tc.id <span class="tok-key">in</span> tool_call_id_to_message <span class="tok-key">for</span> tc <span class="tok-key">in</span> assistant_msg.tool_calls):
+        messages.append(assistant_msg)              <span class="tok-comment"># 先 assistant</span>
+        <span class="tok-key">for</span> tc <span class="tok-key">in</span> assistant_msg.tool_calls:
+            messages.append(tool_call_id_to_message[tc.id])  <span class="tok-comment"># 后 tool results</span></pre>
+  </div>
+
+  <!-- 最终 prompt 结构 -->
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:20px 0 8px">最终发给 LLM 的 messages 结构（以上文 bug fix 例子为例）</div>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:#d9736a"></span>
+      <span class="dot" style="background:#c8a04a"></span>
+      <span class="dot" style="background:#6dbb84"></span>
+      messages list &nbsp;·&nbsp; 发给 LLM 的第 3 步（agent 看到 grep 结果后决策）
+    </div>
+    <pre>[
+  { <span class="tok-key">"role"</span>: <span class="tok-str">"system"</span>,    <span class="tok-str">"content"</span>: <span class="tok-str">"You are OpenHands agent..."</span> },
+
+  { <span class="tok-key">"role"</span>: <span class="tok-str">"user"</span>,      <span class="tok-str">"content"</span>: <span class="tok-str">"Fix: authenticate() should raise ValueError"</span> },
+
+  { <span class="tok-key">"role"</span>: <span class="tok-str">"assistant"</span>,          <span class="tok-comment">← event id=1 的 CmdRunAction</span>
+    <span class="tok-str">"tool_calls"</span>: [{
+      <span class="tok-str">"id"</span>: <span class="tok-str">"call_x1"</span>,
+      <span class="tok-str">"function"</span>: { <span class="tok-str">"name"</span>: <span class="tok-str">"bash_tool"</span>,
+                    <span class="tok-str">"arguments"</span>: <span class="tok-str">"{\"command\":\"grep -rn 'def authenticate' src/\"}"</span> }
+    }]
+  },
+
+  { <span class="tok-key">"role"</span>: <span class="tok-str">"tool"</span>,              <span class="tok-comment">← event id=2 的 CmdOutputObservation</span>
+    <span class="tok-str">"tool_call_id"</span>: <span class="tok-str">"call_x1"</span>,  <span class="tok-comment">← 与 assistant 的 tool_call.id 配对</span>
+    <span class="tok-str">"name"</span>: <span class="tok-str">"bash_tool"</span>,
+    <span class="tok-str">"content"</span>: <span class="tok-str">"src/auth.py:42:def authenticate(user, pwd):\n[exit_code 0]"</span>
+  }
+  <span class="tok-comment">// ← LLM 在此基础上生成下一个 assistant message（FileReadAction 或 FileEditAction）</span>
+]</pre>
+  </div>
+
+  <div class="callout key">
+    <div class="callout-icon">◆</div>
+    <div class="callout-body">
+      <strong>设计的关键洞察</strong>：<code>ConversationMemory</code> 本质上是把 EventStream（时序日志）重新组���成合法的 LLM 对话格式。两个系统的关注点不同——EventStream 关心"发生了什么、谁触发了谁"，ConversationMemory 关心"怎么让 LLM 看到完整上下文"。<code>cause</code> 字段服务于前者，<code>tool_call_id</code> 服务于后者，互不干扰。
+    </div>
+  </div>
+
+</section>
+
+<!-- ─── 03 Action Space ─── -->
+<section class="sec" id="actions">
+  <div class="sec-header">
+    <span class="sec-num">03</span>
+    <div class="sec-line" style="background:var(--purple)"></div>
+    <h2 class="sec-title">Action Space</h2>
+  </div>
+
+  <p>OpenHands 定义了一套完整的结构化 Action 类型，覆盖代码执行、文件操作、网页交互、agent 控制等所有维度。</p>
+
+  <div class="action-list">
+    <div class="action-item">
+      <div class="action-name">CmdRunAction</div>
+      <div class="action-desc">在 Bash shell 中执行命令。<code>command</code> 字段为 shell 命令字符串，<code>timeout</code> 可设超时。<strong>最常用的 action 类型</strong>，git/pytest/find 等均通过此执行。</div>
+    </div>
+    <div class="action-item">
+      <div class="action-name">IPythonRunCellAction</div>
+      <div class="action-desc">在 Jupyter IPython kernel 中执行 Python 代码。保持 kernel 状态（变量、import 持久），适合数据分析、逐步调试。<strong>CodeAct 的核心 action</strong>——工具调用通过 Python 函数实现。</div>
+    </div>
+    <div class="action-item">
+      <div class="action-name">BrowseURLAction</div>
+      <div class="action-desc">在 headless browser 中打开指定 URL，返回页面截图（PNG）+ DOM 结构 + 文本摘要。触发 <code>BrowserObservation</code>，包含可交互元素坐标。</div>
+    </div>
+    <div class="action-item">
+      <div class="action-name">BrowseInteractiveAction</div>
+      <div class="action-desc">执行浏览器交互指令序列（点击、输入、滚动、截图）。使用 Playwright/Puppeteer 驱动，支持动态页面。主要供 <code>BrowsingAgent</code> 使用，也支持 VLM 视觉理解。</div>
+    </div>
+    <div class="action-item">
+      <div class="action-name">FileReadAction</div>
+      <div class="action-desc">读取 sandbox 内文件内容，支持按行范围读取（<code>start</code>/<code>end</code>）。返回 <code>FileReadObservation</code> 含文件内容和 error 信息。</div>
+    </div>
+    <div class="action-item">
+      <div class="action-name">FileWriteAction</div>
+      <div class="action-desc">向 sandbox 内文件写入内容，支持完整覆盖或 append 模式。是代码编辑的主要路径之一（另一路径是通过 IPython/Bash 直接写）。</div>
+    </div>
+    <div class="action-item">
+      <div class="action-name">AgentDelegateAction</div>
+      <div class="action-desc">将子任务委托给另一个 agent（如将"搜索文档"子任务交给 <code>BrowsingAgent</code>）。<strong>DelegatorAgent</strong> 的核心机制，实现多 agent 协作分工。</div>
+    </div>
+    <div class="action-item">
+      <div class="action-name">AgentFinishAction</div>
+      <div class="action-desc">宣告任务完成，携带最终回答或总结（<code>outputs</code> 字段）。触发后 AgentController 将 session 状态置为 <code>FINISHED</code>。</div>
+    </div>
+    <div class="action-item">
+      <div class="action-name">MessageAction</div>
+      <div class="action-desc">agent 向用户或协作 agent 发送消息（非执行性）。用于请求澄清、汇报中间进���，或在 DelegatorAgent 框架内的 agent 间通信。</div>
+    </div>
+  </div>
+
+  <div class="callout key">
+    <div class="callout-icon">◆</div>
+    <div class="callout-body">
+      <strong>Action 的双重语义</strong>：在 SWE 任务中，<code>CmdRunAction</code> 和 <code>IPythonRunCellAction</code> 约占 action 总量的 70%+。<code>FileReadAction</code> / <code>FileWriteAction</code> 也常见，但在 CodeAct 范式下，文件操作更倾向于通过 Python（<code>open()</code>）完成，保持一致性。
+    </div>
+  </div>
+</section>
+
+<!-- ─── 04 Agent 类型 ─── -->
+<section class="sec" id="agents">
+  <div class="sec-header">
+    <span class="sec-num">04</span>
+    <div class="sec-line" style="background:var(--amber)"></div>
+    <h2 class="sec-title">Agent 类型</h2>
+  </div>
+
+  <p>OpenHands 提供多种 agent 实现，每种针对不同任务类型优化。实际部署中可单独使用，也可通过 DelegatorAgent 组合。</p>
+
+  <div class="agent-cards">
+    <div class="agent-card" style="border-left-color:var(--teal)">
+      <div class="agent-card-head">
+        <span class="agent-badge" style="background:rgba(77,184,164,.14);color:var(--teal);border:1px solid rgba(77,184,164,.3)">PRIMARY</span>
+        <div class="agent-card-title">CodeActAgent</div>
+      </div>
+      <div class="agent-card-body">
+        <strong>OpenHands 的主力 agent</strong>，基于 CodeAct 论文（arXiv:2402.01030）设计。核心思路：<strong>以可执行代码（Python/Bash）作为 action 的载体</strong>，而非自然语言工具调用。<br><br>
+        在每步推理中，LLM 输出一段 Python 或 Bash 代码，OpenHands 直接执行并返回 stdout/stderr。相比 JSON function calling，代码有更强的表达力（条件、循环、错误处理）。<br><br>
+        <strong>工具使用方式</strong>：通过 <code>from openhands.tools import *</code> 导入工具包，以普通函数调用的方式使用（如 <code>search_files("pattern")</code>），LLM 无需学习特定的 tool call schema。<br><br>
+        <strong>SWE 任务优化</strong>：内置 SWE-specific 工具集（文件树浏览、grep、git diff、patch apply），针对大型代码库导航做了 prompt 优化。
+      </div>
+    </div>
+
+    <div class="agent-card" style="border-left-color:var(--blue)">
+      <div class="agent-card-head">
+        <span class="agent-badge" style="background:rgba(94,168,192,.12);color:var(--blue);border:1px solid rgba(94,168,192,.25)">BROWSING</span>
+        <div class="agent-card-title">BrowsingAgent</div>
+      </div>
+      <div class="agent-card-body">
+        专门针对<strong>网页浏览任务</strong>优化。使用 <code>BrowseURLAction</code> 和 <code>BrowseInteractiveAction</code>，每步接收页面截图 + DOM 结构。<br><br>
+        支持 <strong>视觉理解</strong>：当 LLM 支持 vision 时（Claude / GPT-4V / Gemini），截图以 base64 图像形式传入 prompt，agent 直接"看图操作"。这是 <strong>VLM 评测的关键路径</strong>。<br><br>
+        用途：WebArena、WebVoyager 等浏览器任务评测；也作为 CodeActAgent 的子 agent（通过 AgentDelegateAction 调用）完成"查阅文档/搜索信息"等子任务。
+      </div>
+    </div>
+
+    <div class="agent-card" style="border-left-color:var(--purple)">
+      <div class="agent-card-head">
+        <span class="agent-badge" style="background:rgba(136,120,184,.12);color:var(--purple);border:1px solid rgba(136,120,184,.25)">ORCHESTRATOR</span>
+        <div class="agent-card-title">DelegatorAgent</div>
+      </div>
+      <div class="agent-card-body">
+        <strong>多 agent 编排层</strong>。接收高层任务后，分解为子任务并通过 <code>AgentDelegateAction</code> 分配给专门的子 agent（CodeActAgent 写代码、BrowsingAgent 查文档）。子 agent 完成后通过 <code>AgentFinishAction</code> 返回结果。<br><br>
+        典型使用场景：复杂 SWE 任务（先 BrowsingAgent 查 API 文档，再 CodeActAgent 实现并测试）；或需要并行子任务的 multi-step 问题。
+      </div>
+    </div>
+
+    <div class="agent-card" style="border-left-color:var(--muted2)">
+      <div class="agent-card-head">
+        <span class="agent-badge" style="background:rgba(64,82,74,.2);color:var(--muted);border:1px solid rgba(64,82,74,.4)">LEGACY</span>
+        <div class="agent-card-title">MonologueAgent / ReActAgent</div>
+      </div>
+      <div class="agent-card-body">
+        早期实现，用于对比实验。MonologueAgent 基于 ReAct 框架（Reason → Act → Observe），以自然语言 "thinking" 作为中间步骤，性能显著弱于 CodeActAgent，现已基本不用于评测。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── 04b Sub-Agent ─── -->
+<section class="sec" id="delegates">
+  <div class="sec-header">
+    <span class="sec-num">04b</span>
+    <div class="sec-line" style="background:var(--purple)"></div>
+    <h2 class="sec-title">Sub-Agent 管理机制</h2>
+  </div>
+
+  <p>OpenHands 通过 <strong>AgentDelegateAction</strong> 实现多 agent 协作。最反直觉的设计：子 agent <strong>不是并发运行</strong>的，而是父 agent 完全暂停、把控制权线性交接给子 agent，子 agent 结束后父 agent 恢复。</p>
+
+  <!-- ── 数据结构 ── -->
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 12px">数据结构 &nbsp;·&nbsp; openhands/events/action/agent.py</div>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:#d9736a"></span>
+      <span class="dot" style="background:#c8a04a"></span>
+      <span class="dot" style="background:#6dbb84"></span>
+      AgentDelegateAction &amp; AgentDelegateObservation
+    </div>
+    <pre><span class="tok-key">@dataclass</span>
+<span class="tok-key">class</span> AgentDelegateAction(Action):
+    agent: <span class="tok-key">str</span>        <span class="tok-comment"># 要调用的 agent 名称，如 "BrowsingAgent"</span>
+    inputs: <span class="tok-key">dict</span>      <span class="tok-comment"># 子任务描述，必含 "task" key</span>
+    thought: <span class="tok-key">str</span> = <span class="tok-str">''</span> <span class="tok-comment"># LLM 的委托理由</span>
+    action: <span class="tok-key">str</span> = ActionType.DELEGATE
+
+<span class="tok-key">@dataclass</span>
+<span class="tok-key">class</span> AgentDelegateObservation(Observation):
+    outputs: <span class="tok-key">dict</span>      <span class="tok-comment"># 子 agent 的最终 outputs（来自其 AgentFinishAction）</span>
+    content: <span class="tok-key">str</span> = <span class="tok-str">''</span> <span class="tok-comment"># 格式化摘要，如 "BrowsingAgent finishes task with answer: ..."</span>
+    observation: <span class="tok-key">str</span> = ObservationType.DELEGATE</pre>
+  </div>
+
+  <!-- ── 最关键设计：共享 EventStream ── -->
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:22px 0 12px">最关键设计：子 agent 共享父 agent 的 EventStream</div>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:#d9736a"></span>
+      <span class="dot" style="background:#c8a04a"></span>
+      <span class="dot" style="background:#6dbb84"></span>
+      agent_controller.py &nbsp;·&nbsp; start_delegate()
+    </div>
+    <pre><span class="tok-key">async def</span> start_delegate(self, action: AgentDelegateAction) -> <span class="tok-key">None</span>:
+    <span class="tok-comment"># 按名称加载子 agent 类</span>
+    agent_cls = Agent.get_cls(action.agent)          <span class="tok-comment"># e.g. BrowsingAgent</span>
+    delegate_agent = agent_cls(config=agent_config, llm_registry=self.agent.llm_registry)
+
+    <span class="tok-comment"># 创建子 agent 的独立 State（独立历史，但共享 metrics / iteration / budget）</span>
+    state = State(
+        inputs=action.inputs,
+        delegate_level=self.state.delegate_level + <span class="tok-num">1</span>,  <span class="tok-comment"># 记录嵌套深度，但无上限检查</span>
+        metrics=self.state.metrics,                   <span class="tok-comment"># ← 共享，父子一起算 token 消耗</span>
+        iteration_flag=self.state.iteration_flag,     <span class="tok-comment"># ← 共享，子 agent 消耗父的步数配额</span>
+        budget_flag=self.state.budget_flag,           <span class="tok-comment"># ← 共享，子 agent 消耗父的 cost 配额</span>
+        start_id=self.event_stream.get_latest_event_id() + <span class="tok-num">1</span>,
+    )
+
+    self.delegate = AgentController(
+        agent=delegate_agent,
+        event_stream=self.event_stream,  <span class="tok-comment"># ★ 与父 agent 共用同一个 EventStream</span>
+        initial_state=state,
+        is_delegate=<span class="tok-key">True</span>,               <span class="tok-comment"># 不独立订阅 stream，由父 controller 转发事件</span>
+    )
+
+    <span class="tok-comment"># 向共享 stream 发送任务消息（子 agent 的起点）</span>
+    <span class="tok-key">if</span> <span class="tok-str">'task'</span> <span class="tok-key">in</span> action.inputs:
+        self.event_stream.add_event(
+            MessageAction(content=<span class="tok-str">'TASK: '</span> + action.inputs[<span class="tok-str">'task'</span>]),
+            EventSource.USER,
+        )</pre>
+  </div>
+
+  <!-- ── 控制权线性交接 ── -->
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:22px 0 12px">控制权线性交接：父 agent 完全暂停</div>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:#d9736a"></span>
+      <span class="dot" style="background:#c8a04a"></span>
+      <span class="dot" style="background:#6dbb84"></span>
+      agent_controller.py &nbsp;·&nbsp; on_event()（父 controller 的事件回调）
+    </div>
+    <pre><span class="tok-key">def</span> on_event(self, event: Event) -> <span class="tok-key">None</span>:
+    <span class="tok-key">if</span> self.delegate <span class="tok-key">is not None</span>:
+        delegate_state = self.delegate.get_agent_state()
+
+        <span class="tok-key">if</span> delegate_state <span class="tok-key">not in</span> (FINISHED, ERROR, REJECTED):
+            <span class="tok-comment"># 子 agent 还在运行 → 把所有事件转发给子 controller，父 agent 不处理</span>
+            self.delegate._on_event(event)
+            <span class="tok-key">return</span>                           <span class="tok-comment"># ← 父 agent 完全暂停</span>
+        <span class="tok-key">else</span>:
+            <span class="tok-comment"># 子 agent 结束 → 回收，恢复父 agent</span>
+            self.end_delegate()
+            <span class="tok-key">return</span>
+
+    <span class="tok-comment"># ��有活跃子 agent → 父 agent 正常处理</span>
+    self._on_event(event)</pre>
+  </div>
+
+  <!-- ── 结束与结果回传 ── -->
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:22px 0 12px">子 agent 结束 → 结果回传父 agent</div>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:#d9736a"></span>
+      <span class="dot" style="background:#c8a04a"></span>
+      <span class="dot" style="background:#6dbb84"></span>
+      agent_controller.py &nbsp;·&nbsp; end_delegate()
+    </div>
+    <pre><span class="tok-key">def</span> end_delegate(self) -> <span class="tok-key">None</span>:
+    <span class="tok-comment"># ① 同步子 agent 消耗的 iteration 计数回父 agent</span>
+    self.state.iteration_flag.current_value = self.delegate.state.iteration_flag.current_value
+
+    <span class="tok-comment"># ② 关闭子 controller</span>
+    self.delegate.close()
+
+    <span class="tok-comment"># ③ 把子 agent 的结果封装为 AgentDelegateObservation，写入共享 stream</span>
+    delegate_outputs = self.delegate.state.outputs   <span class="tok-comment"># 来自子 AgentFinishAction</span>
+    content = <span class="tok-str">f'{self.delegate.agent.name} finishes task with {delegate_outputs}'</span>
+    obs = AgentDelegateObservation(outputs=delegate_outputs, content=content)
+
+    <span class="tok-comment"># ④ 把 obs 的 tool_call_metadata 指向原始 AgentDelegateAction（用于 prompt 组装配对）</span>
+    <span class="tok-key">for</span> event <span class="tok-key">in</span> reversed(self.state.history):
+        <span class="tok-key">if</span> isinstance(event, AgentDelegateAction):
+            obs.tool_call_metadata = event.tool_call_metadata
+            <span class="tok-key">break</span>
+
+    self.event_stream.add_event(obs, EventSource.AGENT)
+    self.delegate = <span class="tok-key">None</span>   <span class="tok-comment"># ← 父 agent 恢复控制权</span></pre>
+  </div>
+
+  <!-- ── 完整 event 序列可视化 ── -->
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:22px 0 12px">含子 agent 的完整 EventStream（父子共享同一序列）</div>
+
+  <p style="font-size:13px;color:var(--muted);margin-bottom:10px">场景：CodeActAgent 需要查阅某 API 文档，委托 BrowsingAgent 完成搜索后继续修代码。</p>
+
+  <div class="event-chain">
+    <div class="event-row head">
+      <div class="ev-id">ID</div>
+      <div class="ev-type">Event Type</div>
+      <div class="ev-src">Source</div>
+      <div class="ev-body">内容 / 说明</div>
+    </div>
+    <div class="event-row">
+      <div class="ev-id">0</div>
+      <div class="ev-type" style="color:var(--blue)">MessageAction</div>
+      <div class="ev-src src-user">USER</div>
+      <div class="ev-body">"Implement OAuth2 login for this repo"</div>
+    </div>
+    <div class="event-row">
+      <div class="ev-id">1</div>
+      <div class="ev-type" style="color:var(--teal)">CmdRunAction</div>
+      <div class="ev-src src-agent">AGENT</div>
+      <div class="ev-body"><code>grep -rn 'oauth' src/</code> &nbsp;—— CodeActAgent 先探索代码库</div>
+    </div>
+    <div class="event-row">
+      <div class="ev-id">2</div>
+      <div class="ev-type" style="color:var(--amber)">CmdOutputObservation</div>
+      <div class="ev-src src-env">ENV</div>
+      <div class="ev-body">无匹配结果 <span class="cause-tag">cause=1</span></div>
+    </div>
+    <div class="event-row" style="background:rgba(136,120,184,.04);border-left:2px solid rgba(136,120,184,.3)">
+      <div class="ev-id" style="color:var(--purple)">3</div>
+      <div class="ev-type" style="color:var(--purple)">AgentDelegateAction</div>
+      <div class="ev-src src-agent">AGENT</div>
+      <div class="ev-body">agent="BrowsingAgent", inputs={"task":"Find OAuth2 Python library docs"} &nbsp;<strong style="color:var(--purple);font-size:11px">↓ 子 agent 开始</strong></div>
+    </div>
+    <div class="event-row" style="background:rgba(136,120,184,.04);border-left:2px solid rgba(136,120,184,.15)">
+      <div class="ev-id" style="color:var(--muted2)">4</div>
+      <div class="ev-type" style="color:var(--blue)">MessageAction</div>
+      <div class="ev-src src-user">USER</div>
+      <div class="ev-body">"TASK: Find OAuth2 Python library docs" &nbsp;<em style="color:var(--muted2);font-size:11px">（start_delegate 自动注入）</em></div>
+    </div>
+    <div class="event-row" style="background:rgba(136,120,184,.04);border-left:2px solid rgba(136,120,184,.15)">
+      <div class="ev-id" style="color:var(--muted2)">5</div>
+      <div class="ev-type" style="color:var(--blue)">BrowseURLAction</div>
+      <div class="ev-src src-agent">AGENT</div>
+      <div class="ev-body">url="https://docs.authlib.org" &nbsp;<em style="color:var(--muted2);font-size:11px">（BrowsingAgent 的 action，写入共享 stream）</em></div>
+    </div>
+    <div class="event-row" style="background:rgba(136,120,184,.04);border-left:2px solid rgba(136,120,184,.15)">
+      <div class="ev-id" style="color:var(--muted2)">6</div>
+      <div class="ev-type" style="color:var(--amber)">BrowserOutputObservation</div>
+      <div class="ev-src src-env">ENV</div>
+      <div class="ev-body">截图 + DOM 文本 <span class="cause-tag">cause=5</span></div>
+    </div>
+    <div class="event-row" style="background:rgba(136,120,184,.04);border-left:2px solid rgba(136,120,184,.15)">
+      <div class="ev-id" style="color:var(--muted2)">7</div>
+      <div class="ev-type" style="color:var(--green)">AgentFinishAction</div>
+      <div class="ev-src src-agent">AGENT</div>
+      <div class="ev-body">outputs={"answer":"Use authlib, install with pip install authlib..."} &nbsp;<strong style="color:var(--purple);font-size:11px">↑ 子 agent 结束</strong></div>
+    </div>
+    <div class="event-row" style="background:rgba(136,120,184,.04);border-left:2px solid rgba(136,120,184,.3)">
+      <div class="ev-id" style="color:var(--purple)">8</div>
+      <div class="ev-type" style="color:var(--purple)">AgentDelegateObservation</div>
+      <div class="ev-src src-agent">AGENT</div>
+      <div class="ev-body">"BrowsingAgent finishes task with answer: Use authlib..." <span class="cause-tag">cause=3</span> &nbsp;<em style="color:var(--muted2);font-size:11px">（end_delegate 生成，父 agent 恢复）</em></div>
+    </div>
+    <div class="event-row">
+      <div class="ev-id">9</div>
+      <div class="ev-type" style="color:var(--teal)">FileEditAction</div>
+      <div class="ev-src src-agent">AGENT</div>
+      <div class="ev-body">编辑 requirements.txt，添加 authlib &nbsp;<em style="color:var(--muted2);font-size:11px">（CodeActAgent 恢复，看到 id=8 的结果继续）</em></div>
+    </div>
+  </div>
+
+  <p style="font-size:12px;color:var(--muted2);margin-top:8px">紫色边框的行（id 3–8）是子 agent 期间产生的事件，全部在同一个 EventStream 里，按时间顺序连续排列。父 agent 的 history 包含全部事件，但子 agent 的 history 只从 id=4 开始（由 <code>state.start_id</code> 控制）。</p>
+
+  <!-- ── 状态共享表 ── -->
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:22px 0 12px">父子 agent 共享 vs 隔离的状态</div>
+
+  <table class="bench-table">
+    <thead>
+      <tr><th>组件</th><th>共享？</th><th>原因 / 影响</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>EventStream</td>
+        <td><span style="color:var(--green)">✓ 共享</span></td>
+        <td style="color:var(--muted)">父子事件混在同一序列，子 agent 的事件对父 agent 可见</td>
+      </tr>
+      <tr>
+        <td>metrics（token/cost）</td>
+        <td><span style="color:var(--green)">✓ 共享</span></td>
+        <td style="color:var(--muted)">子 agent 的消耗计入父 agent 的总账单</td>
+      </tr>
+      <tr>
+        <td>iteration_flag</td>
+        <td><span style="color:var(--green)">✓ 共享</span></td>
+        <td style="color:var(--muted)">子 agent 的步��占用父 agent 的步数配额，<strong style="color:var(--text)">子 agent 越多越快耗尽</strong></td>
+      </tr>
+      <tr>
+        <td>budget_flag</td>
+        <td><span style="color:var(--green)">✓ 共享</span></td>
+        <td style="color:var(--muted)">子 agent 消耗同一个 cost budget</td>
+      </tr>
+      <tr>
+        <td>LLM registry</td>
+        <td><span style="color:var(--green)">✓ 共享</span></td>
+        <td style="color:var(--muted)">子 agent 默认使用相同的 LLM 配置（可覆盖）</td>
+      </tr>
+      <tr>
+        <td>State.history</td>
+        <td><span style="color:var(--red)">✗ 隔离</span></td>
+        <td style="color:var(--muted)">子 agent 只看到从 <code>start_id</code> 开始的事件，不读父 agent 的历史</td>
+      </tr>
+      <tr>
+        <td>AgentController 实例</td>
+        <td><span style="color:var(--red)">✗ 隔离</span></td>
+        <td style="color:var(--muted)">父子各有独立的 controller；父暂停期间 <code>self.delegate</code> 指向子 controller</td>
+      </tr>
+      <tr>
+        <td>嵌套深度</td>
+        <td colspan="2" style="color:var(--muted)"><code>delegate_level</code> 记录但<strong style="color:var(--text)">无上限检查</strong>——理论上子 agent 可以继续委托孙 agent，无限嵌套</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout key">
+    <div class="callout-icon">◆</div>
+    <div class="callout-body">
+      <strong>对轨迹采集的影响</strong>：由于父子共享 EventStream，一个含子 agent 的 session 的磁盘 event 序列里，父 agent 和子 agent 的事件是<strong>交织在一起的</strong>（见上方 id=3–8）。用于训练时，需要决定：① 把整个序列作为一条长轨迹；② 只提取父 agent 的 (AgentDelegateAction, AgentDelegateObservation) 对；③ 把子 agent 的子序列单独提取为独立轨迹。三种策略对应不同的训练目标。
+    </div>
+  </div>
+
+  <!-- cross-system comparison -->
+  <h3 style="font-family:'Lora',serif;font-size:1.05rem;color:var(--head);margin:2.2rem 0 .9rem;padding-bottom:.4rem;border-bottom:1px solid var(--border)">4b.ext 三种 Sub-Agent 管理模式横向对比</h3>
+
+  <p>OpenHands 的中断-委派模式只是 sub-agent 管理的一种方案。以 OpenClaw/coco（本工作��使用的 agent 系统）和 Claude Code 的 Agent tool 作为对照，三种模式的核心差异如下。</p>
+
+  <!-- mode diagrams -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin:1.2rem 0 1.6rem">
+
+    <div style="background:var(--s1);border:1px solid var(--border2);border-top:2px solid var(--green);border-radius:8px;padding:1rem 1.1rem">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--green);letter-spacing:.1em;margin-bottom:.5rem">MODE 1 · INTERRUPT-DELEGATE</div>
+      <div style="font-size:.88rem;color:var(--head);font-weight:500;margin-bottom:.5rem">OpenHands</div>
+      <pre style="font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);line-height:1.7;background:none;border:none;padding:0">parent  ──AgentDelegate──►
+(暂停)   ←─────────────────
+              child 跑完
+        ◄──AgentDelegateObs</pre>
+      <div style="font-size:.8rem;color:var(--muted);margin-top:.6rem;border-top:1px solid var(--border);padding-top:.5rem">串行 · 共享 EventStream · 结果为 Observation 事件</div>
+    </div>
+
+    <div style="background:var(--s1);border:1px solid var(--border2);border-top:2px solid var(--amber);border-radius:8px;padding:1rem 1.1rem">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--amber);letter-spacing:.1em;margin-bottom:.5rem">MODE 2 · SUBPROCESS-BLOCKING</div>
+      <div style="font-size:.88rem;color:var(--head);font-weight:500;margin-bottom:.5rem">OpenClaw / coco</div>
+      <pre style="font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);line-height:1.7;background:none;border:none;padding:0">parent  ──coco -p──► 子进程
+(阻塞)               独立 session
+        ◄── stdout ──────────
+            frozenResultText</pre>
+      <div style="font-size:.8rem;color:var(--muted);margin-top:.6rem;border-top:1px solid var(--border);padding-top:.5rem">默认串行 · 仅共享文件系统 · 结果为 stdout 文本</div>
+    </div>
+
+    <div style="background:var(--s1);border:1px solid var(--border2);border-top:2px solid var(--blue);border-radius:8px;padding:1rem 1.1rem">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--blue);letter-spacing:.1em;margin-bottom:.5rem">MODE 3 · ASYNC-CONCURRENT</div>
+      <div style="font-size:.88rem;color:var(--head);font-weight:500;margin-bottom:.5rem">Claude Code Agent tool</div>
+      <pre style="font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);line-height:1.7;background:none;border:none;padding:0">parent ──spawn(bg)──► A
+       ──spawn(bg)──► B
+       继续执行…
+       ◄─TaskOutput(A)──
+       ◄─TaskOutput(B)──</pre>
+      <div style="font-size:.8rem;color:var(--muted);margin-top:.6rem;border-top:1px solid var(--border);padding-top:.5rem">并发 · 无共享状态（可 worktree 隔离）· 消息系统通信</div>
+    </div>
+
+  </div>
+
+  <!-- comparison table -->
+  <table class="bench-table">
+    <thead>
+      <tr><th>维度</th><th style="color:var(--green)">OpenHands</th><th style="color:var(--amber)">OpenClaw / coco</th><th style="color:var(--blue)">Claude Code Agent</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>执行模式</td>
+        <td>串行（父暂停）</td>
+        <td>串行（进程阻塞）</td>
+        <td>并发（父不阻塞）</td>
+      </tr>
+      <tr>
+        <td>状态共享</td>
+        <td>EventStream（深度共享）</td>
+        <td>文件系统（浅共享）</td>
+        <td>无 / worktree 隔离</td>
+      </tr>
+      <tr>
+        <td>通信机制</td>
+        <td><code>AgentDelegateObservation</code>（事件）</td>
+        <td>stdin/stdout + <code>runs.json</code></td>
+        <td><code>SendMessage</code> / <code>TaskOutput</code></td>
+      </tr>
+      <tr>
+        <td>子 agent 独立性</td>
+        <td>弱（同进程同流）</td>
+        <td>强（独立进程 + session）</td>
+        <td>强（独立进程）</td>
+      </tr>
+      <tr>
+        <td>并发粒度</td>
+        <td>框架不支持</td>
+        <td>父 agent <code>run_in_background</code></td>
+        <td>框架原生支持</td>
+      </tr>
+      <tr>
+        <td>父能监控子进展</td>
+        <td>否（只有最终 Obs）</td>
+        <td>否（只有最终 stdout）</td>
+        <td>是（<code>TaskOutput</code> 可轮询）</td>
+      </tr>
+      <tr>
+        <td>结果格式</td>
+        <td>结构化 Observation 事件</td>
+        <td>自由文本</td>
+        <td>自由文本</td>
+      </tr>
+      <tr>
+        <td>适合任务</td>
+        <td>需要共享上下文的深度嵌套</td>
+        <td>独立的批量并行任务</td>
+        <td>可分解的并行独立子任务</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- other modes -->
+  <h4 style="font-size:.9rem;color:var(--head);margin:1.8rem 0 .6rem;font-family:'JetBrains Mono',monospace;font-weight:400;letter-spacing:.05em">▸ 其他模式（领域视野）</h4>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin:.6rem 0">
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:.9rem 1rem">
+      <div style="font-size:.82rem;color:var(--purple);font-family:'JetBrains Mono',monospace;font-size:.78rem;margin-bottom:.3rem">④ Graph/DAG（LangGraph）</div>
+      <div style="font-size:.85rem;color:var(--muted)">Agent 间依赖为任意有向图，非树形父子。适合流水线（采集→分析→报告），某 agent 的输出可同时作为多个下游输入。</div>
+    </div>
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:.9rem 1rem">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--teal);margin-bottom:.3rem">⑤ Role-based Group（CrewAI）</div>
+      <div style="font-size:.85rem;color:var(--muted)">预定义 Researcher/Coder/Reviewer 角色，orchestrator 按任务类型路由。Agent 间通过"对话轮次"交互，非单向委派。</div>
+    </div>
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:.9rem 1rem">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--amber);margin-bottom:.3rem">⑥ Actor 模型（响应式）</div>
+      <div style="font-size:.85rem;color:var(--muted)">每个 agent 是一个 actor，有自己的 mailbox，消息异步到达触发行动。去中心化，无父子概念。理论上最灵活，目前实践较少。</div>
+    </div>
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:.9rem 1rem">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--red);margin-bottom:.3rem">⑦ Reflection（自我委派）</div>
+      <div style="font-size:.85rem;color:var(--muted)">Agent 把自己的输出作为下一个 agent 的输入，反复迭代直到满足质量标准。是"单 agent 自我改进"的极限情形。</div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ─── 04c Memory ─── -->
+<section class="sec" id="memory">
+  <div class="sec-header">
+    <span class="sec-num">04c</span>
+    <div class="sec-line" style="background:var(--purple)"></div>
+    <h2 class="sec-title">Memory · 记忆机制</h2>
+  </div>
+
+  <p>OpenHands 的 memory 模块位于 <code>openhands/memory/</code>，承担两项本质不同的职责：<strong>① 知识检索</strong>（首次用户消息时注入 workspace 上下文 + 关键词触发的领域知识）；<strong>② 上下文压缩</strong>（event 数量超出 context window 时，把历史浓缩成摘要）。二者通过不同的数据流路径工作，互不干扰。</p>
+
+  <div class="two-col" style="margin-top:1.4rem">
+    <div class="two-col-card" style="border-top-color:var(--teal)">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--teal);letter-spacing:.1em;margin-bottom:.6rem">SUBSYSTEM 1 · RETRIEVAL</div>
+      <div style="font-size:.97rem;font-weight:500;color:var(--head);margin-bottom:.5rem">Memory 类 — 知识检索</div>
+      <div style="font-size:.88rem;color:var(--muted)">订阅 EventStream，监听 <code>RecallAction</code>，向流中注入 <code>RecallObservation</code>（repo 信息、microagent 知识）</div>
+    </div>
+    <div class="two-col-card" style="border-top-color:var(--purple)">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--purple);letter-spacing:.1em;margin-bottom:.6rem">SUBSYSTEM 2 · COMPRESSION</div>
+      <div style="font-size:.97rem;font-weight:500;color:var(--head);margin-bottom:.5rem">Condenser — 历史压缩</div>
+      <div style="font-size:.88rem;color:var(--muted)">接受 <code>View</code>，判断是否超限，输出 <code>Condensation</code>（触发 agent 发射 <code>CondensationAction</code> 写回 EventStream）</div>
+    </div>
+  </div>
+
+  <!-- 4c.1 Memory class -->
+  <h3 style="font-family:'Lora',serif;font-size:1.05rem;color:var(--head);margin:2.2rem 0 .9rem;padding-bottom:.4rem;border-bottom:1px solid var(--border)">4c.1 Memory 类 — 知识检索子系统</h3>
+
+  <p><code>Memory</code>（<code>memory/memory.py</code>）以 <code>EventStreamSubscriber.MEMORY</code> 身份订阅事件流，只处理 <code>RecallAction</code> 类型的事件。RecallAction 有两种 <code>recall_type</code>，触发不同的检索逻辑：</p>
+
+  <div style="margin:1.2rem 0">
+    <table class="bench-table">
+      <thead><tr><th>recall_type</th><th>触发条件</th><th>检索内容</th><th>返回</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>WORKSPACE_CONTEXT</code></td>
+          <td>source=USER（第一条用户消息）</td>
+          <td>repo_name / repo_directory / branch；runtime web_hosts；repo 级 microagent 指令；关键词匹配的知识 microagent；conversation_instructions</td>
+          <td><code>RecallObservation</code> (recall_type=WORKSPACE_CONTEXT)</td>
+        </tr>
+        <tr>
+          <td><code>KNOWLEDGE</code></td>
+          <td>source=USER 或 AGENT（后续消息）</td>
+          <td>仅关键词匹配的 KnowledgeMicroagent 内容</td>
+          <td><code>RecallObservation</code> (recall_type=KNOWLEDGE) 或 <code>NullObservation</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>两种 recall 均设置 <code>obs._cause = event.id</code>，使 RecallObservation 在 EventStream 中与触发它的 RecallAction 因果关联，之后由 <code>ConversationMemory.process_events()</code> 拼成 LLM prompt 的 system 消息部分。</p>
+
+  <!-- Microagents -->
+  <h3 style="font-family:'Lora',serif;font-size:1.05rem;color:var(--head);margin:2rem 0 .9rem;padding-bottom:.4rem;border-bottom:1px solid var(--border)">4c.2 Microagents — 知识注入单元</h3>
+
+  <p>Microagent 是 Memory 检索的知识载体。系统在初始化时从两个位置加载，后者可被前者覆盖（同名 key 后写优先）：</p>
+
+  <div style="display:flex;gap:1rem;margin:1rem 0 1.2rem">
+    <div style="flex:1;background:var(--s1);border:1px solid var(--border2);border-radius:6px;padding:1rem 1.2rem">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--amber);letter-spacing:.08em;margin-bottom:.5rem">GLOBAL (公开知识)</div>
+      <code style="font-size:.82rem">OpenHands/skills/</code>
+      <div style="font-size:.82rem;color:var(--muted);margin-top:.4rem">随 OpenHands 代码库分发，包含常用技术栈的领域知识（git、docker、pytest 等）</div>
+    </div>
+    <div style="flex:1;background:var(--s1);border:1px solid var(--border2);border-radius:6px;padding:1rem 1.2rem">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--teal);letter-spacing:.08em;margin-bottom:.5rem">USER (个人知识)</div>
+      <code style="font-size:.82rem">~/.openhands/microagents/</code>
+      <div style="font-size:.82rem;color:var(--muted);margin-top:.4rem">用户自定义，不随代码库分发；目录不存在时自动创建</div>
+    </div>
+  </div>
+
+  <p>Microagent 有两种子类型：</p>
+
+  <div class="two-col" style="margin:.8rem 0 1.2rem">
+    <div class="two-col-card">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--green);letter-spacing:.08em;margin-bottom:.5rem">KnowledgeMicroagent</div>
+      <p style="font-size:.88rem">定义一组触发关键词（triggers）。<code>match_trigger(query)</code> 在 query 中检测到关键词时返回该关键词，Memory 将其 <code>content</code>（Markdown 知识文档）打包进 <code>RecallObservation</code>。适合"遇到 pytest/docker/git 时注入对应知识"。</p>
+    </div>
+    <div class="two-col-card">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--blue);letter-spacing:.08em;margin-bottom:.5rem">RepoMicroagent</div>
+      <p style="font-size:.88rem">不依赖关键词，始终注入其 <code>content</code> 作为 <code>repo_instructions</code>。等价于 Claude Code 的 <code>CLAUDE.md</code>：存放在用户 workspace 里，每次启动时无条件作为 system prompt 的一部分传入 LLM。也可携带 <code>mcp_tools</code> 配置。</p>
+    </div>
+  </div>
+
+  <!-- Condenser -->
+  <h3 style="font-family:'Lora',serif;font-size:1.05rem;color:var(--head);margin:2rem 0 .9rem;padding-bottom:.4rem;border-bottom:1px solid var(--border)">4c.3 Condenser — 历史压缩子系统</h3>
+
+  <p>当 EventStream 中的事件数量增多，<code>View</code>（传给 LLM 的事件列表）可能超出 context window。Condenser 负责压缩：它接受当前 View，返回 <code>View</code>（直接通过）或 <code>Condensation</code>（触发一次压缩）。</p>
+
+  <div style="margin:1rem 0 1.4rem">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.8rem;background:var(--s1);border:1px solid var(--border2);border-radius:8px;padding:1.2rem 1.4rem;line-height:2">
+      <span style="color:var(--muted)">── 每次 agent step ──────────────────────────────────────────</span><br>
+      <span style="color:var(--green)">state.view</span>  <span style="color:var(--muted)">←</span>  <span style="color:var(--blue)">View.from_events(all_events)</span>  <span style="color:var(--muted)">// 过滤 forgotten + 插入摘要</span><br>
+      <span style="color:var(--amber)">result</span>  <span style="color:var(--muted)">←</span>  <span style="color:var(--purple)">condenser.condense(state.view)</span><br>
+      <span style="color:var(--muted)">if isinstance(result, Condensation):</span><br>
+      <span style="color:var(--muted)">&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color:var(--red)">agent returns CondensationAction</span>  <span style="color:var(--muted)">// 不产生任务 action</span><br>
+      <span style="color:var(--muted)">&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color:var(--red)">EventStream.add_event(CondensationAction)</span>  <span style="color:var(--muted)">// forgotten_ids + summary 写入流</span><br>
+      <span style="color:var(--muted)">&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color:var(--muted)">下一 step → View.from_events 重跑 → 被遗忘事件从 View 中消失</span><br>
+      <span style="color:var(--muted)">else:</span><br>
+      <span style="color:var(--muted)">&nbsp;&nbsp;&nbsp;&nbsp;</span><span style="color:var(--green)">正常 agent step，用 result (View) 构造 LLM 消息</span>
+    </div>
+  </div>
+
+  <p><strong>View 的构建逻辑</strong>（<code>View.from_events()</code>）：扫描所有事件，收集每个 <code>CondensationAction</code> 的 <code>forgotten</code> id 集合；过滤掉 forgotten 事件；然后把最新的 <code>CondensationAction.summary</code> 作为 <code>AgentCondensationObservation</code> 插入到 <code>summary_offset</code> 位置。最终的 <code>events</code> 列表就是传给 LLM 的完整历史视图。</p>
+
+  <!-- Condenser types -->
+  <h3 style="font-family:'Lora',serif;font-size:1.05rem;color:var(--head);margin:2rem 0 .9rem;padding-bottom:.4rem;border-bottom:1px solid var(--border)">4c.4 Condenser 类型一览</h3>
+
+  <table class="bench-table">
+    <thead>
+      <tr><th>Condenser</th><th>触发条件</th><th>保留策略</th><th>特点</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>NoOpCondenser</code></td>
+        <td>从不触发</td>
+        <td>全量保留</td>
+        <td>baseline / debug 用</td>
+      </tr>
+      <tr>
+        <td><code>RecentEventsCondenser</code></td>
+        <td>超出 <code>max_events</code></td>
+        <td>前 <code>keep_first</code> 条 + 最近 N 条</td>
+        <td>无摘要，直接丢弃中间事件</td>
+      </tr>
+      <tr>
+        <td><code>ObservationMaskingCondenser</code></td>
+        <td>每次 step 都运行</td>
+        <td>保留所有事件结构，但 attention_window 外的 Observation 内容替换为 <code>&lt;MASKED&gt;</code></td>
+        <td>不丢事件，只遮盖内容；适合 tool-call 密集场景</td>
+      </tr>
+      <tr>
+        <td><code>AmortizedForgettingCondenser</code></td>
+        <td>超出 <code>max_size</code></td>
+        <td>前 <code>keep_first</code> + 最近 <code>max_size/2</code> 条；直接遗忘中间</td>
+        <td>无 LLM 调用，零延迟，但无摘要</td>
+      </tr>
+      <tr>
+        <td><strong><code>LLMSummarizingCondenser</code></strong></td>
+        <td>超出 <code>max_size</code>（默认 100）</td>
+        <td>前 <code>keep_first</code> + 摘要事件 + 最近 <code>max_size/2</code> 条</td>
+        <td>用 LLM 生成结构化摘要（见 4c.5）；信息损失最小</td>
+      </tr>
+      <tr>
+        <td><code>CondenserPipeline</code></td>
+        <td>由内层 condenser 决定</td>
+        <td>多个 condenser 串行，任一返回 Condensation 即停止</td>
+        <td>可组合策略（如先 Masking 再 Summarizing）</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- LLMSummarizing deep dive -->
+  <h3 style="font-family:'Lora',serif;font-size:1.05rem;color:var(--head);margin:2rem 0 .9rem;padding-bottom:.4rem;border-bottom:1px solid var(--border)">4c.5 LLMSummarizingCondenser · 源码深析</h3>
+
+  <p>生产环境最常用的 condenser。核心参数：<code>max_size=100</code>，<code>keep_first=1</code>，<code>max_event_length=10_000</code>。</p>
+
+  <!-- trigger -->
+  <h4 style="font-size:.9rem;color:var(--head);margin:1.4rem 0 .6rem;font-family:'JetBrains Mono',monospace;font-weight:400;letter-spacing:.05em">▸ 触发条件（两路）</h4>
+  <pre class="codeblock">def should_condense(self, view: View) -> bool:
+    return len(view) > self.max_size <span style="color:var(--amber)">or</span> view.unhandled_condensation_request</pre>
+  <p style="font-size:.9rem">
+    <strong>被动触发</strong>：view 事件数超出 <code>max_size</code>（默认 100），自然增长超限时触发。<br>
+    <strong>主动触发</strong>：<code>unhandled_condensation_request = True</code>，由 <code>View.from_events()</code> 检测到：当 EventStream 中存在比最新 <code>CondensationAction</code> 更新的 <code>CondensationRequestAction</code> 时置 True。这意味着 agent 可以在还没超限时就主动插入"请求压缩"事件，强制触发摘要（例如 agent 自己意识到 token 快满）。
+  </p>
+
+  <!-- window math -->
+  <h4 style="font-size:.9rem;color:var(--head);margin:1.6rem 0 .6rem;font-family:'JetBrains Mono',monospace;font-weight:400;letter-spacing:.05em">▸ 窗口切割数学（默认参数具体实例）</h4>
+  <pre class="codeblock">head             = view[:keep_first]                      <span style="color:var(--muted)"># view[0:1] → 1条</span>
+target_size      = max_size // 2                          <span style="color:var(--muted)"># 100//2 = 50</span>
+events_from_tail = target_size - len(head) - 1           <span style="color:var(--muted)"># 50-1-1 = 48条</span>
+forgotten_zone   = view[keep_first : -events_from_tail]  <span style="color:var(--muted)"># 中间 ~51条（排除旧摘要后送LLM）</span></pre>
+  <p style="font-size:.9rem">对一个 101 事件的 view，压缩后结构：</p>
+  <div class="event-chain" style="margin:.8rem 0 1.2rem">
+    <div class="event-row">
+      <div class="ev-id" style="background:rgba(109,187,132,.12);color:var(--green);min-width:52px">head<br><span style="font-size:.75em">1条</span></div>
+      <div class="ev-body">
+        <span class="ev-type" style="color:var(--green)">ev0</span>
+        <span class="ev-detail">首条事件（通常是初始 UserMessage），永久保留，不参与摘要，不被遗忘</span>
+      </div>
+    </div>
+    <div class="event-row">
+      <div class="ev-id" style="background:rgba(136,120,184,.12);color:var(--purple);min-width:52px">sum<br><span style="font-size:.75em">1条</span></div>
+      <div class="ev-body">
+        <span class="ev-type" style="color:var(--purple)">AgentCondensationObservation（旧摘要）</span>
+        <span class="ev-detail">若 <code>view[keep_first]</code> 已是摘要事件则复用；否则创建占位 <em>"No events summarized"</em>。LLM 以此为基础增量更新</span>
+      </div>
+    </div>
+    <div class="event-row">
+      <div class="ev-id" style="background:rgba(217,115,106,.12);color:var(--red);min-width:52px">fgt<br><span style="font-size:.75em">~51条</span></div>
+      <div class="ev-body">
+        <span class="ev-type" style="color:var(--red)">ev1 … ev52（排除旧摘要事件）</span>
+        <span class="ev-detail">即将被遗忘的中间区段，字符串化后截断至 10,000 字符，打包进 prompt 送给 LLM</span>
+      </div>
+    </div>
+    <div class="event-row">
+      <div class="ev-id" style="background:rgba(94,168,192,.12);color:var(--blue);min-width:52px">tail<br><span style="font-size:.75em">48条</span></div>
+      <div class="ev-body">
+        <span class="ev-type" style="color:var(--blue)">ev53 … ev100</span>
+        <span class="ev-detail">最近 48 条，原样保留，完整内容传给主 LLM</span>
+      </div>
+    </div>
+  </div>
+  <p style="font-size:.9rem">压缩后 view = <strong>1 (head) + 1 (新摘要) + 48 (tail) = 50 条</strong>。之后随 agent 继续工作 view 重新增长至 101，再次触发，稳定在 <strong>50 ↔ 100</strong> 的振荡。</p>
+
+  <!-- rolling summary -->
+  <h4 style="font-size:.9rem;color:var(--head);margin:1.6rem 0 .6rem;font-family:'JetBrains Mono',monospace;font-weight:400;letter-spacing:.05em">▸ 增量摘要（Rolling Summary）——核心设计</h4>
+  <p style="font-size:.9rem">每次压缩，LLM 看到的不是从零���始的原始事件，而是 <strong>旧摘要 + 新的待遗忘事件</strong>。旧摘要作为 <code>&lt;PREVIOUS SUMMARY&gt;</code> 注入 prompt，LLM 在此基础上更新，输出新摘要。整个对话历史被折叠进一个不断滚动的文本块，每轮压缩只需处理 <em>新增</em> 的待遗忘区间。</p>
+  <div class="callout good" style="margin:.6rem 0 1rem">
+    <div class="callout-icon">✓</div>
+    <div class="callout-body">这是<strong>增量式</strong>而非全量重新摘要。LLM 的输入规模与 <code>events_from_tail</code>（~51条）成正比，不随 session 总长度增长。若改为每次把全部历史重新摘要，LLM 调用成本会线性增长。</div>
+  </div>
+
+  <!-- prompt structure -->
+  <h4 style="font-size:.9rem;color:var(--head);margin:1.6rem 0 .6rem;font-family:'JetBrains Mono',monospace;font-weight:400;letter-spacing:.05em">▸ Prompt 完整结构（单条 user 消息，无 system turn）</h4>
+  <pre class="codeblock"><span style="color:var(--muted)">──────── PART 1: 角色 + 追踪格式模板 ────────</span>
+You are maintaining a context-aware state summary for an interactive agent.
+You will be given a list of events corresponding to actions taken by the agent,
+and the most recent previous summary if one exists.
+If the events being summarized contain ANY task-tracking, you MUST include a
+TASK_TRACKING section to maintain continuity.
+When referencing tasks make sure to preserve exact task IDs and statuses.
+
+Track:
+USER_CONTEXT:    (Preserve essential user requirements, goals, and clarifications)
+TASK_TRACKING:   {<span style="color:var(--amber)">Active tasks, their IDs and statuses - PRESERVE TASK IDs</span>}
+COMPLETED:       (Tasks completed so far, with brief results)
+PENDING:         (Tasks that still need to be done)
+CURRENT_STATE:   (Current variables, data structures, or relevant state)
+
+For code-specific tasks, also include:
+CODE_STATE:             {File paths, function signatures, data structures}
+TESTS:                  {Failing cases, error messages, outputs}
+CHANGES:                {Code edits, variable updates}
+DEPS:                   {Dependencies, imports, external calls}
+VERSION_CONTROL_STATUS: {Repository state, current branch, PR status, commit history}
+
+PRIORITIZE: 1. Adapt format to task type  2. Capture user goals
+            3. Distinguish completed/pending  4. Keep concise
+SKIP: Tracking irrelevant details for the current task type
+
+<span style="color:var(--muted)">──────── PART 2: Few-shot 示例（2条，固定写死）────────</span>
+For code tasks:
+USER_CONTEXT: Fix FITS card float representation issue
+COMPLETED: Modified mod_float() in card.py, all tests passing
+PENDING: Create PR, update documentation
+CODE_STATE: mod_float() in card.py updated
+TESTS: test_format() passed
+CHANGES: str(val) replaces f"{val:.16G}"
+VERSION_CONTROL_STATUS: Branch: fix-float-precision, Latest commit: a1b2c3d
+
+For other tasks:
+USER_CONTEXT: Write 20 haikus based on coin flip results
+COMPLETED: 15 haikus written for [T,H,T,H,T,H,T,T,H,T,H,T,H,T,H]
+PENDING: 5 more haikus needed
+CURRENT_STATE: Last flip: Heads, Haiku count: 15/20
+
+<span style="color:var(--muted)">──────── PART 3: 旧摘要（增量核心）────────</span>
+&lt;PREVIOUS SUMMARY&gt;
+{summary_event.message，截断至 max_event_length=10,000 字符}
+&lt;/PREVIOUS SUMMARY&gt;
+
+<span style="color:var(--muted)">──────── PART 4: 待遗忘事件列表 ────────</span>
+&lt;EVENT id=5&gt;
+{str(event)，截断至 10,000 字符}
+&lt;/EVENT&gt;
+&lt;EVENT id=6&gt;...&lt;/EVENT&gt;
+...
+
+<span style="color:var(--muted)">──────── PART 5: 收尾指令 ────────</span>
+Now summarize the events using the rules above.</pre>
+  <p style="font-size:.9rem">注意：整个 prompt 是<strong>单条 user 消息</strong>（<code>Message(role='user', ...)</code>），没有 system turn。LLM 输出为<strong>自由文本</strong>（无 JSON schema），直接存为 <code>summary</code> 字符串。唯一被<em>强制要求</em>包含的字段是 <code>TASK_TRACKING</code>（当事件中涉及任务跟踪时）。</p>
+
+  <!-- CondensationAction encoding -->
+  <h4 style="font-size:.9rem;color:var(--head);margin:1.6rem 0 .6rem;font-family:'JetBrains Mono',monospace;font-weight:400;letter-spacing:.05em">▸ CondensationAction 的 forgotten 编码</h4>
+  <pre class="codeblock"><span style="color:var(--muted)"># 支持两种编码方式（二选一）</span>
+forgotten_event_ids:      list[int] | None   <span style="color:var(--muted)"># 显式 ID 列表</span>
+forgotten_events_start_id: int | None        <span style="color:var(--muted)"># 范围起始</span>
+forgotten_events_end_id:   int | None        <span style="color:var(--muted)"># 范围终止</span>
+
+<span style="color:var(--muted)"># forgotten property：展开为完整列表</span>
+@property
+def forgotten(self) -> list[int]:
+    if self.forgotten_event_ids is not None:
+        return self.forgotten_event_ids
+    <span style="color:var(--amber)">return list(range(self.forgotten_events_start_id, self.forgotten_events_end_id + 1))</span></pre>
+  <p style="font-size:.9rem"><code>LLMSummarizingCondenser</code> 用<strong>范围编码</strong>：只存 forgotten 事件集的 min/max id。<code>forgotten</code> property 展开为连续 range。隐含假设：该 ID 范围内全部是待遗忘事件（无有效 gap）。若有 gap，gap 对应的 ID 也进入 forgotten 集合，但 <code>View.from_events()</code> 只过滤<em>实际存在</em>于流中的事件，不存在的 ID 不影响结果——用更紧凑的存储换取可��受的假设。</p>
+
+  <!-- full lifecycle -->
+  <h4 style="font-size:.9rem;color:var(--head);margin:1.6rem 0 .6rem;font-family:'JetBrains Mono',monospace;font-weight:400;letter-spacing:.05em">▸ 一次完整压缩的端到端数据流</h4>
+  <div style="font-family:'JetBrains Mono',monospace;font-size:.8rem;background:var(--s1);border:1px solid var(--border2);border-radius:8px;padding:1.2rem 1.4rem;line-height:2.1">
+    <span style="color:var(--muted)">Step N：view 有 101 条事件</span><br>
+    <span style="color:var(--muted)">  ↓ should_condense = True → get_condensation(view)</span><br>
+    <span style="color:var(--muted)">  ↓ 构造 prompt（旧摘要 + ~51条待遗忘事件）</span><br>
+    <span style="color:var(--purple)">  ↓ LLM call → summary = "USER_CONTEXT: ... CODE_STATE: ..."</span><br>
+    <span style="color:var(--muted)">  ↓ return Condensation(CondensationAction(</span><br>
+    <span style="color:var(--muted)">        forgotten_events_start_id=</span><span style="color:var(--red)">2</span><span style="color:var(--muted)">, forgotten_events_end_id=</span><span style="color:var(--red)">52</span><span style="color:var(--muted)">,</span><br>
+    <span style="color:var(--muted)">        summary=</span><span style="color:var(--purple)">"..."</span><span style="color:var(--muted)">, summary_offset=</span><span style="color:var(--green)">1</span><span style="color:var(--muted)">))</span><br>
+    <span style="color:var(--amber)">  ↓ agent 本轮不产生任务 action，直接 return CondensationAction</span><br>
+    <span style="color:var(--amber)">  ↓ EventStream.add_event(CondensationAction, id=102)</span><br>
+    <br>
+    <span style="color:var(--muted)">Step N+1：View.from_events(all 102 events)</span><br>
+    <span style="color:var(--muted)">  ↓ 遇到 CondensationAction(id=102) → forgotten_ids = {2,3,...,52}</span><br>
+    <span style="color:var(--muted)">  ↓ kept = [ev0, ev53...ev101]（49条）</span><br>
+    <span style="color:var(--muted)">  ↓ 在 offset=1 插入 AgentCondensationObservation(summary)</span><br>
+    <span style="color:var(--green)">  ↓ final view = [ev0, SummaryObs, ev53...ev101] = 50条</span><br>
+    <span style="color:var(--green)">  ↓ should_condense = False → 正常 agent step</span>
+  </div>
+
+  <div class="callout info" style="margin-top:1.6rem">
+    <div class="callout-icon">ℹ</div>
+    <div class="callout-body"><strong>缓存注意</strong>：<code>LLMSummarizingCondenser.from_config()</code> 强制设 <code>llm_config.caching_prompt = False</code>。原因：每轮摘要 prompt 都含新增事件，内容不同，缓存写入后极少命中，付出 cache-write token 成本但几乎没有 cache-read 收益，得不偿失。</div>
+  </div>
+
+  <!-- Implications -->
+  <div class="callout key" style="margin-top:1.8rem">
+    <div class="callout-icon">◆</div>
+    <div class="callout-body">
+      <strong>对轨迹采集的影响</strong>：Memory 子系统的两层机制都会在 EventStream 中留下痕迹。①&nbsp;<code>RecallObservation</code> 是事件序列的一部分（cause 链接到 RecallAction），训练时需决定是否将其纳入轨迹（它等价于 system prompt 的动态部分，通常 <strong>不</strong>应作为 agent 预测目标）。②&nbsp;<code>CondensationAction</code> 同样写入 EventStream；从 EventStream 重放轨迹时，<code>View.from_events()</code> 会自动应用压缩语义，但若直接读取原始 event 列表则会看到已被"遗忘"的事件——两种读法给出不同的历史视图，需根据训练目标明确选择。
+    </div>
+  </div>
+
+</section>
+
+<!-- ─── 05 Runtime ─── -->
+<section class="sec" id="runtime">
+  <div class="sec-header">
+    <span class="sec-num">05</span>
+    <div class="sec-line" style="background:var(--green)"></div>
+    <h2 class="sec-title">沙箱 Runtime</h2>
+  </div>
+
+  <p>Runtime 是 OpenHands 与 LLM 之外的另一个核心模块，负责安全隔离地执行 agent 下达的各类 action。</p>
+
+  <div class="comp-grid">
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--green)">Runtime · Docker</div>
+      <div class="comp-name">容器沙箱</div>
+      <div class="comp-body">
+        每个 session 启动一个 <strong>独立 Docker 容器</strong>（基于 <code>nikolaik/python-nodejs</code> 或自定义 base image）。提供完整的 Linux 环境：apt 包、Python 多版本、Node.js、git 等。容器内运行 <code>openhands-runtime</code> 服务（FastAPI），接受来自 Controller 的 action 请求。
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--blue)">Runtime · IPython</div>
+      <div class="comp-name">Jupyter Kernel</div>
+      <div class="comp-body">
+        容器内常驻 <strong>IPython kernel 进程</strong>，维持 Python 状态（变量、import、当前目录）跨 action 持久存在。<code>IPythonRunCellAction</code> 通过 <code>jupyter_client</code> 协议与 kernel 通信，支持 rich output（图像、表格）。
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--purple)">Runtime · Browser</div>
+      <div class="comp-name">Playwright 浏览器</div>
+      <div class="comp-body">
+        容器内运行 <strong>Chromium headless 浏览器</strong>（via Playwright），支持完整 DOM 交互、JavaScript 执行、截图（1280×720 默认分辨率）。截图以 base64 PNG 格式附在 BrowserObservation 中，传给支持 vision 的 LLM。
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--amber)">Runtime · Files</div>
+      <div class="comp-name">文件系统</div>
+      <div class="comp-body">
+        容器将 <strong>工作目录挂载</strong>（volume mount）到宿主机，使 agent 修改的文件可以直接被评测脚本读取。支持 <code>/workspace</code> 作为默认工作目录，也支持将 git repo 复制进容器（SWE 任务标配流程）。
+      </div>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <div class="callout-icon">⚠</div>
+    <div class="callout-body">
+      <strong>网络隔离注意</strong>：SWE 评测（如 SWE-Bench）要求关闭容器对外网络（防止 agent 直接 <code>git pull</code> 拉取答案）。默认配置网络开放，评测时需设 <code>network_disabled=True</code>。daVinci-Env 在 Reward Hacking 过滤中明确移除了含 <code>git pull</code> 的 bash action。
+    </div>
+  </div>
+
+  <div style="margin-top:16px">
+    <p style="font-size:12.5px;color:var(--muted);margin-bottom:10px">Runtime 与 Controller 的通信协议（简化）：</p>
+    <div class="codeblock">
+      <div class="codeblock-head">
+        <span class="dot" style="background:#d9736a"></span>
+        <span class="dot" style="background:#c8a04a"></span>
+        <span class="dot" style="background:#6dbb84"></span>
+        runtime / api_schema.py
+      </div>
+      <pre><span class="tok-comment"># Controller → Runtime: POST /execute_action</span>
+{
+  <span class="tok-key">"action"</span>: <span class="tok-str">"cmd_run"</span>,
+  <span class="tok-key">"args"</span>: {
+    <span class="tok-key">"command"</span>: <span class="tok-str">"pytest tests/test_foo.py -x"</span>,
+    <span class="tok-key">"timeout"</span>: <span class="tok-num">120</span>
+  }
+}
+
+<span class="tok-comment"># Runtime → Controller: CmdOutputObservation</span>
+{
+  <span class="tok-key">"observation"</span>: <span class="tok-str">"run"</span>,
+  <span class="tok-key">"content"</span>: <span class="tok-str">"...PASSED 3 tests in 1.24s..."</span>,
+  <span class="tok-key">"exit_code"</span>: <span class="tok-num">0</span>,
+  <span class="tok-key">"command"</span>: <span class="tok-str">"pytest tests/test_foo.py -x"</span>
+}</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ─── 06 CodeAct ─── -->
+<section class="sec" id="codeact">
+  <div class="sec-header">
+    <span class="sec-num">06</span>
+    <div class="sec-line" style="background:var(--amber)"></div>
+    <h2 class="sec-title">CodeAct 范式</h2>
+  </div>
+
+  <p>CodeAct（arXiv:2402.01030）是 OpenHands 核心 agent 的理论基础，主张<strong>用可执行代码替代文本/JSON 形式的工具调用</strong>作为 action 的统一表示。</p>
+
+  <div class="comp-grid">
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--red)">传统范式（ReAct / JSON tool call）</div>
+      <div class="comp-name">局限性</div>
+      <div class="comp-body">
+        每个工具单独声明 JSON schema，LLM 必须学习工具的确切参数名称和格式。工具间组合需要多步交互（先查询再写入），表达能力受限于预定义工具集。<strong>错误处理</strong>几乎不可能——没有 try/except，没有条件分支。
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-tag" style="color:var(--teal)">CodeAct 范式</div>
+      <div class="comp-name">优势</div>
+      <div class="comp-body">
+        <strong>代码天然具备完整表达力</strong>：条件判断、循环、错误捕获、变量状态都是 Python 语言的一部分。工具以 Python 函数形式提供，可以随意组合。LLM 对代码语法的训练量远大于任意 JSON schema，泛化更好。
+      </div>
+    </div>
+  </div>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:#d9736a"></span>
+      <span class="dot" style="background:#c8a04a"></span>
+      <span class="dot" style="background:#6dbb84"></span>
+      CodeActAgent · 典型单步输出（IPythonRunCellAction）
+    </div>
+    <pre><span class="tok-comment"># LLM 输出的可执行 Python code</span>
+<span class="tok-key">import</span> subprocess, os
+
+<span class="tok-comment"># 先定位相关文件</span>
+result = subprocess.run(
+    [<span class="tok-str">'grep'</span>, <span class="tok-str">'-rn'</span>, <span class="tok-str">'def authenticate'</span>, <span class="tok-str">'src/'</span>],
+    capture_output=<span class="tok-key">True</span>, text=<span class="tok-key">True</span>
+)
+<span class="tok-key">print</span>(result.stdout[:2000])  <span class="tok-comment"># 只打印前 2000 字符避免截断</span>
+
+<span class="tok-comment"># 同时检查测试文件</span>
+<span class="tok-key">for</span> f <span class="tok-key">in</span> os.listdir(<span class="tok-str">'tests/'</span>):
+    <span class="tok-key">if</span> <span class="tok-str">'auth'</span> <span class="tok-key">in</span> f:
+        <span class="tok-key">print</span>(<span class="tok-str">f"Found test file: {f}"</span>)</pre>
+  </div>
+
+  <div class="callout good">
+    <div class="callout-icon">✓</div>
+    <div class="callout-body">
+      <strong>实验结论（CodeAct 论文）</strong>：在 M3ToolEval 上，CodeAct agent 比 JSON tool call baseline 平均高 <strong>+20.2%</strong>；在多步任务上优势更显著（+26.5%），因为代码可以在单步内完成多个操作的组合，减少 LLM 调用轮次。
+    </div>
+  </div>
+
+  <div style="margin-top:20px">
+    <p><strong>内置工具集（SWE 任务相关）：</strong></p>
+    <div class="tag-row">
+      <span class="tag">search_files(pattern)</span>
+      <span class="tag">view_file(path, start, end)</span>
+      <span class="tag">edit_file(path, old, new)</span>
+      <span class="tag">run_command(cmd)</span>
+      <span class="tag blue">git_diff()</span>
+      <span class="tag blue">git_apply(patch)</span>
+      <span class="tag blue">run_tests(pattern)</span>
+      <span class="tag amber">browse_url(url)</span>
+      <span class="tag purple">think(reasoning)</span>
+    </div>
+  </div>
+</section>
+
+<!-- ─── 07 评测结果 ─── -->
+<section class="sec" id="eval">
+  <div class="sec-header">
+    <span class="sec-num">07</span>
+    <div class="sec-line" style="background:var(--red)"></div>
+    <h2 class="sec-title">评测基准与结果</h2>
+  </div>
+
+  <p>OpenHands 支持 15+ 评测基准的内置 harness，覆盖代码修复、网页任务、通用 agent 能力三大类。</p>
+
+  <div style="margin-bottom:20px">
+    <p style="font-size:12.5px;color:var(--muted);margin-bottom:14px"><strong style="color:var(--head)">SWE-Bench Verified</strong>（代码修复主评测，500 实例）</p>
+    <div class="bar-row">
+      <span style="color:var(--muted);font-size:12.5px">Claude 3.7 Sonnet</span>
+      <div class="bar-track"><div class="bar-fill" style="width:50.8%"></div></div>
+      <span class="bar-val">50.8%</span>
+    </div>
+    <div class="bar-row">
+      <span style="color:var(--muted);font-size:12.5px">Claude 3.5 Sonnet</span>
+      <div class="bar-track"><div class="bar-fill" style="width:38.0%"></div></div>
+      <span class="bar-val">38.0%</span>
+    </div>
+    <div class="bar-row">
+      <span style="color:var(--muted);font-size:12.5px">GPT-4o (2024-11)</span>
+      <div class="bar-track"><div class="bar-fill" style="width:32.5%"></div></div>
+      <span class="bar-val">32.5%</span>
+    </div>
+    <div class="bar-row">
+      <span style="color:var(--muted);font-size:12.5px">Llama 3.3 70B</span>
+      <div class="bar-track"><div class="bar-fill" style="width:24.6%"></div></div>
+      <span class="bar-val">24.6%</span>
+    </div>
+    <div class="bar-row">
+      <span style="color:var(--muted);font-size:12.5px">Qwen2.5-Coder 32B</span>
+      <div class="bar-track"><div class="bar-fill" style="width:22.0%;background:var(--amber)"></div></div>
+      <span class="bar-val" style="color:var(--amber)">22.0%</span>
+    </div>
+    <div style="font-size:11.5px;color:var(--muted2);margin-top:6px">※ 数据来源：OpenHands 官方 leaderboard，2025.01</div>
+  </div>
+
+  <table class="bench-table">
+    <thead>
+      <tr>
+        <th>评测集</th>
+        <th>任务类型</th>
+        <th>代表结果</th>
+        <th>备注</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>SWE-Bench Verified</td>
+        <td style="color:var(--muted)">代码修复 (500)</td>
+        <td><span class="highlight">50.8%</span></td>
+        <td class="note">Claude 3.7 Sonnet + OH</td>
+      </tr>
+      <tr>
+        <td>SWE-Bench Lite</td>
+        <td style="color:var(--muted)">代码修复 (300)</td>
+        <td><span class="highlight">41.7%</span></td>
+        <td class="note">Claude 3.5 Sonnet + OH</td>
+      </tr>
+      <tr>
+        <td>WebArena</td>
+        <td style="color:var(--muted)">网页任务</td>
+        <td><span class="highlight">18.1%</span></td>
+        <td class="note">BrowsingAgent + GPT-4</td>
+      </tr>
+      <tr>
+        <td>GAIA</td>
+        <td style="color:var(--muted)">通用 agent</td>
+        <td><span class="highlight">53.1%</span></td>
+        <td class="note">Level 1</td>
+      </tr>
+      <tr>
+        <td>HumanEval</td>
+        <td style="color:var(--muted)">代码生成</td>
+        <td><span class="highlight">96.2%</span></td>
+        <td class="note">GPT-4o + pass@1</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout info">
+    <div class="callout-icon">ℹ</div>
+    <div class="callout-body">
+      <strong>daVinci-Env 中的使用</strong>：daVinci-Env 的 difficulty-centric filtering 使用 <strong>GLM-4.7</strong>（200k context，300 steps）在 <strong>OpenHands scaffold 上采样 4 条轨迹</strong>（temperature=1.0）来估计每个实例的难度（pass rate）。这意味着 OpenHands 在 daVinci-Env 的数据管线中承担了实际的 agent 推理执行角色。
+    </div>
+  </div>
+</section>
+
+<!-- ─── 08 作为 Scaffold ─── -->
+<section class="sec" id="scaffold">
+  <div class="sec-header">
+    <span class="sec-num">08</span>
+    <div class="sec-line" style="background:var(--blue)"></div>
+    <h2 class="sec-title">作为 Scaffold 使用</h2>
+  </div>
+
+  <p>"Scaffold"指为 agent 提供<strong>环境接口、工具封装、上下文管理</strong>的框架层，LLM 在 scaffold 之上运行。OpenHands 作为 scaffold 的角色在多个研究中出现：</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0">
+    <div style="background:var(--s1);border:1px solid var(--border);border-left:3px solid var(--teal);border-radius:0 8px 8px 0;padding:14px 16px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">daVinci-Env · 难度过滤</div>
+      <div style="font-size:12.5px;color:var(--muted);line-height:1.7">
+        <strong style="color:var(--text)">目的</strong>：估计每个 SWE 实例的难度（agent pass rate）<br>
+        <strong style="color:var(--text)">配置</strong>：GLM-4.7 + 200k ctx + 300 max steps<br>
+        <strong style="color:var(--text)">用法</strong>：在 OpenHands + SWE-Agent scaffold 上各采样 4 条轨迹，统计通过率<br>
+        <strong style="color:var(--text)">过滤规则</strong>：0/4 丢弃（无解），3-4/4 丢弃（太简单），1-2/4 保留
+      </div>
+    </div>
+    <div style="background:var(--s1);border:1px solid var(--border);border-left:3px solid var(--blue);border-radius:0 8px 8px 0;padding:14px 16px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">本研究 · Phase 2 VLM 评测</div>
+      <div style="font-size:12.5px;color:var(--muted);line-height:1.7">
+        <strong style="color:var(--text)">候选角色</strong>：ThothVL 的 agentic 能力评测平台<br>
+        <strong style="color:var(--text)">优势</strong>：原生支持 vision 输入（截图 → VLM），BrowsingAgent 可直接测 GUI 理解能力<br>
+        <strong style="color:var(--text)">评测路径</strong>：WebArena（GUI 导航）+ SWE-Bench（代码 + 视觉理解）<br>
+        <strong style="color:var(--text)">对比基线</strong>：SWE-Agent（只有 CodeAct，无 vision 路径）
+      </div>
+    </div>
+  </div>
+
+  <p style="font-size:13px;color:var(--muted)">如何将 VLM 接入 OpenHands：</p>
+
+  <div class="codeblock">
+    <div class="codeblock-head">
+      <span class="dot" style="background:#d9736a"></span>
+      <span class="dot" style="background:#c8a04a"></span>
+      <span class="dot" style="background:#6dbb84"></span>
+      config.toml · 接入 VLM 后端
+    </div>
+    <pre>[llm]
+<span class="tok-key">model</span> = <span class="tok-str">"openai/thothvl-7b"</span>  <span class="tok-comment"># ���自定义 endpoint</span>
+<span class="tok-key">base_url</span> = <span class="tok-str">"http://localhost:8000/v1"</span>
+<span class="tok-key">api_key</span> = <span class="tok-str">"EMPTY"</span>
+<span class="tok-key">max_input_tokens</span> = <span class="tok-num">128000</span>
+
+<span class="tok-comment"># 启用 vision（截图作为 observation 传给 VLM）</span>
+[llm.vision]
+<span class="tok-key">enable_vision</span> = <span class="tok-key">true</span>
+<span class="tok-key">image_format</span> = <span class="tok-str">"base64"</span>
+
+[agent]
+<span class="tok-key">name</span> = <span class="tok-str">"CodeActAgent"</span>
+<span class="tok-key">max_iterations</span> = <span class="tok-num">50</span>
+
+[sandbox]
+<span class="tok-key">timeout</span> = <span class="tok-num">120</span>
+<span class="tok-key">base_container_image</span> = <span class="tok-str">"nikolaik/python-nodejs:python3.12-nodejs21"</span></pre>
+  </div>
+
+  <div class="callout good">
+    <div class="callout-icon">✓</div>
+    <div class="callout-body">
+      <strong>OpenHands vs SWE-Agent 作为 scaffold 的选择</strong>：如果目标是 Phase 2 VLM 的 <em>视觉 + 代码</em> 综合能力评测，OpenHands 更合适（BrowsingAgent + vision 支持）；如果只关注 code agent SWE 性能，SWE-Agent 更专注（prompt 针对 SWE 任务深度优化），两者结果对比有助于衡量 VLM 的视觉理解对 coding 能力的贡献。
+    </div>
+  </div>
+</section>
+
+<!-- ─── 09 Takeaways ─── -->
+<section class="sec" id="takeaways">
+  <div class="sec-header">
+    <span class="sec-num">09</span>
+    <div class="sec-line" style="background:var(--amber)"></div>
+    <h2 class="sec-title">对本研究的启发</h2>
+  </div>
+
+  <div class="insight-cards">
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--teal)"></div>
+      <div>
+        <div class="insight-title">轨迹数据格式直接参考 Event Stream</div>
+        <div class="insight-body">
+          OpenHands Event Stream 的 <strong>(action, observation) 序列</strong>是最自然的 agent 轨迹表示。D^env 的轨迹采集可以直接输出 OpenHands 格式的 event log，方便后续在 OpenHands scaffold 上评测和对比。避免自定义格式带来的转换成本。
+        </div>
+      </div>
+    </div>
+
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--blue)"></div>
+      <div>
+        <div class="insight-title">CodeAct 范式适合 VLM 的 agentic 训练</div>
+        <div class="insight-body">
+          相比 JSON function call，<strong>代码作为 action</strong> 对 VLM 更友好——VLM 的预训练数据中代码比例高，且代码的视觉表示（语法高亮、缩进）对图文混合理解��益。D^env 轨迹数据应以 Python/Bash 代码作为主要 action 载体，而非 JSON tool calls。
+        </div>
+      </div>
+    </div>
+
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--purple)"></div>
+      <div>
+        <div class="insight-title">Vision 路径是 VLM 差异化的评测维度</div>
+        <div class="insight-body">
+          OpenHands BrowsingAgent 在每步接收页面截图，这是 <strong>LLM agent 无法完成但 VLM agent 理论上更擅长</strong>的场景。Phase 2 可以通过 BrowsingAgent + GUI 任务（WebArena、Mind2Web）来量化 ThothVL 的 vision 能力对 agentic 性能的实际增益，与 text-only LLM baseline 对比。
+        </div>
+      </div>
+    </div>
+
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--amber)"></div>
+      <div>
+        <div class="insight-title">difficulty 估���：OpenHands + 弱模型是低成本方案</div>
+        <div class="insight-body">
+          daVinci-Env 的 difficulty filtering 用 GLM-4.7（非顶级模型）在 OpenHands 上采样 4 次来估计难度，这是一个<strong>成本可控的 difficulty 代理</strong>。对 D^env 数据集，可以用类似方式（如 Qwen2.5-7B + OpenHands）做初步难度筛选，避免动用昂贵的大模型。
+        </div>
+      </div>
+    </div>
+
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--green)"></div>
+      <div>
+        <div class="insight-title">开源 + 活跃社区 = 工程复用价值高</div>
+        <div class="insight-body">
+          OpenHands 在 GitHub 上有 <strong>40k+ stars</strong>，持续更新，有活跃的 evaluation harness 维护团队。SWE-Bench、WebArena 等主流基准的 eval harness 都已内置，可以直接复用，不需要从头搭建评测基础设施。Phase 2 VLM 的评测管线建议直接基于 OpenHands 构建，节省工程成本。
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+
+<script>
+  // Active nav on scroll
+  const sections = document.querySelectorAll('section.sec[id], .hero[id]');
+  const navItems = document.querySelectorAll('nav .nav-item');
+
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const id = e.target.id;
+        navItems.forEach(a => {
+          a.classList.toggle('active', a.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -65% 0px' });
+
+  sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>

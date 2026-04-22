@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Video-R1 | 精读笔记</title>
+<style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --highlight: #fef3c7;
+            --code-bg: #f1f5f9;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .paper-header {
+            background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+        .paper-header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 12px; }
+        .paper-header .meta { font-size: 0.85rem; opacity: 0.9; }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.2);
+        }
+        .section {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .section h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+        .section h3 {
+            font-size: 1.1rem;
+            color: var(--text);
+            margin: 20px 0 12px;
+        }
+        .highlight-box {
+            background: var(--highlight);
+            border-left: 4px solid #f59e0b;
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .key-point {
+            background: #eff6ff;
+            border-left: 4px solid var(--primary);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .success-box {
+            background: #f0fdf4;
+            border-left: 4px solid var(--success);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background: var(--code-bg);
+            font-weight: 600;
+            color: var(--text);
+        }
+        tr:hover { background: #f8fafc; }
+        .metric { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+        .up { color: var(--success); }
+        .formula {
+            background: var(--code-bg);
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            margin: 12px 0;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+<!-- Header -->
+<div class="paper-header">
+<span class="badge">arXiv:2503.21776</span>
+<span class="badge">March 2025</span>
+<h1>Video-R1:<br/>Reinforcing Video Reasoning in MLLMs</h1>
+<div class="meta">CUHK MMLab | Tsinghua | UCAS | T-GRPO 时序对比奖励</div>
+</div>
+<!-- TL;DR -->
+<div class="section">
+<h2>📌 TL;DR 核心贡献</h2>
+<div class="highlight-box">
+<strong>核心问题：</strong>标准RL缺乏<strong>时序归纳偏置</strong>，视频理解模型无法有效利用时间信息。
+            </div>
+<div class="key-point">
+<strong>解决方案：</strong><strong>T-GRPO</strong> (Temporal Group Relative Policy Optimization)
+<ul>
+<li><strong>对比奖励机制：</strong>比较正序 vs 乱序帧的答题表现</li>
+<li>显式激励模型利用<strong>时间顺序信息</strong>
+</li>
+<li>无需额外标注，完全自监督</li>
+</ul>
+</div>
+<div class="success-box">
+<strong>效果：</strong>Video-R1-7B在VSI-Bench达到<strong>37.1%</strong>，超越<strong>GPT-4o</strong>，首次将DeepSeek-R1范式成功扩展到视频领域。
+            </div>
+</div>
+<!-- 核心问题 -->
+<div class="section">
+<h2>🎯 核心问题：视频的时序推理</h2>
+<h3>观察到的缺陷</h3>
+<div class="highlight-box">
+<strong>发现：</strong>标准MLLM处理视频时，即使帧顺序被打乱，答案也经常正确。这说明模型<strong>没有真正利用时序信息</strong>，而只是做空间理解。
+            <br/><br/>
+            根本原因：训练目标缺乏对时序敏感性的显式约束。
+        </div>
+<h3>为什么标准GRPO不够？</h3>
+<ul>
+<li>GRPO只关注答案正确性，不约束推理过程</li>
+<li>模型可能通过<strong>静态视觉特征</strong>猜测答案</li>
+<li>时间顺序、动作序列、事件因果等关键信息被忽略</li>
+</ul>
+</div>
+<!-- 方法详解 -->
+<div class="section">
+<h2>🔧 T-GRPO 方法详解</h2>
+<h3>核心思想：对比时序奖励</h3>
+<p>对于每个视频问题，模型处理两次输入：</p>
+<ol>
+<li>
+<strong>Ordered Sequence：</strong>帧按正确时间顺序</li>
+<li>
+<strong>Shuffled Sequence：</strong>相同帧随机打乱</li>
+</ol>
+<h3>时序奖励计算</h3>
+<div class="formula">
+            r<sub>t</sub> = α, if p &gt; μ · p̃<br/>
+            r<sub>t</sub> = 0, otherwise
+        </div>
+<p>其中：</p>
+<ul>
+<li>
+<strong>p：</strong>正序帧的正确率</li>
+<li>
+<strong>p̃：</strong>乱序帧的正确率</li>
+<li>
+<strong>α = 0.3：</strong>时序奖励系数</li>
+<li>
+<strong>μ = 0.8：</strong>阈值系数</li>
+</ul>
+<h3>最终奖励</h3>
+<div class="formula">
+            r<sub>i</sub><sup>T-GRPO</sup> = r<sub>i</sub> + r<sub>t</sub>, if o<sub>i</sub> is correct<br/>
+            r<sub>i</sub><sup>T-GRPO</sup> = r<sub>i</sub>, otherwise
+        </div>
+<p>设计原理：</p>
+<ul>
+<li>只有答案正确时才给时序奖励（确保有意义的学习）</li>
+<li>如果正序显著优于乱序，说明模型利用了时序信息</li>
+<li>奖励模型发展<strong>依赖于时间顺序</strong>的推理策略</li>
+</ul>
+</div>
+<!-- 数据集构建 -->
+<div class="section">
+<h2>📚 数据集构建</h2>
+<h3>Video-R1-CoT-165k（SFT冷启动）</h3>
+<ul>
+<li>图像和视频推理样本混合</li>
+<li>包含CoT标注</li>
+<li>用于冷启动训练</li>
+</ul>
+<h3>Video-R1-260k（RL训练）</h3>
+<ul>
+<li>高质量图像推理数据 + 视频数据混合</li>
+<li>稳定训练，促进图像到视频的知识迁移</li>
+<li>缓解视频数据稀缺问题</li>
+</ul>
+</div>
+<!-- 实验结果 -->
+<div class="section">
+<h2>📊 实验结果</h2>
+<h3>主要性能</h3>
+<table>
+<tr>
+<th>Benchmark</th>
+<th>基线</th>
+<th>Video-R1-7B</th>
+<th>GPT-4o</th>
+</tr>
+<tr>
+<td><strong>VSI-Bench</strong></td>
+<td>-</td>
+<td class="metric up">37.1%</td>
+<td>被超越</td>
+</tr>
+<tr>
+<td><strong>VideoMMMU</strong></td>
+<td>-</td>
+<td>提升</td>
+<td>-</td>
+</tr>
+<tr>
+<td><strong>MVBench</strong></td>
+<td>基线</td>
+<td>提升</td>
+<td>-</td>
+</tr>
+<tr>
+<td><strong>TempCompass</strong></td>
+<td>基线</td>
+<td>提升</td>
+<td>-</td>
+</tr>
+</table>
+<h3>关键发现</h3>
+<div class="key-point">
+<strong>T-GRPO的有效性验证：</strong>
+            <ul>
+<li>正序 vs 乱序的准确率差距显著拉开</li>
+<li>模型生成的CoT显式提及时间相关词汇（"before", "after", "then"）</li>
+<li>时序推理能力可迁移到新视频任务</li>
+</ul>
+</div>
+</div>
+<!-- 变体与扩展 -->
+<div class="section">
+<h2>🔗 变体与后续工作</h2>
+<table>
+<tr>
+<th>变体</th>
+<th>改进</th>
+<th>适用场景</th>
+</tr>
+<tr>
+<td><strong>TW-GRPO</strong></td>
+<td>信息论加权 + IoU软奖励</td>
+<td>视频时序定位</td>
+</tr>
+<tr>
+<td><strong>VideoChat-R1</strong></td>
+<td>保留对话能力</td>
+<td>交互式视频理解</td>
+</tr>
+<tr>
+<td><strong>Time-R1</strong></td>
+<td>连续IoU奖励</td>
+<td>时序视频 grounding</td>
+</tr>
+<tr>
+<td><strong>STVG-R1</strong></td>
+<td>时空联合奖励</td>
+<td>时空视频定位</td>
+</tr>
+</table>
+</div>
+<!-- 局限与未来 -->
+<div class="section">
+<h2>⚠️ 局限与未来方向</h2>
+<table>
+<tr>
+<th>局限</th>
+<th>说明</th>
+<th>可能解决方向</th>
+</tr>
+<tr>
+<td>帧数限制</td>
+<td>仅16帧，长程依赖受限</td>
+<td>增加帧数/采用稀疏采样</td>
+</tr>
+<tr>
+<td>计算开销</td>
+<td>对比评估需额外处理乱序</td>
+<td>缓存/近似估计</td>
+</tr>
+<tr>
+<td>训练规模</td>
+<td>仅1k RL steps</td>
+<td>大规模持续训练</td>
+</tr>
+<tr>
+<td>固定奖励</td>
+<td>α和μ为超参数</td>
+<td>自适应动态调整</td>
+</tr>
+</table>
+</div>
+<!-- 实践启示 -->
+<div class="section">
+<h2>🛠️ 实践启示</h2>
+<h3>实施要点</h3>
+<table>
+<tr>
+<th>组件</th>
+<th>配置</th>
+<th>说明</th>
+</tr>
+<tr>
+<td>Base Model</td>
+<td>Qwen2.5-VL / InternVL</td>
+<td>强视觉基础模型</td>
+</tr>
+<tr>
+<td>帧采样</td>
+<td>16帧均匀采样</td>
+<td>当前最佳实践</td>
+</tr>
+<tr>
+<td>α（时序奖励系数）</td>
+<td>0.3</td>
+<td>平衡主要奖励</td>
+</tr>
+<tr>
+<td>μ（阈值系数）</td>
+<td>0.8</td>
+<td>要求正序显著优于乱序</td>
+</tr>
+<tr>
+<td>RL步数</td>
+<td>1k steps</td>
+<td>论文设定，可扩展</td>
+</tr>
+</table>
+<h3>适用场景</h3>
+<div class="success-box">
+<strong>T-GRPO最适合：</strong>
+<ul>
+<li>需要<strong>显式时序理解</strong>的视频任务</li>
+<li>动作识别、事件检测、视频QA</li>
+<li>现有模型<strong>时序敏感性不足</strong>的场景</li>
+<li>希望<strong>可解释</strong>的时序推理过程</li>
+</ul>
+            </div>
+</div>
+<!-- 关键洞察 -->
+<div class="section">
+<h2>💡 关键洞察</h2>
+<div class="key-point">
+<strong>对比学习思想在RL中的扩展：</strong>
+            <br/><br/>
+            T-GRPO的核心创新是将<strong>对比学习</strong>的思想引入RL奖励设计：
+            <ol>
+<li>构造正负样本对（正序 vs 乱序）</li>
+<li>奖励模型对正样本的偏好</li>
+<li>不依赖人工标注，完全自监督</li>
+</ol>
+<br/>
+            这种思路可推广到其他需要<strong>特定结构归纳偏置</strong>的场景。
+        </div>
+</div>
+<div class="section" style="text-align: center; color: var(--text-light);">
+<p>精读完成 | 论文: Video-R1 (arXiv:2503.21776)</p>
+<p>GitHub: https://github.com/tulerfeng/Video-R1</p>
+</div>
+</div>
+</body>
+</html>

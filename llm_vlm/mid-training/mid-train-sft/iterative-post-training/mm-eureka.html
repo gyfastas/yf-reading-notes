@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MM-Eureka | 精读笔记</title>
+<style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --highlight: #fef3c7;
+            --code-bg: #f1f5f9;
+            --success: #10b981;
+            --purple: #8b5cf6;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .paper-header {
+            background: linear-gradient(135deg, var(--purple) 0%, #7c3aed 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+        .paper-header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 12px; }
+        .paper-header .meta { font-size: 0.85rem; opacity: 0.9; }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.2);
+        }
+        .section {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .section h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+        .section h3 {
+            font-size: 1.1rem;
+            color: var(--text);
+            margin: 20px 0 12px;
+        }
+        .highlight-box {
+            background: var(--highlight);
+            border-left: 4px solid #f59e0b;
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .key-point {
+            background: #eff6ff;
+            border-left: 4px solid var(--primary);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .success-box {
+            background: #f0fdf4;
+            border-left: 4px solid var(--success);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background: var(--code-bg);
+            font-weight: 600;
+            color: var(--text);
+        }
+        tr:hover { background: #f8fafc; }
+        .metric { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+        .up { color: var(--success); }
+    </style>
+</head>
+<body>
+<div class="container">
+<!-- Header -->
+<div class="paper-header">
+<span class="badge">arXiv:2503.07365</span>
+<span class="badge">March 2025</span>
+<h1>MM-Eureka:<br/>Exploring the Frontiers of<br/>Multimodal Reasoning with<br/>Rule-based Reinforcement Learning</h1>
+<div class="meta">Shanghai AI Lab | CUHK | RLOO | Online Filtering</div>
+</div>
+<!-- TL;DR -->
+<div class="section">
+<h2>📌 TL;DR 核心贡献</h2>
+<div class="highlight-box">
+<strong>核心问题：</strong>如何将DeepSeek-R1/o1风格的规则-based RL成功扩展到多模态领域？
+            </div>
+<div class="key-point">
+<strong>解决方案：</strong><strong>MM-Eureka</strong> - 基于RLOO的规则-based RL框架
+<ul>
+<li><strong>MMK12数据集：</strong>高质量多模态数学推理数据</li>
+<li><strong>在线过滤：</strong>动态筛选训练样本提升稳定性</li>
+<li><strong>两阶段训练：</strong>SFT冷启动 + RL优化</li>
+</ul>
+</div>
+<div class="success-box">
+<strong>效果：</strong>MM-EUREKA-32B在多学科推理任务上<strong>匹敌o1</strong>，超越InternVL2.5-78B。
+            </div>
+</div>
+<!-- 核心方法 -->
+<div class="section">
+<h2>🔧 核心方法</h2>
+<h3>1. RLOO (REINFORCE Leave-One-Out)</h3>
+<div class="key-point">
+<strong>相比GRPO的优势：</strong>
+<ul>
+<li>作为REINFORCE的变体，使用leave-one-out baseline</li>
+<li>在VLM上训练更稳定</li>
+<li>方差更小，收敛更快</li>
+</ul>
+            </div>
+<h3>2. 在线过滤机制 (Online Filtering)</h3>
+<div class="highlight-box">
+<strong>核心创新：</strong>训练过程中动态过滤样本
+            <ul>
+<li>过滤过于简单或过于困难的样本</li>
+<li>保持训练批次在"学习区"（Zone of Proximal Development）</li>
+<li>提升训练稳定性和效率</li>
+</ul>
+</div>
+<h3>3. 规则-based奖励</h3>
+<p>无需奖励模型，完全基于规则的奖励：</p>
+<ul>
+<li>答案精确匹配</li>
+<li>格式合规性检查</li>
+<li>推理步骤完整性（可选）</li>
+</ul>
+</div>
+<!-- 数据集 -->
+<div class="section">
+<h2>📚 MMK12 数据集</h2>
+<h3>数据特点</h3>
+<table>
+<tr>
+<th>特征</th>
+<th>说明</th>
+</tr>
+<tr>
+<td><strong>来源</strong></td>
+<td>K-12教育级别多模态数学题</td>
+</tr>
+<tr>
+<td><strong>质量</strong></td>
+<td>人工验证答案</td>
+</tr>
+<tr>
+<td><strong>多样性</strong></td>
+<td>多学科：数学、物理、化学等</td>
+</tr>
+<tr>
+<td><strong>模态</strong></td>
+<td>图文混合，需要视觉理解</td>
+</tr>
+</table>
+<h3>数据作用</h3>
+<div class="key-point">
+<strong>MMK12的价值：</strong>
+<ul>
+<li>提供可验证的奖励信号</li>
+<li>覆盖多学科推理场景</li>
+<li>难度分布适合课程学习</li>
+</ul>
+            </div>
+</div>
+<!-- 实验结果 -->
+<div class="section">
+<h2>📊 实验结果</h2>
+<h3>模型规格</h3>
+<ul>
+<li>
+<strong>MM-EUREKA-7B：</strong>轻量级版本</li>
+<li>
+<strong>MM-EUREKA-32B：</strong>高性能版本</li>
+</ul>
+<h3>主要性能</h3>
+<table>
+<tr>
+<th>对比模型</th>
+<th>规模</th>
+<th>vs MM-EUREKA-32B</th>
+</tr>
+<tr>
+<td>InternVL2.5</td>
+<td>78B</td>
+<td>MM-Eureka-32B超越</td>
+</tr>
+<tr>
+<td>o1</td>
+<td>-</td>
+<td>匹敌</td>
+</tr>
+<tr>
+<td>GPT-4o</td>
+<td>-</td>
+<td>超越</td>
+</tr>
+</table>
+<h3>关键发现</h3>
+<div class="success-box">
+<strong>规模效率：</strong>32B模型匹敌o1，展示了RL在VLM上的高效性。
+            <br/><br/>
+<strong>跨学科泛化：</strong>在MMK12多学科数据上训练后，模型展现出良好的跨领域推理能力。
+        </div>
+</div>
+<!-- 训练策略 -->
+<div class="section">
+<h2>🎯 两阶段训练策略</h2>
+<h3>阶段1: SFT冷启动</h3>
+<ul>
+<li>使用高质量CoT数据进行监督微调</li>
+<li>建立基础推理格式和能力</li>
+<li>为RL阶段提供良好初始化</li>
+</ul>
+<h3>阶段2: RLOO优化</h3>
+<ul>
+<li>规则-based奖励信号</li>
+<li>在线过滤维持训练稳定性</li>
+<li>自我探索提升推理边界</li>
+</ul>
+<div class="highlight-box">
+<strong>在线过滤的作用：</strong>
+            <ol>
+<li>剔除过简单样本（无学习价值）</li>
+<li>剔除过难样本（超出当前能力）</li>
+<li>保留"学习区"样本（最近发展区）</li>
+<li>动态调整，随模型能力进化</li>
+</ol>
+</div>
+</div>
+<!-- 对比分析 -->
+<div class="section">
+<h2>🔬 与相关方法对比</h2>
+<table>
+<tr>
+<th>方法</th>
+<th>RL算法</th>
+<th>特点</th>
+<th>vs MM-Eureka</th>
+</tr>
+<tr>
+<td><strong>OpenVLThinker</strong></td>
+<td>GRPO</td>
+<td>Iterative SFT-RL</td>
+<td>MM-Eureka单阶段RLOO</td>
+</tr>
+<tr>
+<td><strong>R1-VL</strong></td>
+<td>StepGRPO</td>
+<td>步骤级密集奖励</td>
+<td>MM-Eureka结果级奖励</td>
+</tr>
+<tr>
+<td><strong>Video-R1</strong></td>
+<td>T-GRPO</td>
+<td>时序对比奖励</td>
+<td>MM-Eureka专注于静态多模态</td>
+</tr>
+<tr>
+<td><strong>MM-Eureka</strong></td>
+<td><strong>RLOO</strong></td>
+<td><strong>在线过滤</strong></td>
+<td>训练更稳定，规模效率更高</td>
+</tr>
+</table>
+</div>
+<!-- 实践启示 -->
+<div class="section">
+<h2>🛠️ 实践启示</h2>
+<h3>实施要点</h3>
+<table>
+<tr>
+<th>组件</th>
+<th>建议</th>
+<th>说明</th>
+</tr>
+<tr>
+<td>RL算法</td>
+<td>RLOO</td>
+<td>比GRPO在VLM上更稳定</td>
+</tr>
+<tr>
+<td>在线过滤</td>
+<td>启用</td>
+<td>显著提升训练稳定性</td>
+</tr>
+<tr>
+<td>数据质量</td>
+<td>人工验证答案</td>
+<td>规则-based RL依赖准确奖励</td>
+</tr>
+<tr>
+<td>课程策略</td>
+<td>难度渐进</td>
+<td>从简单到复杂</td>
+</tr>
+</table>
+<h3>适用场景</h3>
+<div class="key-point">
+<strong>MM-Eureka最适合：</strong>
+<ul>
+<li>需要<strong>高稳定性</strong>的VLM RL训练</li>
+<li>有<strong>可验证答案</strong>的多模态任务</li>
+<li>追求<strong>规模效率</strong>（小模型大能力）</li>
+<li>多学科推理场景</li>
+</ul>
+            </div>
+</div>
+<!-- 关键洞察 -->
+<div class="section">
+<h2>💡 关键洞察</h2>
+<div class="highlight-box">
+<strong>"数据质量 + 算法选择 = 规模效率"</strong>
+            <br/><br/>
+            MM-Eureka的成功揭示：
+            <ol>
+<li><strong>高质量可验证数据</strong>（MMK12）是基础</li>
+<li><strong>RLOO</strong>在VLM上比GRPO更稳定</li>
+<li><strong>在线过滤</strong>是训练稳定的关键技巧</li>
+<li>三者结合，32B可匹敌o1</li>
+</ol>
+</div>
+</div>
+<div class="section" style="text-align: center; color: var(--text-light);">
+<p>精读完成 | 论文: MM-Eureka (arXiv:2503.07365)</p>
+<p>GitHub: https://github.com/ModalMinds/MM-EUREKA</p>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,147 @@
+{
+  " foundational_papers": [
+    {
+      "title": "Curriculum Learning",
+      "authors": ["Yoshua Bengio", "Jérôme Louradour", "Ronan Collobert", "Jason Weston"],
+      "year": 2009,
+      "arxiv_id": "0907.0047",
+      "url": "https://arxiv.org/abs/0907.0047",
+      "category": "foundational",
+      "note": "课程学习的开创性工作"
+    },
+    {
+      "title": "Hindsight Experience Replay",
+      "authors": ["Marcin Andrychowicz", "Filip Wolski", "Alex Ray", "Jonas Schneider", "Rachel Fong", "Peter Welinder", "Bob McGrew", "Josh Tobin", "Pieter Abbeel", "Wojciech Zaremba"],
+      "year": 2017,
+      "arxiv_id": "1707.01495",
+      "url": "https://arxiv.org/abs/1707.01495",
+      "category": "foundational",
+      "note": "HER算法，自动课程生成的里程碑"
+    },
+    {
+      "title": "Teacher-Student Curriculum Learning",
+      "authors": ["Tambet Matiisen", "Avital Oliver", "Taco Cohen", "John Schulman"],
+      "year": 2017,
+      "arxiv_id": "1707.00183",
+      "url": "https://arxiv.org/abs/1707.00183",
+      "category": "foundational",
+      "note": "师生课程学习框架"
+    }
+  ],
+  "auto_curriculum_papers": [
+    {
+      "title": "Emergent Complexity and Zero-shot Transfer via Unsupervised Environment Design",
+      "authors": ["Michael Dennis", "Natasha Jaques", "Eugene Vinitsky", "Alexandre Bayen", "Stuart Russell", "Andrew Critch", "Sergey Levine"],
+      "year": 2020,
+      "arxiv_id": "2012.02096",
+      "url": "https://arxiv.org/abs/2012.02096",
+      "category": "auto-curriculum",
+      "note": "PAIRED算法，对抗式环境设计"
+    },
+    {
+      "title": "ACCEL: A Framework for Automatically Curricula for Embodied Agents",
+      "authors": ["Yuqing Du", "Olivia Watkins", "Zhanling Zhu", "Chelsea Finn"],
+      "year": 2023,
+      "arxiv_id": "2310.03791",
+      "url": "https://arxiv.org/abs/2310.03791",
+      "category": "auto-curriculum",
+      "note": "在线自适应课程学习"
+    },
+    {
+      "title": "Unsupervised Environment Design",
+      "authors": ["Minqi Jiang", "Michael Dennis", "Jack Parker-Holder", "Andreas Maurer", "Heinrich Jiang", "Tim Rocktäschel"],
+      "year": 2021,
+      "arxiv_id": "2108.06063",
+      "url": "https://arxiv.org/abs/2108.06063",
+      "category": "auto-curriculum",
+      "note": "UED框架，统一课程学习环境设计"
+    }
+  ],
+  "agentic_rl_papers": [
+    {
+      "title": "Voyager: An Open-Ended Embodied Agent with Large Language Models",
+      "authors": ["Guanzhi Wang", "Yuqi Xie", "Yunfan Jiang", "Ajay Mandlekar", "Chaowei Xiao", "Yuke Zhu", "Linxi Fan", "Anima Anandkumar"],
+      "year": 2023,
+      "arxiv_id": "2305.16291",
+      "url": "https://arxiv.org/abs/2305.16291",
+      "category": "agentic-rl",
+      "note": "Minecraft Agent，自动课程生成+技能库"
+    },
+    {
+      "title": "Agent Workflow Memory",
+      "authors": ["Zora Zhiruo Wang", "Jiayuan Mao", "Daniel Fried", "Graham Neubig"],
+      "year": 2024,
+      "arxiv_id": "2409.07429",
+      "url": "https://arxiv.org/abs/2409.07429",
+      "category": "agentic-rl",
+      "note": "工作流记忆与技能组合"
+    },
+    {
+      "title": "EvoAgent: Towards Automatic Multi-Agent Generation via Evolutionary Algorithms",
+      "authors": ["Weize Chen", "Ziming You", "Ran Li", "Yitong Guan", "Chen Qian", "Chenyang Zhao", "Cheng Yang", "Ruobing Xie", "Zhiyuan Liu", "Maosong Sun"],
+      "year": 2024,
+      "arxiv_id": "2406.14228",
+      "url": "https://arxiv.org/abs/2406.14228",
+      "category": "agentic-rl",
+      "note": "进化算法自动生成多Agent"
+    }
+  ],
+  "llm_curriculum_papers": [
+    {
+      "title": "Let It Learn: Fully Automatic Curriculum Design for embodied agents",
+      "authors": ["Samuel Garcia", "Dario D'Ambrosio", "Antonio Paolillo", "Jiaqi Leng", "Yunchao Zhang", "Kourosh Darvish", "Jie Tan", "Animesh Garg"],
+      "year": 2024,
+      "arxiv_id": "2410.07129",
+      "url": "https://arxiv.org/abs/2410.07129",
+      "category": "llm-curriculum",
+      "note": "全自动课程设计"
+    },
+    {
+      "title": "Large Language Models as Teachers for Tailored Language Modeling Curriculum",
+      "authors": ["Jiachen Zhao", "Zonghai Yao", "Yusheng Liao", "Zhihua Wen", "Lifeng Jin", "Lingkai Kong", "Haowen Lin", "Bairu Hou", "Jingbo Shang"],
+      "year": 2024,
+      "arxiv_id": "2409.01725",
+      "url": "https://arxiv.org/abs/2409.01725",
+      "category": "llm-curriculum",
+      "note": "LLM作为教师设计课程"
+    },
+    {
+      "title": "Automatic Prompt Selection for Large Language Models",
+      "authors": ["Leo Gao", "Stella Biderman", "Sid Black", "Laurence Golding", "Travis Hoppe", "Charles Foster", "Jason Phang", "Horace He", "Anish Thite", "Noa Nabeshima"],
+      "year": 2021,
+      "arxiv_id": "2101.03598",
+      "url": "https://arxiv.org/abs/2101.03598",
+      "category": "llm-curriculum",
+      "note": "提示词选择的课程学习"
+    }
+  ],
+  "horizon_related": [
+    {
+      "title": "Hierarchical Reinforcement Learning for Long-Horizon Manipulation Tasks",
+      "authors": ["Yecheng Jason Ma", "Jason Yan", "Dinesh Jayaraman", "Osbert Bastani"],
+      "year": 2022,
+      "arxiv_id": "2211.12403",
+      "url": "https://arxiv.org/abs/2211.12403",
+      "category": "horizon",
+      "note": "长程操作的层次化RL"
+    },
+    {
+      "title": "Learning to Generate Abstractions for Long-Horizon Robot Planning",
+      "authors": ["Nishanth Kumar", "Sungkweon Chris Baek", "Willie McClinton", "Linfeng Zhao", "Tomás Lozano-Pérez", "Leslie Pack Kaelbling"],
+      "year": 2024,
+      "arxiv_id": "2405.03130",
+      "url": "https://arxiv.org/abs/2405.03130",
+      "category": "horizon",
+      "note": "长程规划的抽象生成"
+    },
+    {
+      "title": "ReAct: Synergizing Reasoning and Acting in Language Models",
+      "authors": ["Shunyu Yao", "Jeffrey Zhao", "Dian Yu", "Nan Du", "Izhak Shafran", "Karthik Narasimhan", "Yuan Cao"],
+      "year": 2022,
+      "arxiv_id": "2210.03629",
+      "url": "https://arxiv.org/abs/2210.03629",
+      "category": "agentic-rl",
+      "note": "推理+行动，Agentic RL的基础框架"
+    }
+  ]
+}

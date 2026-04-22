@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TON (Think or Not) | 精读笔记</title>
+<style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --highlight: #fef3c7;
+            --code-bg: #f1f5f9;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .paper-header {
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+        .paper-header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 12px; }
+        .paper-header .meta { font-size: 0.85rem; opacity: 0.9; }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.2);
+        }
+        .section {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .section h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+        .section h3 {
+            font-size: 1.1rem;
+            color: var(--text);
+            margin: 20px 0 12px;
+        }
+        .highlight-box {
+            background: var(--highlight);
+            border-left: 4px solid #f59e0b;
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .key-point {
+            background: #eff6ff;
+            border-left: 4px solid var(--primary);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .success-box {
+            background: #f0fdf4;
+            border-left: 4px solid var(--success);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background: var(--code-bg);
+            font-weight: 600;
+            color: var(--text);
+        }
+        tr:hover { background: #f8fafc; }
+        .metric { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+        .up { color: var(--success); }
+        .stage {
+            background: var(--code-bg);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 12px 0;
+            border-left: 4px solid var(--success);
+        }
+        .stage h4 { color: var(--success); margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+<div class="container">
+<!-- Header -->
+<div class="paper-header">
+<span class="badge">NeurIPS 2025</span>
+<span class="badge">arXiv:2505.16854</span>
+<h1>Think or Not?<br/>Selective Reasoning via Reinforcement Learning<br/>for Vision-Language Models</h1>
+<div class="meta">Show Lab @ National University of Singapore | 选择性推理</div>
+</div>
+<!-- TL;DR -->
+<div class="section">
+<h2>📌 TL;DR 核心贡献</h2>
+<div class="highlight-box">
+<strong>核心问题：</strong>现有VLM不管任务难易都生成完整推理链，造成<strong>不必要的计算开销</strong>。何时应该思考，何时可以直接回答？
+            </div>
+<div class="key-point">
+<strong>解决方案：</strong><strong>TON</strong> (Think or Not) - 首个VLM<strong>选择性推理</strong>框架
+<ul>
+<li>通过<strong>"Thought Dropout"</strong>冷启动，让模型学会思考可跳过</li>
+<li>GRPO自探索优化选择性策略</li>
+<li>根据任务难度<strong>自适应</strong>决定是否推理</li>
+</ul>
+</div>
+<div class="success-box">
+<strong>效果：</strong>最高减少<strong>90%</strong>推理token，部分任务性能反而提升（GeoQA +17%），首次证明"少思考"可以"更准确"。
+            </div>
+</div>
+<!-- 核心问题 -->
+<div class="section">
+<h2>🎯 核心问题：统一长CoT的浪费</h2>
+<h3>观察到的现象</h3>
+<div class="highlight-box">
+<strong>问题：</strong>标准GRPO对所有问题都生成详细推理，即使简单问题如"图中有几只猫？"也要经历：
+            <br/><br/>
+            "Let me look at the image... I can see... There appears to be... So the answer is..."
+            <br/><br/>
+            这种<strong>统一长CoT策略</strong>造成巨大浪费。
+        </div>
+<h3>关键洞察</h3>
+<p>不同任务需要不同程度的推理：</p>
+<ul>
+<li><strong>感知任务</strong>（物体计数、颜色识别）：几乎不需要推理</li>
+<li><strong>复杂推理</strong>（数学、物理）：需要详细CoT</li>
+<li><strong>统一策略</strong>无法适应这种差异</li>
+</ul>
+</div>
+<!-- 方法详解 -->
+<div class="section">
+<h2>🔧 TON 方法详解</h2>
+<h3>两阶段训练框架</h3>
+<div class="stage">
+<h4>阶段1: SFT with Thought Dropout</h4>
+<ul>
+<li>
+<strong>Thought Dropout：</strong>随机将详细推理替换为最小占位符（<code>\n\n</code>），只保留正确答案</li>
+<li>
+<strong>目的：</strong>作为冷启动，让模型知道"推理是可以跳过的"</li>
+<li>
+<strong>Reverse Thinking：</strong>不依赖外部模型，通过反向思考生成高质量推理数据</li>
+<li>数据量：混合有/无推理的样本</li>
+</ul>
+</div>
+<div class="stage">
+<h4>阶段2: GRPO自探索</h4>
+<ul>
+<li>仅基于答案正确性给予奖励</li>
+<li>无额外正则化，让模型自由探索何时思考</li>
+<li>Skip-thought比例随训练提升（自适应学习信号）</li>
+<li>模型学会<strong>自我评估</strong>任务难度并决定推理深度</li>
+</ul>
+</div>
+<h3>关键设计：为什么有效？</h3>
+<table>
+<tr>
+<th>设计点</th>
+<th>原理</th>
+<th>效果</th>
+</tr>
+<tr>
+<td><strong>Thought Dropout</strong></td>
+<td>破坏强制推理模式</td>
+<td>模型知道有直接回答选项</td>
+</tr>
+<tr>
+<td><strong>无正则化GRPO</strong></td>
+<td>纯奖励驱动探索</td>
+<td>自然涌现选择性行为</td>
+</tr>
+<tr>
+<td><strong>Answer-only奖励</strong></td>
+<td>不惩罚跳过推理</td>
+<td>简单问题趋向直接回答</td>
+</tr>
+</table>
+</div>
+<!-- 实验结果 -->
+<div class="section">
+<h2>📊 实验结果</h2>
+<h3>主要性能</h3>
+<table>
+<tr>
+<th>Benchmark</th>
+<th>基线 (GRPO)</th>
+<th>TON</th>
+<th>Token减少</th>
+<th>性能变化</th>
+</tr>
+<tr>
+<td><strong>CLEVR</strong> (计数)</td>
+<td>-</td>
+<td>-</td>
+<td class="metric up">87%</td>
+<td>持平</td>
+</tr>
+<tr>
+<td><strong>GeoQA</strong> (几何推理)</td>
+<td>-</td>
+<td>-</td>
+<td class="metric up">65%</td>
+<td class="metric up">+17%</td>
+</tr>
+<tr>
+<td><strong>AITZ</strong> (移动Agent)</td>
+<td>3.6K tokens</td>
+<td>0.9K tokens</td>
+<td class="metric up">75%</td>
+<td>持平</td>
+</tr>
+</table>
+<h3>关键发现</h3>
+<div class="key-point">
+<strong>"少思考更准确"现象：</strong>
+            <br/><br/>
+            在GeoQA上，减少65%推理token反而提升17%准确率！
+            <br/><br/>
+            可能原因：
+            <ol>
+<li>过长推理引入错误累积</li>
+<li>简单问题过度思考反而干扰</li>
+<li>选择性策略让模型更专注于真正困难的问题</li>
+</ol>
+</div>
+<h3>自适应行为</h3>
+<p>训练过程中观察到：</p>
+<ul>
+<li>
+<strong>Skip-thought比例逐渐上升</strong>：模型越来越善于识别简单问题</li>
+<li>
+<strong>奖励提升与跳过比例正相关</strong>：正确识别何时跳过带来更好性能</li>
+<li>困难问题仍保持详细推理</li>
+</ul>
+</div>
+<!-- 对比分析 -->
+<div class="section">
+<h2>🔬 与相关方法对比</h2>
+<table>
+<tr>
+<th>方法</th>
+<th>策略</th>
+<th>vs TON</th>
+</tr>
+<tr>
+<td><strong>vanilla GRPO</strong></td>
+<td>统一长CoT</td>
+<td>TON自适应，token效率高</td>
+</tr>
+<tr>
+<td><strong>长度惩罚方法</strong></td>
+<td>显式惩罚长输出</td>
+<td>TON不惩罚，让模型自主选择</td>
+</tr>
+<tr>
+<td><strong>早停推理</strong></td>
+<td> Confidence-based停止</td>
+<td>TON从最开始就决定是否推理</td>
+</tr>
+<tr>
+<td><strong>TON (本文)</strong></td>
+<td><strong>选择性推理</strong></td>
+<td>首个系统研究"何时思考"的框架</td>
+</tr>
+</table>
+</div>
+<!-- 实践启示 -->
+<div class="section">
+<h2>🛠️ 实践启示</h2>
+<h3>实施要点</h3>
+<table>
+<tr>
+<th>组件</th>
+<th>配置</th>
+<th>说明</th>
+</tr>
+<tr>
+<td>Base Model</td>
+<td>Qwen-2.5-VL (3B/7B)</td>
+<td>强视觉基础模型</td>
+</tr>
+<tr>
+<td>Thought Dropout率</td>
+<td>30-50%</td>
+<td>平衡有/无推理样本</td>
+</tr>
+<tr>
+<td>GRPO奖励</td>
+<td>仅答案正确性</td>
+<td>不惩罚跳过推理</td>
+</tr>
+<tr>
+<td>训练步数</td>
+<td>直到skip比例稳定</td>
+<td>观察自适应信号</td>
+</tr>
+</table>
+<h3>适用场景</h3>
+<div class="success-box">
+<strong>TON最适合：</strong>
+<ul>
+<li>需要<strong>高效率推理</strong>的场景（边缘设备、高并发）</li>
+<li>任务难度<strong>差异大</strong>的混合数据集</li>
+<li>已有VLM需要<strong>推理加速</strong>而不损失精度</li>
+<li>研究<strong>推理可解释性</strong>：理解模型认为什么算"困难"</li>
+</ul>
+            </div>
+<h3>局限与注意</h3>
+<div class="highlight-box">
+<strong>注意：</strong>
+<ul>
+<li>某些任务可能<strong>永远需要推理</strong>（如复杂数学），TON应识别出这类情况</li>
+<li>Skip-thought比例过高可能损害复杂任务性能</li>
+<li>需要监控验证集上的性能-效率权衡曲线</li>
+</ul>
+            </div>
+</div>
+<!-- 关键洞察 -->
+<div class="section">
+<h2>💡 关键洞察</h2>
+<div class="key-point">
+<strong>"思考是一种选择，而非义务"</strong>
+            <br/><br/>
+            TON揭示了一个反直觉的事实：强制所有任务都做长推理不仅浪费计算，还可能损害性能。
+            <br/><br/>
+            真正智能的系统应该：
+            <ol>
+<li><strong>自我评估</strong>任务难度</li>
+<li><strong>自适应分配</strong>计算资源</li>
+<li>在<strong>效率与效果</strong>之间找到最优平衡</li>
+</ol>
+</div>
+</div>
+<div class="section" style="text-align: center; color: var(--text-light);">
+<p>精读完成 | 论文: TON (NeurIPS 2025)</p>
+<p>GitHub: https://github.com/kokolerk/TON</p>
+</div>
+</div>
+</body>
+</html>

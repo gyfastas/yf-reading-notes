@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Scaffold 演进地图</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0c0a08;
+  --s0:       #12100c;
+  --s1:       #1a1610;
+  --s2:       #22201a;
+  --border:   #29251e;
+  --border2:  #352f24;
+  --text:     #cec8b8;
+  --muted:    #706048;
+  --muted2:   #524a38;
+  --head:     #e8e0d0;
+  --c1:       #6dbb84;
+  --c2:       #d4944a;
+  --c3:       #5ea8c0;
+  --c4:       #8878b8;
+  --c5:       #d9736a;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; font-size:15px; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 300;
+  line-height: 1.8;
+}
+
+/* --- Layout --- */
+.layout { display:flex; min-height:100vh; }
+
+aside {
+  position: fixed;
+  top: 0; left: 0;
+  width: 240px;
+  height: 100vh;
+  background: var(--s0);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  z-index: 200;
+}
+
+.aside-head {
+  padding: 26px 20px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.back-link {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+  transition: color .2s;
+}
+.back-link:hover { color: var(--c2); }
+.aside-title {
+  font-family: 'Lora', serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--head);
+  line-height: 1.4;
+}
+.aside-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 5px;
+}
+
+nav { padding: 14px 0; flex: 1; }
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 20px;
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color .2s, background .2s;
+  border-left: 2px solid transparent;
+}
+.nav-item:hover { color: var(--text); background: rgba(255,255,255,.02); }
+.nav-item.active { color: var(--c2); border-left-color: var(--c2); background: rgba(212,148,74,.05); }
+.nav-item .n {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted2);
+  min-width: 16px;
+}
+
+.aside-foot {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted2);
+  line-height: 1.8;
+}
+
+/* --- Main --- */
+main {
+  margin-left: 240px;
+  flex: 1;
+  max-width: 900px;
+  padding: 40px 40px 100px;
+}
+
+/* --- Hero --- */
+.hero { margin-bottom: 48px; }
+.hero-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--c2);
+  margin-bottom: 14px;
+}
+.hero h1 {
+  font-family: 'Lora', serif;
+  font-size: 32px;
+  font-weight: 500;
+  color: var(--head);
+  line-height: 1.2;
+  margin-bottom: 12px;
+}
+.hero h1 em { font-style: italic; color: var(--c2); }
+.hero-desc {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.7;
+  max-width: 700px;
+}
+
+/* --- Section --- */
+.sec { margin-bottom: 56px; }
+.sec-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.sec-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--c2);
+}
+.sec-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.sec-title {
+  font-family: 'Lora', serif;
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--head);
+}
+
+/* --- Timeline --- */
+.timeline {
+  position: relative;
+  padding-left: 24px;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--border);
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 28px;
+  padding-left: 20px;
+}
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -22px;
+  top: 6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--s1);
+  border: 2px solid var(--muted);
+}
+.timeline-item.major::before {
+  background: var(--c2);
+  border-color: var(--c2);
+  width: 14px;
+  height: 14px;
+  left: -24px;
+  top: 4px;
+}
+.timeline-item.active::before {
+  background: var(--c1);
+  border-color: var(--c1);
+}
+
+.timeline-date {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: .1em;
+}
+.timeline-title {
+  font-family: 'Lora', serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--head);
+  margin: 4px 0;
+}
+.timeline-title a {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px dotted var(--muted2);
+  transition: border-color .2s, color .2s;
+}
+.timeline-title a:hover {
+  color: var(--c2);
+  border-bottom-color: var(--c2);
+}
+.timeline-desc {
+  font-size: 12.5px;
+  color: var(--text);
+  line-height: 1.7;
+  margin-top: 8px;
+}
+.timeline-tag {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  margin-top: 8px;
+  margin-right: 6px;
+}
+.tag-maint { background: rgba(217,115,106,.12); color: var(--c5); border: 1px solid rgba(217,115,106,.3); }
+.tag-active { background: rgba(109,187,132,.12); color: var(--c1); border: 1px solid rgba(109,187,132,.3); }
+.tag-paper { background: rgba(94,168,192,.12); color: var(--c3); border: 1px solid rgba(94,168,192,.3); }
+.tag-no-paper { background: rgba(112,96,72,.12); color: var(--muted); border: 1px solid var(--border2); }
+
+/* --- Comparison Table --- */
+.comp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  margin: 20px 0;
+}
+.comp-table th {
+  text-align: left;
+  padding: 12px 14px;
+  background: var(--s1);
+  border-bottom: 2px solid var(--border);
+  font-weight: 500;
+  color: var(--head);
+}
+.comp-table td {
+  padding: 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  line-height: 1.7;
+}
+.comp-table tr:hover td {
+  background: rgba(255,255,255,.02);
+}
+.comp-table .agent-name {
+  font-family: 'Lora', serif;
+  font-weight: 500;
+  color: var(--head);
+}
+.comp-table .agent-name a {
+  color: inherit;
+  text-decoration: none;
+}
+.comp-table .agent-name a:hover {
+  color: var(--c2);
+}
+.comp-table .highlight {
+  color: var(--c2);
+  font-weight: 500;
+}
+
+/* --- Evolution Arrow --- */
+.evolution-box {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--c2);
+  border-radius: 0 8px 8px 0;
+  padding: 16px 20px;
+  margin: 20px 0;
+  font-size: 13px;
+  line-height: 1.8;
+}
+.evolution-box strong {
+  color: var(--head);
+}
+
+/* --- Insight Box --- */
+.insight-box {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 16px 0;
+}
+.insight-title {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--c1);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.insight-content {
+  font-size: 12.5px;
+  line-height: 1.8;
+  color: var(--text);
+}
+
+/* --- ACL Comparison --- */
+.acl-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin: 20px 0;
+}
+.acl-card {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+}
+.acl-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.acl-card-title {
+  font-family: 'Lora', serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--head);
+}
+.acl-card-year {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  margin-left: auto;
+}
+.acl-card-body {
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--text);
+}
+.acl-card-body ul {
+  padding-left: 18px;
+  margin: 8px 0;
+}
+.acl-card-body li {
+  margin: 4px 0;
+}
+
+/* --- Responsive --- */
+@media (max-width: 800px) {
+  aside { display: none; }
+  main { margin-left: 0; padding: 24px; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="aside-head">
+    <a href="../../Reference.html" class="back-link">&larr; 返回 Reference</a>
+    <div class="aside-title">Agent Scaffold 演进地图</div>
+    <div class="aside-sub">Design Evolution & Comparison</div>
+  </div>
+  <nav>
+    <a class="nav-item active" href="#timeline"><span class="n">01</span>时间线演进</a>
+    <a class="nav-item" href="#taxonomy"><span class="n">02</span>架构分类学</a>
+    <a class="nav-item" href="#aci-evolution"><span class="n">03</span>ACI 设计演进</a>
+    <a class="nav-item" href="#comparison"><span class="n">04</span>架构对比</a>
+    <a class="nav-item" href="#language-matrix"><span class="n">05</span>语言与特性矩阵</a>
+    <a class="nav-item" href="#insights"><span class="n">06</span>设计洞察</a>
+  </nav>
+  <div class="aside-foot">
+    scaffold_code/<br>
+    13 frameworks analyzed<br>
+    Based on arXiv:2604.03515v1
+  </div>
+</aside>
+
+<main>
+
+<!-- --- Hero --- -->
+<div class="hero">
+  <div class="hero-eyebrow">Evolution Map · Design Patterns</div>
+  <h1>Code Agent <em>Scaffold</em> 演进地图</h1>
+  <div class="hero-desc">
+    基于 arXiv:2604.03515v1《Inside the Scaffold》源码级分析，梳理 13 个开源 coding agent 框架的演进脉络：
+    从 SWE-agent 的 ACI 概念，到 OpenHands 的 Event Stream，再到 Agentless 的"无 Agent"设计——
+    揭示编程语言选择、控制循环策略、工具设计理念等核心 trade-off。
+  </div>
+</div>
+
+<!-- --- 01 Timeline --- -->
+<section class="sec" id="timeline">
+  <div class="sec-header">
+    <span class="sec-num">01</span>
+    <div class="sec-line" style="background:var(--c2)"></div>
+    <h2 class="sec-title">时间线演进</h2>
+  </div>
+
+  <div class="timeline">
+
+    <div class="timeline-item major">
+      <div class="timeline-date">2023 — 持续活跃</div>
+      <div class="timeline-title"><a href="Aider.html">Aider</a></div>
+      <div class="timeline-desc">
+        最早的实用化代码 Agent 工具之一。核心创新：<strong>RepoMap</strong>（基于 tree-sitter + PageRank 的代码库理解）、
+        <strong>多种编辑格式</strong>（whole/diff/SEARCH-REPLACE）、<strong>Git-native</strong> 设计、
+        <strong>Architect/Editor 双模型模式</strong>。工程导向，无学术论文，但实战表现优异（26.3% SWE-bench Lite）。
+      </div>
+      <span class="timeline-tag tag-no-paper">无学术论文</span>
+      <span class="timeline-tag tag-active">持续活跃</span>
+    </div>
+
+    <div class="timeline-item major">
+      <div class="timeline-date">2024.05 — 维护模式</div>
+      <div class="timeline-title"><a href="SWE-agent.html">SWE-agent</a></div>
+      <div class="timeline-desc">
+        Princeton NLP 推出，首次系统性地提出 <strong>ACI (Agent-Computer Interface)</strong> 概念——
+        为 LLM 定制一套 shell 命令（open, scroll, search_file 等），使代码导航对 agent 更友好。
+        核心洞察：<em>好的接口设计比更强的模型更能提升性能</em>。但因设计局限（命令粒度粗、缺乏结构化输出），
+        已进入 <strong>maintenance mode</strong>，由 mini-swe-agent 接替。
+      </div>
+      <span class="timeline-tag tag-paper">arXiv:2405.15793</span>
+      <span class="timeline-tag tag-maint">维护模式</span>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-date">2024.07</div>
+      <div class="timeline-title"><a href="Agentless.html">Agentless</a></div>
+      <div class="timeline-desc">
+        UIUC 提出，挑战"复杂 agent 循环是必需"的假设。<strong>无 agent loop</strong>，
+        采用三阶段流水线：Localization &rarr; Repair &rarr; Validation。
+        性能与 agent 方案相当（27.3%），但成本仅 1/6~1/10。证明：对于 bug fix 任务，
+        LLM 本身已具备足够能力，无需自主探索环境。
+      </div>
+      <span class="timeline-tag tag-paper">arXiv:2407.01489 · ICSE 2025</span>
+    </div>
+
+    <div class="timeline-item major active">
+      <div class="timeline-date">2024.07 — 持续活跃</div>
+      <div class="timeline-title"><a href="OpenHands.html">OpenHands</a> (原 OpenDevin)</div>
+      <div class="timeline-desc">
+        UIUC/CMU 等多机构联合开发，目前最主流的开源 code agent 框架。
+        核心设计：<strong>Event Stream 架构</strong>（统一事件总线解耦通信）、
+        <strong>可插拔 Runtime</strong>（Docker 沙箱）、<strong>CodeAct 范式</strong>（以可执行代码作为 action 载体）。
+        相比 SWE-agent 的 ACI，OpenHands 提供更细粒度的 <strong>Tool/Function Calling</strong> 机制，
+        支持 browser automation、IPython 内核等多模态能力。
+      </div>
+      <span class="timeline-tag tag-paper">arXiv:2407.16741</span>
+      <span class="timeline-tag tag-active">活跃开发</span>
+    </div>
+
+    <div class="timeline-item active">
+      <div class="timeline-date">2024 — 持续活跃</div>
+      <div class="timeline-title"><a href="MoatlessTools.html">Moatless Tools</a></div>
+      <div class="timeline-desc">
+        基于 <strong>有限状态机 (FSM)</strong> 的代码编辑框架。将修复任务建模为显式状态转换：
+        Search &rarr; Identify &rarr; PlanToCode &rarr; EditCode。
+        使用 Claude 4 Sonnet 在 SWE-bench Verified 上达 <strong>70.8%</strong>，成本仅 $0.63/instance。
+        也是 moatless-tree-search（MCTS for code editing）的基础框架。
+      </div>
+      <span class="timeline-tag tag-active">活跃开发</span>
+    </div>
+
+    <div class="timeline-item active">
+      <div class="timeline-date">2025 — 持续活跃</div>
+      <div class="timeline-title"><a href="OpenCode.html">OpenCode</a></div>
+      <div class="timeline-desc">
+        受 Claude Code 启发的开源实现。核心设计：<strong>Client/Server 架构</strong>（远程 agent 执行）、
+        <strong>Build vs Plan 双模式</strong>（执行型 vs 规划型 agent）、<strong>LSP 原生集成</strong>。
+        使用 TypeScript 实现，GitHub stars 增长最快（135k），代表 CLI 工具类别的成熟形态。
+      </div>
+      <span class="timeline-tag tag-active">活跃开发</span>
+    </div>
+
+  </div>
+
+  <div class="evolution-box">
+    <strong>演进主线：</strong>从 SWE-agent 的<strong>命令式 ACI</strong>（粗粒度 shell 命令）
+    &rarr; 到 OpenHands 的<strong>函数式 CodeAct</strong>（细粒度 tool calling + 可执行代码）
+    &rarr; 再到 Agentless 的<strong>无状态流水线</strong>（证明复杂 agent loop 非必需）
+    &rarr; Moatless 的<strong>显式 FSM</strong>（结构化状态转换，天然产出训练轨迹）。
+  </div>
+</section>
+
+<!-- --- 02 Taxonomy (NEW) --- -->
+<section class="sec" id="taxonomy">
+  <div class="sec-header">
+    <span class="sec-num">02</span>
+    <div class="sec-line" style="background:var(--c5)"></div>
+    <h2 class="sec-title">架构分类学：12维度分析框架</h2>
+  </div>
+
+  <p style="margin-bottom:20px;font-size:13px;line-height:1.8">
+    基于 arXiv:2604.03515v1《Inside the Scaffold》的源码级分析，13个开源 coding agent 框架在<strong>12个架构维度</strong>上呈现连续谱分布，
+    而非离散类别。这些维度组织为三层：控制架构层、工具与环境接口层、资源管理层。
+  </p>
+
+  <div class="insight-box">
+    <div class="insight-title">三层架构维度概览</div>
+    <div class="insight-content">
+      <strong>Layer 1: Control Architecture（控制架构层）</strong><br>
+      • Control loop type: Fixed pipeline → Sequential ReAct → Phased loop → Tree search → Full MCTS<br>
+      • Loop driver: User-driven → Scaffold-driven → LLM-driven<br>
+      • Control flow implementation: While loop / Recursion / Graph-as-control-flow / Exception-based<br><br>
+
+      <strong>Layer 2: Tool & Environment Interface（工具与环境接口层）</strong><br>
+      • Tool set design: 0 tools (Aider) → 37 action classes (Moatless Tools)<br>
+      • Edit & patch format: Unified diff → String replacement / Search-replace<br>
+      • Tool discovery: Static (startup) → Config-conditional → Dynamic (runtime)<br>
+      • Context retrieval: Keyword search → AST-aware → Knowledge graph traversal<br>
+      • Execution isolation: Host filesystem → Docker container → Shadow git / Sandbox<br><br>
+
+      <strong>Layer 3: Resource Management（资源管理层）</strong><br>
+      • State management: Destructive overwrite → Flat list → Typed event log → Graph-scoped → Event-sourced<br>
+      • Context compaction: None → Rule-based truncation → Structural isolation → LLM summarization<br>
+      • Multi-model routing: Single model → Role-based → Classifier chain → Per-attempt cycling<br>
+      • Persistent memory: None → Config file → LLM-writable rules → Full session persistence
+    </div>
+  </div>
+
+  <div class="evolution-box">
+    <strong>核心发现：</strong>11/13 的 agent 采用<strong>多原语组合</strong>（composable loop primitives），而非单一控制结构。
+    五种 loop 原语作为可组合构建块：ReAct、generate-test-repair、plan-execute、multi-attempt retry、tree search。
+    Agent 架构空间是<strong>组合式</strong>而非<strong>类别式</strong>的。
+  </div>
+</section>
+
+<!-- --- 03 ACI Evolution (renumbered) --- -->
+<section class="sec" id="aci-evolution">
+  <div class="sec-header">
+    <span class="sec-num">03</span>
+    <div class="sec-line" style="background:var(--c3)"></div>
+    <h2 class="sec-title">ACI 设计演进：从命令到函数</h2>
+  </div>
+
+  <p style="margin-bottom:20px;font-size:13px;line-height:1.8">
+    <strong>ACI (Agent-Computer Interface)</strong> 是 Agent 与代码环境交互的抽象层。
+    不同框架对 ACI 的理解差异巨大，反映了从"命令式"到"函数式"的设计演进。
+  </p>
+
+  <div class="acl-grid">
+
+    <div class="acl-card">
+      <div class="acl-card-header">
+        <div class="acl-card-title">SWE-agent</div>
+        <div class="acl-card-year">2024.05</div>
+      </div>
+      <div class="acl-card-body">
+        <strong>命令式 ACI</strong>：自定义 shell 函数作为 action<br><br>
+        <ul>
+          <li><code>open &lt;file&gt; [line]</code> — 100行窗口浏览</li>
+          <li><code>scroll_up/down</code> — 翻页</li>
+          <li><code>search_file &lt;pattern&gt;</code> — 文本搜索</li>
+          <li><code>edit &lt;line&gt; &lt;content&gt;</code> — 行级编辑</li>
+        </ul>
+        <strong>局限：</strong>命令粒度粗，无结构化输出，parse 依赖正则，agent 难以精确控制。
+      </div>
+    </div>
+
+    <div class="acl-card">
+      <div class="acl-card-header">
+        <div class="acl-card-title">Aider</div>
+        <div class="acl-card-year">2023+</div>
+      </div>
+      <div class="acl-card-body">
+        <strong>结构化编辑协议</strong>：多种编辑格式适配不同模型能力<br><br>
+        <ul>
+          <li><strong>Whole</strong> — 输出完整文件内容</li>
+          <li><strong>Diff</strong> — 类 unified diff 格式</li>
+          <li><strong>SEARCH/REPLACE</strong> — 精确块级替换</li>
+          <li><strong>RepoMap</strong> — 代码库拓扑理解</li>
+        </ul>
+        <strong>优势：</strong>编辑成功率高，Git-native 保证可追溯性。
+      </div>
+    </div>
+
+    <div class="acl-card">
+      <div class="acl-card-header">
+        <div class="acl-card-title">OpenHands</div>
+        <div class="acl-card-year">2024.07</div>
+      </div>
+      <div class="acl-card-body">
+        <strong>CodeAct + Function Calling</strong>：以代码为 action 载体<br><br>
+        <ul>
+          <li><code>IPythonRunCellAction</code> — 执行 Python 代码</li>
+          <li><code>CmdRunAction</code> — 执行 shell 命令</li>
+          <li><code>BrowseURLAction</code> — 浏览器自动化</li>
+          <li><code>FileRead/WriteAction</code> — 文件操作</li>
+        </ul>
+        <strong>优势：</strong>细粒度、可组合、结构化输出，支持多模态。
+      </div>
+    </div>
+
+    <div class="acl-card">
+      <div class="acl-card-header">
+        <div class="acl-card-title">Moatless Tools</div>
+        <div class="acl-card-year">2024+</div>
+      </div>
+      <div class="acl-card-body">
+        <strong>FSM 状态转换</strong>：显式状态机定义合法操作<br><br>
+        <ul>
+          <li><strong>Search</strong> — 代码定位</li>
+          <li><strong>Identify</strong> — 确认修改点</li>
+          <li><strong>PlanToCode</strong> — 规划编辑</li>
+          <li><strong>EditCode</strong> — 执行修改</li>
+        </ul>
+        <strong>优势：</strong>状态转换天然产出结构化轨迹，适合训练数据构建。
+      </div>
+    </div>
+
+  </div>
+
+  <div class="insight-box">
+    <div class="insight-title">关键洞察：为什么 SWE-agent 的 ACI 被认为"落后"？</div>
+    <div class="insight-content">
+      <strong>1. 输出格式：</strong>SWE-agent 使用<strong>纯文本命令</strong>（如"open file.py"），
+      需要复杂的正则 parse；OpenHands/Aider 使用<strong>结构化 Function Call / XML</strong>，
+      天然可序列化、可验证。<br><br>
+      <strong>2. 粒度控制：</strong>SWE-agent 的 <code>edit</code> 命令只能按行编辑；
+      Aider 的 SEARCH/REPLACE 支持块级精确替换；OpenHands 的 CodeAct 支持任意 Python 代码执行。<br><br>
+      <strong>3. 反馈闭环：</strong>SWE-agent 的 observation 是原始 shell 输出；
+      OpenHands 的 observation 是结构化对象（包含 exit_code、formatted_output 等），
+      便于 agent 做程序化处理。<br><br>
+      <strong>4. 可扩展性：</strong>SWE-agent 添加新命令需要修改 Docker 镜像中的 bash 函数；
+      OpenHands 添加新 tool 只需继承 Action 类，无需修改 runtime。
+    </div>
+  </div>
+</section>
+
+<!-- --- 04 Comparison (renumbered) --- -->
+<section class="sec" id="comparison">
+  <div class="sec-header">
+    <span class="sec-num">04</span>
+    <div class="sec-line" style="background:var(--c1)"></div>
+    <h2 class="sec-title">架构设计对比</h2>
+  </div>
+
+  <table class="comp-table">
+    <thead>
+      <tr>
+        <th>Framework</th>
+        <th>核心范式</th>
+        <th>Agent Loop</th>
+        <th>关键创新</th>
+        <th>SWE-bench Lite</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="agent-name"><a href="Aider.html">Aider</a></td>
+        <td>Pair Programming</td>
+        <td>交互式会话</td>
+        <td class="highlight">RepoMap, Architect/Editor, Git-native</td>
+        <td>26.3%</td>
+      </tr>
+      <tr>
+        <td class="agent-name"><a href="SWE-agent.html">SWE-agent</a></td>
+        <td>ACI / 命令式</td>
+        <td>迭代执行</td>
+        <td class="highlight">Agent-Computer Interface (ACI) 概念</td>
+        <td>12.5%</td>
+      </tr>
+      <tr>
+        <td class="agent-name"><a href="Agentless.html">Agentless</a></td>
+        <td>流水线 / 无 Agent</td>
+        <td><strong>无</strong></td>
+        <td class="highlight">Localization→Repair→Validation 三阶段</td>
+        <td>27.3%</td>
+      </tr>
+      <tr>
+        <td class="agent-name"><a href="OpenHands.html">OpenHands</a></td>
+        <td>CodeAct / 事件驱动</td>
+        <td>Event Stream 循环</td>
+        <td class="highlight">Event Stream, CodeAct, 可插拔 Runtime</td>
+        <td>~20-30%</td>
+      </tr>
+      <tr>
+        <td class="agent-name"><a href="MoatlessTools.html">Moatless</a></td>
+        <td>FSM / 状态机</td>
+        <td>状态转换</td>
+        <td class="highlight">有限状态机, MCTS 搜索, tree-sitter</td>
+        <td>70.8%*</td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="font-size:11px;color:var(--muted);margin-top:-10px">* Moatless 使用 Claude 4 Sonnet 在 SWE-bench Verified 上的结果</p>
+
+  <div class="insight-box">
+    <div class="insight-title">架构选择的关键 Trade-off</div>
+    <div class="insight-content">
+      <strong>Agent Loop vs 无 Agent：</strong>Agentless 证明对于确定性任务（如 bug fix），
+      无循环的流水线设计更经济；但对于探索性任务（如需求理解、架构设计），
+      OpenHands 的灵活 agent loop 更有优势。<br><br>
+      <strong>通用性 vs 专用性：</strong>OpenHands 追求通用平台（支持 browser、多语言、多 agent 协作）；
+      Aider/Moatless 专注于代码编辑这一核心能力的极致优化。<br><br>
+      <strong>可解释性 vs 灵活性：</strong>Moatless 的 FSM 提供完全可解释的轨迹，天然适合训练数据；
+      OpenHands 的自由度更高，但轨迹噪声也更大。
+    </div>
+  </div>
+</section>
+
+<!-- --- 05 Language & Features Matrix (NEW) --- -->
+<section class="sec" id="language-matrix">
+  <div class="sec-header">
+    <span class="sec-num">05</span>
+    <div class="sec-line" style="background:var(--c4)"></div>
+    <h2 class="sec-title">语言与特性矩阵</h2>
+  </div>
+
+  <p style="margin-bottom:20px;font-size:13px;line-height:1.8">
+    基于 arXiv:2604.03515v1 的源码分析，以下汇总 13 个开源 coding agent scaffold 的<strong>编程语言</strong>、
+    <strong>主要特性</strong>和<strong>设计思路</strong>。
+  </p>
+
+  <table class="comp-table">
+    <thead>
+      <tr>
+        <th style="min-width:110px">Agent</th>
+        <th>语言</th>
+        <th>Control Loop</th>
+        <th>Tools</th>
+        <th>核心设计思路</th>
+        <th>Stars</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="agent-name"><a href="https://github.com/anomalyco/opencode">OpenCode</a></td>
+        <td>TypeScript</td>
+        <td>Sequential ReAct</td>
+        <td>18+</td>
+        <td>Client/Server 架构，Event-driven pub/sub，LSP 集成，Build/Plan 双模式</td>
+        <td>135k</td>
+      </tr>
+      <tr>
+        <td class="agent-name">Gemini CLI</td>
+        <td>TypeScript</td>
+        <td>Sequential ReAct</td>
+        <td>17+</td>
+        <td>7层分类器链路由，本地 Gemma 模型选择，MCP 集成，工具发现子进程</td>
+        <td>108k</td>
+      </tr>
+      <tr>
+        <td class="agent-name">Codex CLI</td>
+        <td>Rust / TS</td>
+        <td>Sequential ReAct</td>
+        <td>~20+</td>
+        <td>每轮动态工具重建，Platform sandboxing，Guardian 安全子 agent，权限协商</td>
+        <td>72k</td>
+      </tr>
+      <tr>
+        <td class="agent-name"><a href="OpenHands.html">OpenHands</a></td>
+        <td>Python</td>
+        <td>Sequential ReAct</td>
+        <td>9+</td>
+        <td>Event Stream 解耦架构，CodeAct 范式，Docker 运行时，可插拔 browser 工具</td>
+        <td>70k</td>
+      </tr>
+      <tr>
+        <td class="agent-name">Cline</td>
+        <td>TypeScript</td>
+        <td>Sequential ReAct</td>
+        <td>27+</td>
+        <td>VS Code IDE 扩展，CheckpointTracker shadow git，MCP 服务器，LLM-initiated 压缩</td>
+        <td>60k</td>
+      </tr>
+      <tr>
+        <td class="agent-name"><a href="Aider.html">Aider</a></td>
+        <td>Python</td>
+        <td>User-driven loop</td>
+        <td>0 (LLM 直接输出)</td>
+        <td>RepoMap PageRank 代码拓扑，Architect/Editor 双模型，13种编辑格式，Git-native</td>
+        <td>43k</td>
+      </tr>
+      <tr>
+        <td class="agent-name"><a href="SWE-agent.html">SWE-agent</a></td>
+        <td>Python</td>
+        <td>Sequential ReAct</td>
+        <td>3-35 (bundles)</td>
+        <td>ACI 概念先驱，Windowed file view，Polling 参数，per-attempt model cycling</td>
+        <td>19k</td>
+      </tr>
+      <tr>
+        <td class="agent-name">mini-swe-agent</td>
+        <td>Python</td>
+        <td>Sequential ReAct</td>
+        <td>1</td>
+        <td>SWE-agent 极简 baseline，exception-based 控制流，所有能力通过 bash</td>
+        <td>4k</td>
+      </tr>
+      <tr>
+        <td class="agent-name">AutoCodeRover</td>
+        <td>Python</td>
+        <td>Phased loop</td>
+        <td>8</td>
+        <td>Phase separation (search→patch)，SBFL 故障定位，Proxy agent 工具调用，per-attempt cycling</td>
+        <td>3k</td>
+      </tr>
+      <tr>
+        <td class="agent-name"><a href="Agentless.html">Agentless</a></td>
+        <td>Python</td>
+        <td><strong>Fixed pipeline</strong></td>
+        <td>0-1</td>
+        <td>无 agent loop，独立采样策略，majority voting，Localization→Repair→Validation 三阶段</td>
+        <td>2k</td>
+      </tr>
+      <tr>
+        <td class="agent-name">Prometheus</td>
+        <td>Python</td>
+        <td>Phased loop</td>
+        <td>17 (per-node scoped)</td>
+        <td>LangGraph 状态机，per-node 工具子集，Actor-critic 架构，多语言 tree-sitter (20+)</td>
+        <td>1k</td>
+      </tr>
+      <tr>
+        <td class="agent-name"><a href="MoatlessTools.html">Moatless Tools</a></td>
+        <td>Python</td>
+        <td><strong>Full MCTS</strong></td>
+        <td>37</td>
+        <td>显式 FSM，MCTS 搜索，tree-sitter AST，Search→Identify→Plan→Edit 状态转换，Shadow mode</td>
+        <td>600</td>
+      </tr>
+      <tr>
+        <td class="agent-name">DARS-Agent</td>
+        <td>Python</td>
+        <td><strong>Depth-first tree search</strong></td>
+        <td>~15</td>
+        <td>树搜索嵌套 ReAct，Docker 环境重置分支，Greedy LLM critic，inherited from SWE-agent</td>
+        <td>70</td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="font-size:11px;color:var(--muted);margin-top:-10px">
+    数据来源：arXiv:2604.03515v1，按 GitHub stars 排序。TypeScript 为主的框架多集中在 CLI 工具类别，Python 框架多为 SWE-bench 评测导向。
+  </p>
+
+  <div class="insight-box">
+    <div class="insight-title">编程语言分布洞察</div>
+    <div class="insight-content">
+      <strong>TypeScript (5个)</strong>：OpenCode, Gemini CLI, Cline 以及部分 Codex CLI。集中在<strong>CLI 工具</strong>类别，
+      注重 IDE 集成、交互式开发者体验。Node.js 生态适合构建富客户端，但 analysis framework 对其支持较弱。<br><br>
+
+      <strong>Python (8个)</strong>：SWE-agent, OpenHands, Agentless, Moatless Tools, AutoCodeRover, DARS-Agent, Prometheus, mini-swe-agent。
+      集中在<strong>SWE-bench 评测</strong>类别，科学计算/ML 生态成熟，适合 benchmark 驱动的研究。
+      Python 框架的 AST 分析、tree-sitter 集成更深度。<br><br>
+
+      <strong>Rust (1个)</strong>：Codex CLI 使用 Rust 实现核心，注重性能与安全 sandboxing。
+    </div>
+  </div>
+
+  <div class="insight-box">
+    <div class="insight-title">设计思路分类</div>
+    <div class="insight-content">
+      <strong>1. 用户驱动 (User-driven)</strong>：Aider 代表，外循环由用户发起，inner generate-test-repair 循环自主。
+      适合 pair programming 场景，用户作为安全边界。<br><br>
+
+      <strong>2. Scaffold 驱动 (Scaffold-driven)</strong>：Agentless, AutoCodeRover 代表，脚手架控制时序，LLM 在固定点被调用。
+      阶段分离清晰，适合确定性任务。<br><br>
+
+      <strong>3. LLM 驱动 (LLM-driven)</strong>：SWE-agent, OpenHands, Codex CLI 等代表，LLM 选择工具并控制探索。
+      灵活性高，适合复杂 open-ended 任务。<br><br>
+
+      <strong>4. 混合驱动 (Hybrid)</strong>：Prometheus 代表，LangGraph 状态机中 LLM 驱动工具选择，但节点间转移由脚手架控制。
+    </div>
+  </div>
+
+  <div class="insight-box">
+    <div class="insight-title">控制循环策略对比</div>
+    <div class="insight-content">
+      <strong>Fixed Pipeline (Agentless)</strong>：10阶段独立脚本，JSONL 连接，无反馈循环。
+      最简单、最低成本，但无法适应复杂场景。<br><br>
+
+      <strong>Sequential ReAct (SWE-agent, OpenHands, Cline)</strong>：标准 Thought-Tool-Observation 循环。
+      主流选择，平衡简单性与灵活性。<br><br>
+
+      <strong>Phased Loop (AutoCodeRover, Prometheus)</strong>：不同阶段有不同工具访问权限。
+      AutoCodeRover 的 search-then-patch 分离；Prometheus 的 LangGraph 显式边。<br><br>
+
+      <strong>Tree Search (DARS-Agent)</strong>：ReAct 步骤形成搜索树节点，分支点 LLM 选择。
+      在线决策 + 离线评估分离。<br><br>
+
+      <strong>Full MCTS (Moatless Tools)</strong>：完整蒙特卡洛树搜索，Select-Expand-Simulate-Backpropagate。
+      数值奖励引导，visit counts 平衡探索与利用。
+    </div>
+  </div>
+</section>
+
+<!-- --- 06 Insights (renumbered) --- -->
+<section class="sec" id="insights">
+  <div class="sec-header">
+    <span class="sec-num">06</span>
+    <div class="sec-line" style="background:var(--c5)"></div>
+    <h2 class="sec-title">设计洞察与启示</h2>
+  </div>
+
+  <div class="insight-box">
+    <div class="insight-title">对 Midtrain 数据合成的启示</div>
+    <div class="insight-content">
+      <strong>1. Scaffold 选择策略：</strong><br>
+      • <strong>Phase 1 (大规模 rollouts)</strong>：推荐 Moatless Tools 或 Agentless——结构化轨迹、低成本、高成功率<br>
+      • <strong>Phase 2 (VLM 多模态)</strong>：推荐 OpenHands——天然支持 screenshot、browser、IPython<br>
+      • <strong>迭代编辑能力</strong>：参考 Aider 的多种编辑格式设计，提高 apply 成功率<br><br>
+
+      <strong>2. ACI 设计的演进方向：</strong><br>
+      • 从 SWE-agent 的<strong>文本命令</strong> &rarr; 到 OpenHands 的<strong>函数调用</strong><br>
+      • 从<strong>行级编辑</strong> &rarr; 到<strong>块级/AST 级编辑</strong>（参考 Aider/Moatless 的 tree-sitter 使用）<br>
+      • 从<strong>无状态命令</strong> &rarr; 到<strong>状态机显式转换</strong>（Moatless FSM）<br><br>
+
+      <strong>3. 成本与质量权衡：</strong><br>
+      Agentless 提供了重要的 cost-efficient baseline——如果简单流水线就能达到 27.3%，
+      那么复杂的 agent loop 需要证明其带来的额外价值（如 handling 更复杂场景）
+      足以抵消成本增加（6-10x）。
+    </div>
+  </div>
+
+  <div class="insight-box">
+    <div class="insight-title">ACI 设计原则总结</div>
+    <div class="insight-content">
+      <strong>原则 1：结构化优先于文本</strong>——Function Call / XML 比自由文本命令更易 parse、验证、学习<br>
+      <strong>原则 2：细粒度控制</strong>——块级/AST 级编辑比行级更精确，减少 apply 失败<br>
+      <strong>原则 3：可观察性</strong>——每个 action 必须有结构化 observation，便于 agent 做程序化处理<br>
+      <strong>原则 4：可组合性</strong>——Action 应该是原子化的，复杂行为通过组合而非单一大命令实现<br>
+      <strong>原则 5：轨迹友好</strong>——状态转换应该是显式的，天然产出训练数据
+    </div>
+  </div>
+
+  <div class="insight-box">
+    <div class="insight-title">关于 Claude Code 等商业/闭源 Agent</div>
+    <div class="insight-content">
+      根据论文的 inclusion criteria，以下知名 agent 被排除在分析之外（Criterion 2: no readable source code）：<br><br>
+      <strong>Claude Code</strong> — 以编译后的 TypeScript bundle 形式分发，无公开源码仓库。<a href="OpenCode.html">OpenCode</a> 是受其启发的开源实现。<br><br>
+      <strong>GitHub Copilot Workspace, Cursor, Windsurf</strong> — 商业 AI 代码编辑器，scaffold 代码不公开。<br><br>
+      <strong>MASAI</strong> — 仓库仅包含 README 链接，无实现代码发布。<br><br>
+      此外还有 <strong>Criterion 1</strong> 排除的通用框架：Open Interpreter, Deep Agents, MetaGPT, CrewAI（多 agent 协调框架而非单个 agent 架构）。
+    </div>
+  </div>
+
+  <div class="insight-box">
+    <div class="insight-title">收敛与发散维度（来自论文的关键洞察）</div>
+    <div class="insight-content">
+      <strong>收敛维度（已标准化）：</strong><br>
+      • <strong>Tool capability categories</strong>：所有 LLM-driven agent 都覆盖 read/search/edit/execute 四类操作<br>
+      • <strong>Edit format</strong>：向 string replacement / search-replace 收敛，优于 line-number/diff<br>
+      • <strong>Execution isolation</strong>：Benchmark agent 普遍采用 Docker container<br><br>
+      <strong>发散维度（开放设计问题）：</strong><br>
+      • <strong>Context compaction</strong>：7种不同策略，无主导方案<br>
+      • <strong>State management</strong>：从 destructive overwrite 到 event-sourced，spectrum 广泛<br>
+      • <strong>Multi-model routing</strong>：从 single model 到 7-layer classifier chain，设计空间未收敛<br><br>
+      这些发散维度代表了 agent 架构的活跃设计前沿，也是未来研究的投资方向。
+    </div>
+  </div>
+
+</section>
+
+</main>
+</div>
+</body>
+</html>

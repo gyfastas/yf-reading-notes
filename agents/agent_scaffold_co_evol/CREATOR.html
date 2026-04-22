@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CREATOR · 精读笔记</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0c0a08;--s0:#12100c;--s1:#1a1610;--s2:#221e16;--border:#2a251c;--border2:#363020;--text:#cec8b8;--muted:#7a6e58;--muted2:#54493a;--head:#e8e0d0;--accent:#c8a07e;--accent2:#a8845e;--red:#d9736a;--amber:#c8a04a;--blue:#5ea8c0;--purple:#8878b8;--green:#6dbb84;--teal:#4db8a4}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth;font-size:15px}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans SC',sans-serif;font-weight:300;line-height:1.8}
+.layout{display:flex;min-height:100vh}
+aside{position:fixed;top:0;left:0;width:210px;height:100vh;background:var(--s0);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;z-index:200}
+.aside-head{padding:26px 20px 20px;border-bottom:1px solid var(--border)}
+.back-link{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:6px;margin-bottom:14px;transition:color .2s}.back-link:hover{color:var(--accent)}
+.aside-title{font-family:'Lora',serif;font-size:14px;font-weight:600;color:var(--head);line-height:1.4}
+.aside-sub{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-top:5px;letter-spacing:.06em}
+nav{padding:14px 0;flex:1}
+.nav-item{display:flex;align-items:center;gap:9px;padding:6px 20px;font-size:12px;color:var(--muted);text-decoration:none;cursor:pointer;transition:color .2s,background .2s;border-left:2px solid transparent}
+.nav-item:hover{color:var(--text);background:rgba(255,255,255,.02)}
+.nav-item.active{color:var(--accent);border-left-color:var(--accent);background:rgba(200,160,126,.05)}
+.nav-item .n{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted2);min-width:16px}
+.aside-foot{padding:14px 20px;border-top:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted2);line-height:1.8}
+main{margin-left:210px;flex:1;max-width:820px;padding:52px 48px 100px}
+.hero{margin-bottom:52px}
+.hero-eyebrow{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+.hero h1{font-family:'Lora',serif;font-size:32px;font-weight:500;color:var(--head);line-height:1.25;margin-bottom:6px;letter-spacing:-.02em}
+.hero h1 em{font-style:italic;color:var(--accent)}
+.hero-sub{font-family:'Lora',serif;font-style:italic;font-size:15px;color:var(--muted);margin-bottom:20px}
+.hero-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+.chip{font-family:'JetBrains Mono',monospace;font-size:10px;padding:3px 10px;border-radius:3px;text-decoration:none;transition:opacity .15s}.chip:hover{opacity:.75}
+.chip-arxiv{background:rgba(94,168,192,.12);color:var(--blue);border:1px solid rgba(94,168,192,.22)}
+.chip-venue{background:rgba(200,160,126,.10);color:var(--accent);border:1px solid rgba(200,160,126,.2)}
+.hero-abstract{background:var(--s1);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:16px 20px;font-size:13.5px;color:#908878;line-height:1.75}
+.hero-abstract strong{color:var(--text)}
+.sec{margin-bottom:50px}
+.sec-header{display:flex;align-items:center;gap:12px;margin-bottom:22px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.sec-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted2);letter-spacing:.08em;min-width:24px}
+.sec-line{width:3px;height:20px;border-radius:2px;flex-shrink:0}
+.sec-title{font-family:'Lora',serif;font-size:21px;font-weight:500;color:var(--head)}
+p{margin-bottom:12px;font-size:13.5px}p:last-child{margin-bottom:0}
+strong{color:var(--head);font-weight:500}em{color:var(--accent);font-style:italic}
+.pipeline{display:flex;flex-direction:column;gap:2px;margin:16px 0}
+.pipeline-step{display:grid;grid-template-columns:40px 1fr;background:var(--s1);border:1px solid var(--border);border-radius:7px;overflow:hidden;transition:border-color .2s}
+.pipeline-step:hover{border-color:var(--border2)}
+.step-gutter{background:var(--s0);display:flex;align-items:flex-start;justify-content:center;padding:14px 0 0;border-right:1px solid var(--border)}
+.step-badge{font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:500;color:var(--accent);letter-spacing:.06em}
+.step-inner{padding:12px 18px}
+.step-h{font-size:13.5px;font-weight:500;color:var(--head);margin-bottom:5px}
+.step-p{font-size:12.5px;color:var(--muted);line-height:1.65}.step-p strong{color:var(--text)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.two-col-card{background:var(--s1);border:1px solid var(--border);border-radius:7px;padding:14px 16px}
+.two-col-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);margin-bottom:8px}
+.two-col-body{font-size:12px;color:var(--muted);line-height:1.7}.two-col-body strong{color:var(--text)}
+.callout{border-radius:7px;padding:13px 16px;font-size:13px;line-height:1.7;margin:14px 0;display:flex;gap:12px}
+.callout-icon{font-size:14px;flex-shrink:0;padding-top:1px}.callout-body{flex:1}.callout-body strong{font-weight:500}
+.callout.key{background:rgba(200,160,126,.08);border:1px solid rgba(200,160,126,.18);color:#a8906e}
+.callout.info{background:rgba(94,168,192,.08);border:1px solid rgba(94,168,192,.18);color:#6898a8}
+.insight-cards{display:flex;flex-direction:column;gap:10px}
+.insight-card{display:grid;grid-template-columns:3px 1fr;gap:14px;background:var(--s1);border:1px solid var(--border);border-radius:7px;overflow:hidden;padding:14px 16px;transition:border-color .2s}
+.insight-card:hover{border-color:var(--border2)}
+.insight-stripe{border-radius:2px}
+.insight-title{font-size:13.5px;font-weight:500;color:var(--head);margin-bottom:5px}
+.insight-body{font-size:12.5px;color:var(--muted);line-height:1.65}.insight-body strong{color:var(--text)}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+@media(max-width:700px){aside{display:none}main{margin-left:0;padding:28px 18px 60px}.two-col{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside>
+  <div class="aside-head">
+    <a href="../../Reference.html" class="back-link">&larr; 返回 Reference</a>
+    <div class="aside-title">CREATOR</div>
+    <div class="aside-sub">精读笔记 &middot; EMNLP 2023</div>
+  </div>
+  <nav>
+    <a class="nav-item active" href="#overview"><span class="n">00</span>Overview</a>
+    <a class="nav-item" href="#four-stage"><span class="n">01</span>四阶段框架</a>
+    <a class="nav-item" href="#vs-latm"><span class="n">02</span>与 LATM 对比</a>
+    <a class="nav-item" href="#takeaways"><span class="n">03</span>对本研究的启发</a>
+  </nav>
+  <div class="aside-foot">arXiv:2305.14318<br>Qian, Han, Fung, Qin, Liu, Ji<br>EMNLP 2023 Findings</div>
+</aside>
+
+<main>
+<div class="hero" id="overview">
+  <div class="hero-eyebrow">Tool Creation &middot; arXiv:2305.14318</div>
+  <h1><em>CREATOR</em></h1>
+  <div class="hero-sub">Tool Creation for Disentangling Abstract and Concrete Reasoning of LLMs</div>
+  <div class="hero-chips">
+    <a href="https://arxiv.org/abs/2305.14318" target="_blank" class="chip chip-arxiv">&nearr; arXiv:2305.14318</a>
+    <span class="chip chip-venue">Qian et al. &middot; EMNLP 2023 Findings</span>
+  </div>
+  <div class="hero-abstract">
+    <strong>CREATOR</strong> 将 tool creation 提升为推理管线的<strong>第一步</strong>，而非事后补充。核心观点：LLM 的推理困难往往来自抽象规划（知道该做什么）和具体执行（精确计算/操作）的<strong>纠缠</strong>。CREATOR 通过四阶段框架——<strong>Creation, Decision, Execution, Rectification</strong>——将"创建工具"作为显式步骤，使 LLM 先把具体计算逻辑封装为工具函数，再专注于抽象层面的决策和调度。
+  </div>
+</div>
+
+<!-- 01 四阶段框架 -->
+<section class="sec" id="four-stage">
+  <div class="sec-header">
+    <span class="sec-num">01</span>
+    <div class="sec-line" style="background:var(--accent)"></div>
+    <h2 class="sec-title">四阶段框架</h2>
+  </div>
+
+  <p>CREATOR 的推理过程分为四个显式阶段，每个阶段解决不同层次的问题。</p>
+
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">C</span></div>
+      <div class="step-inner">
+        <div class="step-h">Creation — 工具创建</div>
+        <div class="step-p">LLM 分析问题，<strong>主动创建解决该问题所需的工具函数</strong>（Python 代码）。不是从预定义工具库中选择，而是根据问题需求定制化生成。工具封装了具体计算逻辑（数学运算、字符串处理、数据转换等），使后续步骤无需处理低层细节。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">D</span></div>
+      <div class="step-inner">
+        <div class="step-h">Decision — 决策调度</div>
+        <div class="step-p">LLM 决定<strong>如何使用创建的工具</strong>：选择哪个工具、传入什么参数、按什么顺序调用。这一步只涉及抽象层面的规划，不涉及具体计算。Decision 和 Creation 的分离是 CREATOR 的核心贡献。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">E</span></div>
+      <div class="step-inner">
+        <div class="step-h">Execution — 执行</div>
+        <div class="step-p">实际执行工具调用代码，<strong>由 Python 解释器完成</strong>，不经过 LLM。这确保了计算的精确性——LLM 不擅长的精确算术、复杂逻辑判断都交给确定性代码处理。</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-gutter"><span class="step-badge">R</span></div>
+      <div class="step-inner">
+        <div class="step-h">Rectification — 纠错修正</div>
+        <div class="step-p">如果执行失败（异常、结果不合理），LLM <strong>分析错误原因并修正工具代码或调用参数</strong>。这形成了一个自我修复循环：Creation 的错误不会导致整体失败，而是通过 Rectification 迭代改进。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout key">
+    <div class="callout-icon">*</div>
+    <div class="callout-body">
+      <strong>核心洞察——Disentanglement</strong>：传统 CoT 让 LLM 同时做抽象推理和具体计算，两者在 token 序列中交织，互相干扰。CREATOR 通过 Creation 步骤将具体计算提取为可执行代码，LLM 在 Decision 步骤只需做高层规划。这种<strong>抽象-具体解耦</strong>显著降低了每个步骤的认知负担。
+    </div>
+  </div>
+</section>
+
+<!-- 02 与 LATM 对比 -->
+<section class="sec" id="vs-latm">
+  <div class="sec-header">
+    <span class="sec-num">02</span>
+    <div class="sec-line" style="background:var(--blue)"></div>
+    <h2 class="sec-title">与 LATM 对比</h2>
+  </div>
+
+  <div class="two-col">
+    <div class="two-col-card" style="border-left:3px solid var(--accent)">
+      <div class="two-col-label" style="color:var(--accent)">CREATOR</div>
+      <div class="two-col-body">
+        <strong>每个问题都创建专属工具</strong>，tool creation 是推理过程的一部分（在线、per-instance）。不需要工具库或 dispatcher。强调 abstract/concrete 解耦的认知价值。同一个 LLM 同时做 maker 和 user。适合<strong>长尾多样化问题</strong>。
+      </div>
+    </div>
+    <div class="two-col-card" style="border-left:3px solid var(--blue)">
+      <div class="two-col-label" style="color:var(--blue)">LATM</div>
+      <div class="two-col-body">
+        <strong>一次创建、多次复用</strong>。Tool creation 和 usage 解耦为两个独立阶段，使用不同模型（强/弱）。强调成本摊销的经济价值。需要 tool cache 和 dispatcher 机制。适合<strong>可归类的批量任务</strong>。
+      </div>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-icon">i</div>
+    <div class="callout-body">
+      两者并非互斥。CREATOR 的 per-instance creation 可以与 LATM 的 caching 结合：<strong>首次遇到新问题类型时用 CREATOR 流程创建工具，验证有效后存入 LATM cache，后续同类问题直接复用</strong>。这正是 scaffold co-evolution 中 scaffold library 的理想运作方式。
+    </div>
+  </div>
+</section>
+
+<!-- 03 对本研究的启发 -->
+<section class="sec" id="takeaways">
+  <div class="sec-header">
+    <span class="sec-num">03</span>
+    <div class="sec-line" style="background:var(--accent)"></div>
+    <h2 class="sec-title">对本研究的启发</h2>
+  </div>
+
+  <div class="insight-cards">
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--accent)"></div>
+      <div>
+        <div class="insight-title">Abstract-Concrete 解耦指导训练数据设计</div>
+        <div class="insight-body">
+          CREATOR 的 disentanglement 思想对训练数据格式有直接指导：轨迹中应该<strong>显式区分"工具创建/scaffold 定义"步骤和"工具使用/任务执行"步骤</strong>。在 SFT 数据中标注这两个层次，让 model 学会在不同层次上思考，而不是把 scaffold 设计和任务执行混为一体。
+        </div>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--green)"></div>
+      <div>
+        <div class="insight-title">Rectification 循环 = scaffold 的自我修复机制</div>
+        <div class="insight-body">
+          CREATOR 的 Rectification 阶段表明：工具创建不需要一次成功，<strong>iterative refinement 是 tool creation 的自然组成部分</strong>。在 scaffold co-evolution 中，新 scaffold 的"验证-修正"循环应被设计为一等公民，而不是异常处理路径。
+        </div>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--purple)"></div>
+      <div>
+        <div class="insight-title">CREATOR + LATM = scaffold 生命周期的完整模型</div>
+        <div class="insight-body">
+          结合两篇工作：<strong>CREATOR 描述了 scaffold 的诞生过程</strong>（按需创建 + 验证 + 修正），<strong>LATM 描述了 scaffold 的复用机制</strong>（缓存 + 分发 + 成本摊销）。两者拼合就是 scaffold 从创建到成熟的完整生命周期，这正是 scaffold co-evolution 需要实现的。
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+<script>
+const sections = document.querySelectorAll('section.sec[id], .hero[id]');
+const navItems = document.querySelectorAll('nav .nav-item');
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { const id = e.target.id; navItems.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + id)); }});
+}, { rootMargin: '-20% 0px -65% 0px' });
+sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kimi-K2 | 精读笔记</title>
+<style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --highlight: #fef3c7;
+            --code-bg: #f1f5f9;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .paper-header {
+            background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+        .paper-header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 12px; }
+        .paper-header .meta { font-size: 0.85rem; opacity: 0.9; }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.2);
+        }
+        .section {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .section h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+        .section h3 {
+            font-size: 1.1rem;
+            color: var(--text);
+            margin: 20px 0 12px;
+        }
+        .highlight-box {
+            background: var(--highlight);
+            border-left: 4px solid #f59e0b;
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .key-point {
+            background: #eff6ff;
+            border-left: 4px solid var(--primary);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background: var(--code-bg);
+            font-weight: 600;
+            color: var(--text);
+        }
+        tr:hover { background: #f8fafc; }
+        .metric { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+    </style>
+</head>
+<body>
+<div class="container">
+<!-- Header -->
+<div class="paper-header">
+<span class="badge">arXiv:2507.20534</span>
+<span class="badge">July 2025</span>
+<h1>Kimi K2: Open Agentic Intelligence</h1>
+<div class="meta">Moonshot AI | 1T MoE | 15.5T Tokens | MuonClip Optimizer</div>
+</div>
+
+<!-- TL;DR -->
+<div class="section">
+<h2>📌 TL;DR 核心规格</h2>
+<div class="highlight-box">
+<strong>Pre-training Data:</strong> <span class="metric">15.5 trillion tokens</span>
+            <br/>
+            <strong>Model Size:</strong> 1T total / 32B active per token
+            <br/>
+            <strong>Optimizer:</strong> MuonClip (QK-Clip改良版)
+            <br/>
+            <strong>训练稳定性:</strong> 15.5T tokens全程零loss spike
+        </div>
+<div class="key-point">
+<strong>关键创新：</strong>
+            <ul>
+<li>MuonClip优化器：基于Muon改良，引入QK-Clip技术</li>
+<li>WSD学习率调度：10T恒定 + 5.5T衰减</li>
+<li>Agentic能力原生设计</li>
+<li>全开源（权重+技术报告）</li>
+</ul>
+</div>
+</div>
+
+<!-- Pre-training -->
+<div class="section">
+<h2>🎯 Pre-training 详情</h2>
+<table>
+<tr>
+<th>参数</th>
+<th>数值</th>
+</tr>
+<tr>
+<td>总Token数</td>
+<td class="metric">15.5T</td>
+</tr>
+<tr>
+<td>基础上下文</td>
+<td>4,096 tokens</td>
+</tr>
+<tr>
+<td>最终上下文</td>
+<td>128K tokens (YaKN)</td>
+</tr>
+<tr>
+<td>Batch Size (tokens)</td>
+<td>67M</td>
+</tr>
+<tr>
+<td>Weight Decay</td>
+<td>0.1</td>
+</tr>
+</table>
+<h3>学习率调度 (WSD)</h3>
+<table>
+<tr>
+<th>阶段</th>
+<th>Tokens</th>
+<th>学习率</th>
+</tr>
+<tr>
+<td>Warmup</td>
+<td>前500 steps</td>
+<td>线性增长到2e-4</td>
+</tr>
+<tr>
+<td>Stable</td>
+<td>10T</td>
+<td>恒定 2e-4</td>
+</tr>
+<tr>
+<td>Decay</td>
+<td>5.5T</td>
+<td>Cosine decay到2e-5</td>
+</tr>
+</table>
+</div>
+
+<!-- Architecture -->
+<div class="section">
+<h2>🏗️ 架构详情</h2>
+<table>
+<tr>
+<th>组件</th>
+<th>配置</th>
+</tr>
+<tr>
+<td>总参数量</td>
+<td>1T (1 trillion)</td>
+</tr>
+<tr>
+<td>激活参数量</td>
+<td>32B per token</td>
+</tr>
+<tr>
+<td>架构</td>
+<td>Mixture-of-Experts (MoE)</td>
+</tr>
+<tr>
+<td>层数</td>
+<td>61 (1 dense + 60 MoE)</td>
+</tr>
+<tr>
+<td>Attention Hidden Dim</td>
+<td>7,168</td>
+</tr>
+<tr>
+<td>MoE Hidden Dim (per expert)</td>
+<td>2,048</td>
+</tr>
+<tr>
+<td>Attention Heads</td>
+<td>64</td>
+</tr>
+<tr>
+<td>专家数量</td>
+<td>384 total, 8 active</td>
+</tr>
+<tr>
+<td>Shared Experts</td>
+<td>1</td>
+</tr>
+<tr>
+<td>词表大小</td>
+<td>160K</td>
+</tr>
+<tr>
+<td>注意力机制</td>
+<td>MLA (Multi-head Latent Attention)</td>
+</tr>
+</table>
+</div>
+
+<!-- MuonClip Optimizer -->
+<div class="section">
+<h2>⚙️ MuonClip 优化器</h2>
+<div class="highlight-box">
+<strong>核心创新：QK-Clip技术</strong>
+            <br/>
+            在Muon优化器基础上引入QK-Clip，实现训练全程零loss spike
+        </div>
+<h3>MuonClip特点</h3>
+<ul>
+<li><strong>基于Muon：</strong>利用正交梯度更新</li>
+<li><strong>QK-Clip：</strong>对Query/Key进行裁剪，增强稳定性</li>
+<li><strong>零损失尖峰：</strong>15.5T tokens训练无中断</li>
+</ul>
+</div>
+
+<!-- Context Extension -->
+<div class="section">
+<h2>🔄 上下文扩展</h2>
+<h3>Annealing阶段</h3>
+<table>
+<tr>
+<th>阶段</th>
+<th>长度</th>
+<th>Tokens</th>
+</tr>
+<tr>
+<td>Annealing 1</td>
+<td>4K</td>
+<td>400B</td>
+</tr>
+<tr>
+<td>Annealing 2</td>
+<td>32K</td>
+<td>60B</td>
+</tr>
+</table>
+<div class="key-point">
+<strong>扩展方法：</strong>YaKN (Yet another Knowledge-Needed method)
+            <br/>
+            从4K扩展到128K上下文
+        </div>
+</div>
+
+<!-- Performance -->
+<div class="section">
+<h2>📊 关键性能</h2>
+<h3>Agentic能力</h3>
+<table>
+<tr>
+<th>基准</th>
+<th>得分</th>
+</tr>
+<tr>
+<td>Tau2-Bench</td>
+<td class="metric">66.1%</td>
+</tr>
+<tr>
+<td>SWE-Bench Verified</td>
+<td class="metric">65.8%</td>
+</tr>
+<tr>
+<td>SWE-Bench Multilingual</td>
+<td class="metric">47.3%</td>
+</tr>
+</table>
+<h3>推理与代码</h3>
+<table>
+<tr>
+<th>基准</th>
+<th>得分</th>
+</tr>
+<tr>
+<td>AIME 2025</td>
+<td class="metric">49.5%</td>
+</tr>
+<tr>
+<td>GPQA-Diamond</td>
+<td class="metric">75.1%</td>
+</tr>
+<tr>
+<td>LiveCodeBench v6</td>
+<td class="metric">53.7%</td>
+</tr>
+<tr>
+<td>OJBench</td>
+<td class="metric">27.1%</td>
+</tr>
+</table>
+</div>
+
+<!-- Kimi-K2.5 -->
+<div class="section">
+<h2>🔄 Kimi-K2.5 升级</h2>
+<div class="highlight-box">
+<strong>持续预训练：</strong>在Kimi-K2-Base基础上增加约 <span class="metric">15万亿多模态tokens</span>
+        </div>
+<h3>K2.5关键升级</h3>
+<ul>
+<li><strong>多模态：</strong>原生视觉-语言联合训练</li>
+<li><strong>上下文：</strong>256K tokens (翻倍)</li>
+<li><strong>视觉编码器：</strong>MoonViT (400M参数)</li>
+<li><strong>Agent Swarm：</strong>多Agent协作执行</li>
+</ul>
+</div>
+
+<div class="section" style="text-align: center; color: var(--text-light);">
+<p>精读笔记框架 | Kimi K2 Technical Report</p>
+<p>GitHub: https://github.com/MoonshotAI/Kimi-K2.5</p>
+</div>
+</div>
+</body>
+</html>

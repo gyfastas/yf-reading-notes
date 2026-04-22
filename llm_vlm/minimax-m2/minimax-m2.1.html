@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MiniMax M2.1 | 精读笔记</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    :root {
+        --bg-deep: #0a0e17; --bg-card: #111827; --border: rgba(56,189,248,0.12);
+        --border-bright: rgba(56,189,248,0.3); --cyan: #22d3ee; --cyan-dim: rgba(34,211,238,0.15);
+        --blue: #38bdf8; --blue-dim: rgba(56,189,248,0.12); --purple: #a78bfa;
+        --purple-dim: rgba(167,139,250,0.12); --green: #34d399; --green-dim: rgba(52,211,153,0.12);
+        --amber: #fbbf24; --amber-dim: rgba(251,191,36,0.10); --red: #f87171;
+        --red-dim: rgba(248,113,113,0.10); --text: #e2e8f0; --text-dim: #94a3b8; --text-muted: #64748b;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-deep); color: var(--text); line-height: 1.75;
+        background-image: radial-gradient(ellipse 600px 200px at 20% 0%, rgba(167,139,250,0.04) 0%, transparent 100%),
+        radial-gradient(ellipse 400px 300px at 80% 100%, rgba(56,189,248,0.03) 0%, transparent 100%); }
+    .container { max-width: 920px; margin: 0 auto; padding: 48px 24px; }
+    .paper-header { position: relative; background: linear-gradient(135deg, rgba(167,139,250,0.1) 0%, rgba(56,189,248,0.08) 100%);
+        border: 1px solid rgba(167,139,250,0.25); padding: 44px 40px; border-radius: 16px; margin-bottom: 32px; overflow: hidden; }
+    .paper-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+        background: linear-gradient(90deg, var(--purple), var(--blue), var(--purple)); opacity: 0.8; }
+    .paper-header h1 { font-size: 1.85rem; font-weight: 700; margin-bottom: 14px; letter-spacing: -0.02em;
+        background: linear-gradient(135deg, #fff 40%, var(--purple) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .paper-header .meta { font-size: 0.82rem; color: var(--text-dim); }
+    .badge { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; margin-right: 8px; margin-bottom: 10px;
+        background: rgba(167,139,250,0.1); color: var(--purple); border: 1px solid rgba(167,139,250,0.2); letter-spacing: 0.03em; text-transform: uppercase; }
+    .section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 32px; margin-bottom: 24px; transition: border-color 0.3s; }
+    .section:hover { border-color: var(--border-bright); }
+    .section h2 { font-size: 0.95rem; font-weight: 700; color: var(--cyan); margin-bottom: 20px; padding-bottom: 14px;
+        border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.06em; }
+    .section h3 { font-size: 1.02rem; font-weight: 600; color: var(--text); margin: 24px 0 12px; }
+    .section p, .section ul, .section ol { color: var(--text-dim); font-size: 0.92rem; }
+    .section ul, .section ol { padding-left: 20px; } .section li { margin-bottom: 6px; } .section li strong { color: var(--text); }
+    .highlight-box { background: var(--amber-dim); border-left: 3px solid var(--amber); padding: 18px 22px; margin: 18px 0; border-radius: 0 10px 10px 0; font-size: 0.92rem; color: var(--text-dim); }
+    .highlight-box strong { color: var(--amber); }
+    .key-point { background: var(--blue-dim); border-left: 3px solid var(--blue); padding: 18px 22px; margin: 18px 0; border-radius: 0 10px 10px 0; font-size: 0.92rem; color: var(--text-dim); }
+    .key-point strong { color: var(--blue); }
+    .success-box { background: var(--green-dim); border-left: 3px solid var(--green); padding: 18px 22px; margin: 18px 0; border-radius: 0 10px 10px 0; font-size: 0.92rem; color: var(--text-dim); }
+    .success-box strong { color: var(--green); }
+    .purple-box { background: var(--purple-dim); border-left: 3px solid var(--purple); padding: 18px 22px; margin: 18px 0; border-radius: 0 10px 10px 0; font-size: 0.92rem; color: var(--text-dim); }
+    .purple-box strong { color: var(--purple); }
+    .danger-box { background: var(--red-dim); border-left: 3px solid var(--red); padding: 18px 22px; margin: 18px 0; border-radius: 0 10px 10px 0; font-size: 0.92rem; color: var(--text-dim); }
+    .danger-box strong { color: var(--red); }
+    table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 18px 0; font-size: 0.85rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { background: rgba(34,211,238,0.06); font-weight: 600; color: var(--cyan); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; }
+    td { color: var(--text-dim); } td strong { color: var(--text); }
+    tr:last-child td { border-bottom: none; } tr:hover td { background: rgba(56,189,248,0.04); }
+    .metric { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--cyan); font-size: 0.84rem; }
+    .up { color: var(--green) !important; }
+    code { font-family: 'JetBrains Mono', monospace; background: rgba(34,211,238,0.08); border: 1px solid rgba(34,211,238,0.15); padding: 2px 7px; border-radius: 5px; font-size: 0.82em; color: var(--cyan); }
+    .footer-section { text-align: center; color: var(--text-muted); font-size: 0.82rem; padding: 20px; border-top: 1px solid var(--border); margin-top: 8px; }
+    ::selection { background: rgba(167,139,250,0.25); color: #fff; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="paper-header">
+<span class="badge">MiniMax</span>
+<span class="badge">Dec 2025</span>
+<span class="badge">Open Source</span>
+<h1>MiniMax M2.1: Post-Training for<br/>Agent Models</h1>
+<div class="meta">MiniMax | 230B MoE / 10B Active | 128K Context | CISPO | Interleaved Thinking</div>
+</div>
+
+<!-- TL;DR -->
+<div class="section">
+<h2>01 &mdash; TL;DR</h2>
+<div class="highlight-box">
+<strong>核心定位：</strong>在 M2 基础上通过 <strong>CISPO 算法</strong>进行大规模 RL post-training 优化的 Agent 模型。专注于多语言编码和办公自动化场景。SWE-Bench Verified <strong>74%</strong>，成本仅 Claude Sonnet 4.5 的 <strong>1/10</strong>。
+</div>
+<div class="key-point">
+<strong>M1 → M2 → M2.1 架构演进：</strong>
+<ul>
+<li><strong>M1：</strong>456B total / 45.9B active，混合 Linear + Softmax Attention，32 experts</li>
+<li><strong>M2：</strong>230B total / 10B active，纯 Full Attention (MHA + RoPE)，更高效</li>
+<li><strong>M2.1：</strong>架构同 M2，post-training 深度优化（CISPO + 环境交互 RL）</li>
+</ul>
+</div>
+</div>
+
+<!-- Architecture -->
+<div class="section">
+<h2>02 &mdash; 架构</h2>
+<table>
+<tr><th>组件</th><th>配置</th></tr>
+<tr><td><strong>总参数量</strong></td><td class="metric">~230B</td></tr>
+<tr><td><strong>激活参数量</strong></td><td class="metric">~10B per token</td></tr>
+<tr><td><strong>架构</strong></td><td>Transformer MoE</td></tr>
+<tr><td><strong>注意力</strong></td><td>Multi-Head Attention (Full Attention)</td></tr>
+<tr><td><strong>位置编码</strong></td><td>RoPE</td></tr>
+<tr><td><strong>Norm</strong></td><td>RMSNorm</td></tr>
+<tr><td><strong>激活函数</strong></td><td>SiLU (SwiGLU)</td></tr>
+<tr><td><strong>上下文</strong></td><td>128K tokens</td></tr>
+<tr><td><strong>稀疏比</strong></td><td>23:1 (230B total / 10B active)</td></tr>
+</table>
+<div class="key-point">
+<strong>23:1 稀疏比的意义：</strong>推理速度接近 10B dense 模型，但知识容量达 230B 级。支持在消费级硬件（双 RTX 4090）上部署。FP8 原生量化。
+</div>
+</div>
+
+<!-- CISPO -->
+<div class="section">
+<h2>03 &mdash; CISPO 算法（核心创新）</h2>
+<div class="purple-box">
+<strong>CISPO = Context-aware Importance Sampling for Policy Optimization</strong>
+<br/><br/>
+被 Meta 在 "Art of Scaling RL Compute" 中引用。核心区别于 PPO/GRPO：
+</div>
+
+<h3>关键设计</h3>
+<ul>
+<li><strong>序列级 Importance Clipping：</strong>对整条序列而非单个 token 做重要性权重裁剪，避免丢失 "wait" 等话语词的梯度信号</li>
+<li><strong>FP32 Prediction Head：</strong>LLM_head 必须用 FP32 精度，低精度会导致"分段水平线"且与推理结果相关性差</li>
+<li><strong>MIS + PPO 过滤：</strong>用 Multiple Importance Sampling 和 PPO-based 过滤清除长尾分布中的异常统计，稳定工具使用环境下的 RL 训练</li>
+</ul>
+
+<div class="danger-box">
+<strong>为什么 MoE 需要 CISPO：</strong>传统 PPO 在 MoE 上不稳定——不同 expert 的梯度分布差异大，token-level clipping 容易导致 expert 间训练不均衡。CISPO 的序列级操作天然缓解这个问题。
+</div>
+</div>
+
+<!-- Training Data -->
+<div class="section">
+<h2>04 &mdash; 训练数据 & Pipeline</h2>
+
+<h3>SWE Scaling Dataset</h3>
+<table>
+<tr><th>维度</th><th>规模</th></tr>
+<tr><td><strong>编程语言</strong></td><td>10+ 种主要语言</td></tr>
+<tr><td><strong>可运行 PRs</strong></td><td class="metric">10,000+</td></tr>
+<tr><td><strong>增强后任务数</strong></td><td class="metric">140,000+</td></tr>
+<tr><td><strong>验证方式</strong></td><td>F2P/P2P 测试验证 + 模型一致性检查</td></tr>
+</table>
+
+<h3>AppDev & WebExplorer</h3>
+<div class="key-point">
+<strong>Expert-in-the-loop 合成：</strong>
+<ul>
+<li>基于 rubric 的奖励机制</li>
+<li>合成长 horizon 任务，复杂度从 7.9 逐步增至 9.9 推理轮次</li>
+<li>Agent 在真实环境中交互学习（代码仓库、浏览器、API 端点）</li>
+</ul>
+</div>
+
+<h3>Interleaved Thinking</h3>
+<div class="highlight-box">
+<strong>交错思考模式：</strong>使用 <code>&lt;think&gt;...&lt;/think&gt;</code> 标签包裹推理内容。历史对话中必须保留思考标签，删除会损伤性能。这是 M2 系列的特色——不是 "先想��再输出"，而是推理和输出交替进行。
+</div>
+</div>
+
+<!-- Benchmarks -->
+<div class="section">
+<h2>05 &mdash; 性能</h2>
+<table>
+<tr><th>Benchmark</th><th>M2.1</th><th>说明</th></tr>
+<tr><td><strong>SWE-Bench Verified</strong></td><td class="metric">74%</td><td>对标 Claude Sonnet 4.5</td></tr>
+<tr><td><strong>Hot Arena</strong></td><td class="metric up">#1 开源</td><td>开源模型排名第一</td></tr>
+<tr><td><strong>BrowseComp</strong></td><td class="metric">接近 GPT-4.5 SOTA</td><td>带 context management</td></tr>
+<tr><td><strong>多语言编码</strong></td><td colspan="2">Rust / Java / Go / C++ / Kotlin / ObjC / TS / JS</td></tr>
+</table>
+
+<div class="success-box">
+<strong>成本优势：</strong>~$0.30/1M input tokens（Claude Sonnet 4.5: $3.00/1M）。10 倍成本差距，SWE-Bench 性能持平。
+</div>
+</div>
+
+<!-- Takeaway -->
+<div class="section">
+<h2>06 &mdash; 关键启发</h2>
+<div class="success-box">
+<ul>
+<li><strong>CISPO 序列级 clipping：</strong>比 token-level clipping 更适合 MoE + 长序列 RL 场景</li>
+<li><strong>FP32 Prediction Head：</strong>RL 训练中 LLM head 精度不能低于 FP32，否则梯度信号严重退化</li>
+<li><strong>23:1 稀疏比的实用性：</strong>证明了极高稀疏比 MoE 在 Agent 场景下可行（快速多轮调用 = 低延迟 Plan→Code→Run→Fix）</li>
+<li><strong>环境交互 RL > 静态数据：</strong>在真实环境中训练，任务完成率作为 reward，比 preference data 更有效</li>
+</ul>
+</div>
+</div>
+
+<div class="section" style="background: transparent; border: none;">
+<div class="footer-section">
+<p>MiniMax M2.1: Post-Training Experience and Insights for Agent Models</p>
+<p style="margin-top: 4px; font-size: 0.75rem;">MiniMax | Dec 2025 | 精读笔记 2026-03-30</p>
+</div>
+</div>
+
+</div>
+</body>
+</html>

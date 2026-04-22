@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Step 3.5 Flash | 精读笔记</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    :root {
+        --bg-deep: #0a0e17; --bg-card: #111827; --border: rgba(56,189,248,0.12);
+        --border-bright: rgba(56,189,248,0.3); --cyan: #22d3ee; --cyan-dim: rgba(34,211,238,0.15);
+        --blue: #38bdf8; --blue-dim: rgba(56,189,248,0.12); --purple: #a78bfa;
+        --purple-dim: rgba(167,139,250,0.12); --green: #34d399; --green-dim: rgba(52,211,153,0.12);
+        --amber: #fbbf24; --amber-dim: rgba(251,191,36,0.10); --red: #f87171;
+        --red-dim: rgba(248,113,113,0.10); --pink: #f472b6; --pink-dim: rgba(244,114,182,0.10);
+        --text: #e2e8f0; --text-dim: #94a3b8; --text-muted: #64748b;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-deep); color: var(--text); line-height: 1.75;
+        background-image: radial-gradient(ellipse 600px 200px at 20% 0%, rgba(52,211,153,0.04) 0%, transparent 100%),
+        radial-gradient(ellipse 400px 300px at 80% 100%, rgba(56,189,248,0.03) 0%, transparent 100%); }
+    .container { max-width: 920px; margin: 0 auto; padding: 48px 24px; }
+    .paper-header { position: relative; background: linear-gradient(135deg, rgba(52,211,153,0.1) 0%, rgba(56,189,248,0.08) 100%);
+        border: 1px solid rgba(52,211,153,0.25); padding: 44px 40px; border-radius: 16px; margin-bottom: 32px; overflow: hidden; }
+    .paper-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+        background: linear-gradient(90deg, var(--green), var(--cyan), var(--green)); opacity: 0.8; }
+    .paper-header h1 { font-size: 1.85rem; font-weight: 700; margin-bottom: 14px; letter-spacing: -0.02em;
+        background: linear-gradient(135deg, #fff 40%, var(--green) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .paper-header .meta { font-size: 0.82rem; color: var(--text-dim); }
+    .badge { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; margin-right: 8px; margin-bottom: 10px;
+        background: rgba(52,211,153,0.1); color: var(--green); border: 1px solid rgba(52,211,153,0.2); letter-spacing: 0.03em; text-transform: uppercase; }
+    .section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 32px; margin-bottom: 24px; transition: border-color 0.3s; }
+    .section:hover { border-color: var(--border-bright); }
+    .section h2 { font-size: 0.95rem; font-weight: 700; color: var(--cyan); margin-bottom: 20px; padding-bottom: 14px;
+        border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.06em; }
+    .section h3 { font-size: 1.02rem; font-weight: 600; color: var(--text); margin: 24px 0 12px; }
+    .section p, .section ul, .section ol { color: var(--text-dim); font-size: 0.92rem; }
+    .section ul, .section ol { padding-left: 20px; } .section li { margin-bottom: 6px; } .section li strong { color: var(--text); }
+    .highlight-box { background: var(--amber-dim); border-left: 3px solid var(--amber); padding: 18px 22px; margin: 18px 0; border-radius: 0 10px 10px 0; font-size: 0.92rem; color: var(--text-dim); }
+    .highlight-box strong { color: var(--amber); }
+    .key-point { background: var(--blue-dim); border-left: 3px solid var(--blue); padding: 18px 22px; margin: 18px 0; border-radius: 0 10px 10px 0; font-size: 0.92rem; color: var(--text-dim); }
+    .key-point strong { color: var(--blue); }
+    .success-box { background: var(--green-dim); border-left: 3px solid var(--green); padding: 18px 22px; margin: 18px 0; border-radius: 0 10px 10px 0; font-size: 0.92rem; color: var(--text-dim); }
+    .success-box strong { color: var(--green); }
+    .purple-box { background: var(--purple-dim); border-left: 3px solid var(--purple); padding: 18px 22px; margin: 18px 0; border-radius: 0 10px 10px 0; font-size: 0.92rem; color: var(--text-dim); }
+    .purple-box strong { color: var(--purple); }
+    .danger-box { background: var(--red-dim); border-left: 3px solid var(--red); padding: 18px 22px; margin: 18px 0; border-radius: 0 10px 10px 0; font-size: 0.92rem; color: var(--text-dim); }
+    .danger-box strong { color: var(--red); }
+    table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 18px 0; font-size: 0.85rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { background: rgba(34,211,238,0.06); font-weight: 600; color: var(--cyan); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; }
+    td { color: var(--text-dim); } td strong { color: var(--text); }
+    tr:last-child td { border-bottom: none; } tr:hover td { background: rgba(56,189,248,0.04); }
+    .metric { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--cyan); font-size: 0.84rem; }
+    .up { color: var(--green) !important; }
+    code { font-family: 'JetBrains Mono', monospace; background: rgba(34,211,238,0.08); border: 1px solid rgba(34,211,238,0.15); padding: 2px 7px; border-radius: 5px; font-size: 0.82em; color: var(--cyan); }
+    .footer-section { text-align: center; color: var(--text-muted); font-size: 0.82rem; padding: 20px; border-top: 1px solid var(--border); margin-top: 8px; }
+    ::selection { background: rgba(52,211,153,0.25); color: #fff; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="paper-header">
+<span class="badge">StepFun</span>
+<span class="badge">2026</span>
+<span class="badge">Apache 2.0</span>
+<span class="badge">Open Source</span>
+<h1>Step 3.5 Flash: Open Frontier-Level<br/>Intelligence with 11B Active Parameters</h1>
+<div class="meta">StepFun (阶跃星辰) | 196B MoE / 11B Active | 256K Context | MTP-3 | 100-350 tok/s</div>
+</div>
+
+<!-- TL;DR -->
+<div class="section">
+<h2>01 &mdash; TL;DR</h2>
+<div class="highlight-box">
+<strong>核心定位：</strong>Frontier 级推理 + Agent 能力的<strong>高效开源 MoE</strong>。196B 总参数但仅 11B 激活，保持大模型的"记忆容量"同时以小模型的速度推理。全栈开源（权重 + 训练框架 SteptronOss + 预训练 / Mid-training checkpoints）。
+</div>
+<div class="success-box">
+<strong>效率亮点：</strong>
+<ul>
+<li>推理速度 <strong>100-300 tok/s</strong>（编码任务峰值 350 tok/s）</li>
+<li>MTP-3 单次 forward pass 预测 4 tokens</li>
+<li>推理成本约为 DeepSeek-V3.2 的 <strong>1/6</strong></li>
+<li>AIME 2025: <strong>97.3%</strong>, SWE-Bench: <strong>74.4%</strong></li>
+</ul>
+</div>
+</div>
+
+<!-- Architecture -->
+<div class="section">
+<h2>02 &mdash; 架构详情</h2>
+<table>
+<tr><th>组件</th><th>配置</th></tr>
+<tr><td><strong>总参数量</strong></td><td class="metric">196.81B (196B Backbone + 0.81B MTP Head)</td></tr>
+<tr><td><strong>激活参数量</strong></td><td class="metric">~11B per token</td></tr>
+<tr><td><strong>层数</strong></td><td>45</td></tr>
+<tr><td><strong>Hidden Dim</strong></td><td>4,096</td></tr>
+<tr><td><strong>专家配置</strong></td><td>288 routed + 1 shared (always active), Top-8</td></tr>
+<tr><td><strong>词表</strong></td><td>128,896</td></tr>
+<tr><td><strong>上下文</strong></td><td>256K tokens</td></tr>
+<tr><td><strong>注意力</strong></td><td>3:1 SWA ratio (3 sliding-window : 1 full attention)</td></tr>
+<tr><td><strong>SWA Window Size</strong></td><td>512</td></tr>
+</table>
+
+<h3>MoE 设计</h3>
+<div class="key-point">
+<strong>Fine-Grained 路由：</strong>288 个 routed experts + 1 个 always-on shared expert。每 token Top-8 选择。
+<br/><br/>
+<strong>效果：</strong>保留 196B 模型的"知识容量"，但推理开销仅 ~11B 密集模型水平。
+</div>
+
+<h3>3:1 Sliding Window Attention</h3>
+<div class="key-point">
+<strong>混合注意力：</strong>每 4 层中 3 层用 Sliding Window (window=512)，1 层用 Full Attention。
+<br/><br/>
+<strong>优势：</strong>大幅降低长上下文计算开销（256K context），同时通过 full attention 层保持全局信息聚合。
+</div>
+
+<h3>MTP-3 (Multi-Token Prediction)</h3>
+<div class="purple-box">
+<strong>MTP Head 结构：</strong>Sliding-window attention + Dense FFN，单次 forward pass 预测 4 个 tokens。
+<br/><br/>
+<strong>Head 参数：</strong>0.81B（独立于 backbone 的 196B）
+<br/><br/>
+<strong>速度收益：</strong>100-300 tok/s 常规使用，编码任务峰值 350 tok/s。
+</div>
+</div>
+
+<!-- Training -->
+<div class="section">
+<h2>03 &mdash; 训练</h2>
+<div class="highlight-box">
+<strong>全栈开源：</strong>StepFun 开源了完整训练栈 —— 预训练权重、Mid-training ��重（<code>Step-3.5-Flash-Base-Midtrain</code>）、训练框架 SteptronOss（支持 continue pretrain / SFT / RL）。
+</div>
+
+<h3>训练方法</h3>
+<ul>
+<li><strong>Scalable RL Framework：</strong>集成的可扩展强化学习框架，驱动持续自我改进</li>
+<li><strong>On-Policy Distillation：</strong>推进变体以提高样本效率</li>
+<li><strong>Purpose-built for Agent：</strong>RL 框架原生面向 agentic 任务设计</li>
+</ul>
+
+<div class="danger-box">
+<strong>已知局限：</strong>当前依赖比 Gemini 3.0 Pro 更长的生成轨迹来达到同等质量。未来通过 on-policy distillation 优化 token 效率。
+</div>
+</div>
+
+<!-- Benchmarks -->
+<div class="section">
+<h2>04 &mdash; Benchmark 性能</h2>
+
+<h3>推理</h3>
+<table>
+<tr><th>Benchmark</th><th>Score</th></tr>
+<tr><td><strong>AIME 2025</strong></td><td class="metric up">97.3</td></tr>
+<tr><td><strong>HMMT 2025 (Feb)</strong></td><td class="metric">98.4</td></tr>
+<tr><td><strong>HMMT 2025 (Nov)</strong></td><td class="metric">94.0</td></tr>
+<tr><td><strong>IMO-AnswerBench</strong></td><td class="metric">85.4</td></tr>
+<tr><td><strong>GPQA Diamond</strong></td><td class="metric">83.5</td></tr>
+<tr><td><strong>MMLU Pro</strong></td><td class="metric">84.4</td></tr>
+</table>
+
+<h3>代码</h3>
+<table>
+<tr><th>Benchmark</th><th>Score</th></tr>
+<tr><td><strong>LiveCodeBench-V6</strong></td><td class="metric">86.4</td></tr>
+<tr><td><strong>SWE-Bench Verified</strong></td><td class="metric">74.4</td></tr>
+<tr><td><strong>Terminal-Bench 2.0</strong></td><td class="metric">51.0</td></tr>
+</table>
+
+<h3>Agent</h3>
+<table>
+<tr><th>Benchmark</th><th>Score</th></tr>
+<tr><td><strong>Tau2-Bench</strong></td><td class="metric up">88.2</td></tr>
+<tr><td><strong>BrowseComp (w/ CM)</strong></td><td class="metric">69.0</td></tr>
+<tr><td><strong>BrowseComp (raw)</strong></td><td class="metric">51.6</td></tr>
+<tr><td><strong>GAIA (no file)</strong></td><td class="metric">84.5</td></tr>
+<tr><td><strong>xbench-DeepSearch</strong></td><td class="metric">83.7</td></tr>
+</table>
+</div>
+
+<!-- Efficiency Comparison -->
+<div class="section">
+<h2>05 &mdash; 效率对比</h2>
+<table>
+<tr><th>指标</th><th>Step 3.5 Flash</th><th>对比</th></tr>
+<tr><td><strong>激活参数</strong></td><td class="metric">11B</td><td>DeepSeek-V3: 37B, K2: 32B</td></tr>
+<tr><td><strong>总参数</strong></td><td>196B</td><td>DeepSeek-V3: 671B, K2: 1T</td></tr>
+<tr><td><strong>推理速度</strong></td><td class="metric up">100-350 tok/s</td><td>—</td></tr>
+<tr><td><strong>成本 vs DSV3.2</strong></td><td class="metric up">1/6</td><td>—</td></tr>
+<tr><td><strong>量化部署</strong></td><td>INT4: 111.5GB VRAM</td><td>可在 Mac Studio M4 Max 上运行</td></tr>
+</table>
+</div>
+
+<!-- Takeaway -->
+<div class="section">
+<h2>06 &mdash; 关键启发</h2>
+<div class="success-box">
+<ul>
+<li><strong>Fine-grained MoE (288 experts)：</strong>比 DeepSeek-V3 的 256 更细粒度，配合 Top-8 实现极低激活比</li>
+<li><strong>3:1 SWA 是长上下文的高效方案：</strong>不需要全部层做 full attention，混合策略大幅降成本</li>
+<li><strong>MTP 是推理加速的关键：</strong>4-token 预测 + speculative decoding 协同实现 3x+ 加速</li>
+<li><strong>Mid-training checkpoint 开源：</strong>社区可从 mid-train 阶段开始定制化训练</li>
+</ul>
+</div>
+</div>
+
+<div class="section" style="background: transparent; border: none;">
+<div class="footer-section">
+<p>Step 3.5 Flash: Open Frontier-Level Intelligence with 11B Active Parameters</p>
+<p style="margin-top: 4px; font-size: 0.75rem;">StepFun | Apache 2.0 | 精读笔记 2026-03-30</p>
+</div>
+</div>
+
+</div>
+</body>
+</html>

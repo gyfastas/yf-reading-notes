@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent评估环境与评估集推荐指南 - AgentGym</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #06b6d4;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --code-bg: #f1f5f9;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.8;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 50px 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .header .links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            font-size: 0.9em;
+        }
+
+        .header .links a {
+            color: white;
+            text-decoration: none;
+            padding: 6px 12px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 6px;
+        }
+
+        .section {
+            background: var(--card);
+            padding: 35px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .section h2 {
+            color: var(--primary-dark);
+            font-size: 1.6em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .section h3 {
+            color: var(--text);
+            font-size: 1.25em;
+            margin: 25px 0 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.95em;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--bg);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: var(--bg);
+        }
+
+        .box {
+            padding: 18px;
+            border-radius: 8px;
+            margin: 18px 0;
+        }
+
+        .box.info {
+            background: #eff6ff;
+            border-left: 4px solid var(--primary);
+        }
+
+        .box.success {
+            background: #ecfdf5;
+            border-left: 4px solid var(--success);
+        }
+
+        .box.warning {
+            background: #fffbeb;
+            border-left: 4px solid var(--warning);
+        }
+
+        .diagram {
+            background: var(--code-bg);
+            padding: 20px;
+            border-radius: 8px;
+            font-family: "Fira Code", monospace;
+            white-space: pre;
+            overflow-x: auto;
+            margin: 20px 0;
+            line-height: 1.5;
+        }
+
+        .env-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .env-card {
+            background: var(--bg);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .env-card h4 {
+            margin: 0 0 8px;
+            color: var(--primary-dark);
+        }
+
+        .env-card p {
+            font-size: 0.9em;
+            color: var(--text-light);
+            margin: 0;
+        }
+
+        .stars {
+            color: var(--warning);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-light);
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            .section {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Agent评估环境与评估集推荐指南</h1>
+            <div class="subtitle">基于 AgentGym 论文 (arXiv:2406.04151, ACL 2025) 的实践指南</div>
+            <div class="links">
+                <a href="https://arxiv.org/abs/2406.04151" target="_blank">论文</a>
+                <a href="https://github.com/WooooDyy/AgentGym" target="_blank">GitHub</a>
+                <a href="https://agentgym.github.io/" target="_blank">项目主页</a>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>1. 概述</h2>
+            <div class="box info">
+                AgentGym 提供了一个包含 <strong>14个环境</strong>、<strong>89个任务类型</strong> 的综合评估平台。本指南基于论文中的实验设计，为不同研究目标提供环境选择和评估集构建的推荐。
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>2. 环境分类与能力维度</h2>
+
+            <h3>2.1 环境分类总览</h3>
+            <table>
+                <tr>
+                    <th>类别</th>
+                    <th>环境</th>
+                    <th>任务数</th>
+                    <th>评估实例</th>
+                    <th>核心测试能力</th>
+                </tr>
+                <tr>
+                    <td rowspan="2"><strong>网页交互</strong></td>
+                    <td>WebShop</td>
+                    <td>1</td>
+                    <td>200</td>
+                    <td>电商搜索、信息提取、决策</td>
+                </tr>
+                <tr>
+                    <td>WebArena</td>
+                    <td>3</td>
+                    <td>20</td>
+                    <td>真实网页导航、复杂操作</td>
+                </tr>
+                <tr>
+                    <td rowspan="2"><strong>文本游戏</strong></td>
+                    <td>MAZE</td>
+                    <td>1</td>
+                    <td>25</td>
+                    <td>空间导航、路径规划</td>
+                </tr>
+                <tr>
+                    <td>Wordle</td>
+                    <td>1</td>
+                    <td>25</td>
+                    <td>字母级推理、约束满足</td>
+                </tr>
+                <tr>
+                    <td rowspan="3"><strong>具身智能</strong></td>
+                    <td>ALFWorld</td>
+                    <td>6</td>
+                    <td>200</td>
+                    <td>家务任务、常识推理</td>
+                </tr>
+                <tr>
+                    <td>SciWorld</td>
+                    <td>30</td>
+                    <td>200</td>
+                    <td>科学推理、实验操作</td>
+                </tr>
+                <tr>
+                    <td>BabyAI</td>
+                    <td>40</td>
+                    <td>90</td>
+                    <td>指令跟随、视觉-动作映射</td>
+                </tr>
+                <tr>
+                    <td><strong>数字游戏</strong></td>
+                    <td>TextCraft</td>
+                    <td>1</td>
+                    <td>100</td>
+                    <td>组合推理、crafting</td>
+                </tr>
+                <tr>
+                    <td rowspan="5"><strong>工具使用</strong></td>
+                    <td>Weather</td>
+                    <td>1</td>
+                    <td>20</td>
+                    <td>API调用、天气查询</td>
+                </tr>
+                <tr>
+                    <td>Movie</td>
+                    <td>1</td>
+                    <td>20</td>
+                    <td>电影数据库查询</td>
+                </tr>
+                <tr>
+                    <td>Academia</td>
+                    <td>1</td>
+                    <td>20</td>
+                    <td>学术搜索</td>
+                </tr>
+                <tr>
+                    <td>TODOList</td>
+                    <td>1</td>
+                    <td>20</td>
+                    <td>日程管理</td>
+                </tr>
+                <tr>
+                    <td>Sheet</td>
+                    <td>1</td>
+                    <td>20</td>
+                    <td>电子表格操作</td>
+                </tr>
+                <tr>
+                    <td><strong>编程</strong></td>
+                    <td>BIRD-SQL</td>
+                    <td>1</td>
+                    <td>200</td>
+                    <td>SQL生成、数据库查询</td>
+                </tr>
+            </table>
+
+            <h3>2.2 能力维度映射</h3>
+            <div class="diagram">
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        Agent能力评估维度                                 │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  1. 网页导航与操作 (Web Navigation)                                      │
+│     └── WebShop, WebArena                                               │
+│     └── 测试：搜索策略、信息提取、表单填写、多页面导航                      │
+│                                                                         │
+│  2. 空间推理与导航 (Spatial Reasoning)                                   │
+│     └── MAZE, BabyAI                                                    │
+│     └── 测试：路径规划、空间记忆、相对位置理解                             │
+│                                                                         │
+│  3. 常识推理 (Common Sense Reasoning)                                    │
+│     └── ALFWorld                                                        │
+│     └── 测试：日常物品使用、房间布局理解、任务分解                          │
+│                                                                         │
+│  4. 科学推理 (Scientific Reasoning)                                      │
+│     └── SciWorld                                                        │
+│     └── 测试：实验设计、测量仪器使用、物理/化学概念                         │
+│                                                                         │
+│  5. 组合推理 (Compositional Reasoning)                                   │
+│     └── TextCraft, Wordle                                               │
+│     └── 测试：多步组合、约束满足、递归规划                                 │
+│                                                                         │
+│  6. 工具使用与API调用 (Tool Using)                                       │
+│     └── Weather, Movie, Academia, TODOList, Sheet                       │
+│     └── 测试：API选择、参数填充、工具链组合                                │
+│                                                                         │
+│  7. 代码生成 (Code Generation)                                           │
+│     └── BIRD-SQL                                                        │
+│     └── 测试：自然语言到SQL、数据库理解、复杂查询                           │
+│                                                                         │
+│  8. 指令跟随 (Instruction Following)                                     │
+│     └── BabyAI, ALFWorld                                                │
+│     └── 测试：复杂指令解析、多约束满足、动作序列                            │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>3. 按研究目标推荐环境组合</h2>
+
+            <h3>3.1 目标：评估通用Agent能力</h3>
+            <div class="box success">
+                <strong>推荐组合：</strong>WebShop + ALFWorld + SciWorld + Weather + BIRD-SQL
+            </div>
+            <table>
+                <tr>
+                    <th>环境</th>
+                    <th>数量</th>
+                    <th>目的</th>
+                </tr>
+                <tr>
+                    <td>WebShop</td>
+                    <td>200</td>
+                    <td>测试网页交互和信息检索</td>
+                </tr>
+                <tr>
+                    <td>ALFWorld</td>
+                    <td>200</td>
+                    <td>测试常识推理和家务任务</td>
+                </tr>
+                <tr>
+                    <td>SciWorld</td>
+                    <td>200</td>
+                    <td>测试科学推理和实验操作</td>
+                </tr>
+                <tr>
+                    <td>Weather</td>
+                    <td>20</td>
+                    <td>测试基础工具使用</td>
+                </tr>
+                <tr>
+                    <td>BIRD-SQL</td>
+                    <td>200</td>
+                    <td>测试代码生成能力</td>
+                </tr>
+                <tr style="background: #ecfdf5;">
+                    <td><strong>总计</strong></td>
+                    <td><strong>820</strong></td>
+                    <td><strong>覆盖5大核心能力维度</strong></td>
+                </tr>
+            </table>
+
+            <h3>3.2 目标：评估网页Agent</h3>
+            <div class="box info">
+                <strong>推荐组合：</strong>WebShop (200) + WebArena (20)
+            </div>
+            <ul>
+                <li><strong>WebShop：</strong>商品搜索、属性匹配、价格筛选（最大10轮）</li>
+                <li><strong>WebArena：</strong>信息检索、跨站点导航、内容管理（最大25轮）</li>
+            </ul>
+
+            <h3>3.3 目标：评估具身Agent</h3>
+            <div class="box info">
+                <strong>推荐组合：</strong>ALFWorld + SciWorld + BabyAI
+            </div>
+            <table>
+                <tr>
+                    <th>环境</th>
+                    <th>任务类型</th>
+                    <th>评估实例</th>
+                    <th>平均轮数</th>
+                </tr>
+                <tr>
+                    <td>ALFWorld</td>
+                    <td>6</td>
+                    <td>200</td>
+                    <td>13.3</td>
+                </tr>
+                <tr>
+                    <td>SciWorld</td>
+                    <td>30</td>
+                    <td>200</td>
+                    <td>19.9</td>
+                </tr>
+                <tr>
+                    <td>BabyAI</td>
+                    <td>40</td>
+                    <td>90</td>
+                    <td>5.7</td>
+                </tr>
+            </table>
+
+            <h3>3.4 目标：快速原型验证</h3>
+            <div class="box warning">
+                <strong>推荐组合：</strong>WebShop (200) + ALFWorld (200) + Weather (20)
+                <br>总计420实例，覆盖网页、具身、工具三类场景，适合快速验证
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>4. AgentEval 基准测试设计建议</h2>
+
+            <h3>4.1 推荐评估集配比</h3>
+            <div class="diagram">
+┌─────────────────────────────────────────────────────────────┐
+│                   AgentEval 推荐配比                         │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  网页交互 (30%)                                              │
+│  ├── WebShop: 200实例                                        │
+│  └── WebArena: 20实例                                        │
+│                                                             │
+│  具身智能 (35%)                                              │
+│  ├── ALFWorld: 200实例                                       │
+│  ├── SciWorld: 200实例                                       │
+│  └── BabyAI: 90实例                                          │
+│                                                             │
+│  工具使用 (15%)                                              │
+│  ├── Weather: 20实例                                         │
+│  ├── Movie: 20实例                                           │
+│  └── TODOList: 20实例                                        │
+│                                                             │
+│  推理与游戏 (10%)                                            │
+│  ├── MAZE: 25实例                                            │
+│  ├── Wordle: 25实例                                          │
+│  └── TextCraft: 100实例                                      │
+│                                                             │
+│  编程 (10%)                                                  │
+│  └── BIRD-SQL: 200实例                                       │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+            </div>
+
+            <h3>4.2 评估指标设计</h3>
+            <table>
+                <tr>
+                    <th>指标类型</th>
+                    <th>具体指标</th>
+                    <th>适用环境</th>
+                </tr>
+                <tr>
+                    <td><strong>成功率</strong></td>
+                    <td>Success Rate</td>
+                    <td>所有环境</td>
+                </tr>
+                <tr>
+                    <td><strong>奖励</strong></td>
+                    <td>Reward</td>
+                    <td>SciWorld, BabyAI</td>
+                </tr>
+                <tr>
+                    <td><strong>轮数效率</strong></td>
+                    <td>Avg Rounds</td>
+                    <td>所有环境</td>
+                </tr>
+                <tr>
+                    <td><strong>工具调用准确率</strong></td>
+                    <td>Tool Accuracy</td>
+                    <td>Tool环境</td>
+                </tr>
+                <tr>
+                    <td><strong>SQL准确率</strong></td>
+                    <td>SQL Accuracy</td>
+                    <td>BIRD-SQL</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>5. 环境复杂度分级</h2>
+
+            <h3>5.1 高复杂度环境（长程交互）</h3>
+            <table>
+                <tr>
+                    <th>环境</th>
+                    <th>最大轮数</th>
+                    <th>平均轮数</th>
+                    <th>难度</th>
+                </tr>
+                <tr>
+                    <td>SciWorld</td>
+                    <td>30</td>
+                    <td>19.9</td>
+                    <td class="stars">⭐⭐⭐⭐⭐</td>
+                </tr>
+                <tr>
+                    <td>ALFWorld</td>
+                    <td>30</td>
+                    <td>13.3</td>
+                    <td class="stars">⭐⭐⭐⭐</td>
+                </tr>
+                <tr>
+                    <td>WebArena</td>
+                    <td>25</td>
+                    <td>-</td>
+                    <td class="stars">⭐⭐⭐⭐⭐</td>
+                </tr>
+                <tr>
+                    <td>BabyAI</td>
+                    <td>20</td>
+                    <td>5.7</td>
+                    <td class="stars">⭐⭐⭐</td>
+                </tr>
+            </table>
+
+            <h3>5.2 中等复杂度环境</h3>
+            <table>
+                <tr>
+                    <th>环境</th>
+                    <th>最大轮数</th>
+                    <th>平均轮数</th>
+                    <th>难度</th>
+                </tr>
+                <tr>
+                    <td>WebShop</td>
+                    <td>10</td>
+                    <td>5.1</td>
+                    <td class="stars">⭐⭐⭐</td>
+                </tr>
+                <tr>
+                    <td>TextCraft</td>
+                    <td>-</td>
+                    <td>8.0</td>
+                    <td class="stars">⭐⭐⭐</td>
+                </tr>
+                <tr>
+                    <td>TODOList</td>
+                    <td>15</td>
+                    <td>5.6</td>
+                    <td class="stars">⭐⭐</td>
+                </tr>
+            </table>
+
+            <h3>5.3 低复杂度环境（快速验证）</h3>
+            <div class="env-grid">
+                <div class="env-card">
+                    <h4>MAZE</h4>
+                    <p>最大15轮 | 平均4.3轮<br>空间导航快速测试</p>
+                </div>
+                <div class="env-card">
+                    <h4>Wordle</h4>
+                    <p>最大8轮 | 平均4.3轮<br>字母推理快速测试</p>
+                </div>
+                <div class="env-card">
+                    <h4>Movie</h4>
+                    <p>最大12轮 | 平均4.0轮<br>工具使用快速测试</p>
+                </div>
+                <div class="env-card">
+                    <h4>BIRD-SQL</h4>
+                    <p>单轮任务<br>SQL生成快速测试</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>6. 实用建议</h2>
+
+            <h3>6.1 环境选择检查清单</h3>
+            <div class="box info">
+                <ul style="margin: 0; padding-left: 20px;">
+                    <li><strong>研究目标明确：</strong>是测试通用能力还是特定能力？</li>
+                    <li><strong>计算资源评估：</strong>长程环境（如SciWorld）需要更多计算资源</li>
+                    <li><strong>评估时间预算：</strong>完整AgentEval（1160实例）需要约1小时测试时间</li>
+                    <li><strong>基线对比需求：</strong>是否需要与AgentEvol等方法对比？</li>
+                    <li><strong>数据需求：</strong>是否需要使用AgentTraj进行预训练？</li>
+                </ul>
+            </div>
+
+            <h3>6.2 常见误区避免</h3>
+            <div class="box warning">
+                <ol style="margin: 0; padding-left: 20px;">
+                    <li><strong>不要只选简单环境：</strong>MAZE和Wordle虽然简单，但无法代表Agent的通用能力</li>
+                    <li><strong>不要忽略工具环境：</strong>Weather、Movie等工具环境是测试Agent实用能力的重要组成</li>
+                    <li><strong>注意环境依赖性：</strong>部分环境需要外部API（Weather、Movie），确保网络连接</li>
+                    <li><strong>考虑评估成本：</strong>WebArena使用真实网站，可能需要更多调试时间</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Agent评估环境推荐指南 | 基于 AgentGym 论文 (ACL 2025)</p>
+            <p>整理日期: 2026-03-18</p>
+        </div>
+    </div>
+</body>
+</html>

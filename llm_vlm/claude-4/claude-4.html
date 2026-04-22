@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Claude 4 | 精读笔记</title>
+<style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --highlight: #fef3c7;
+            --code-bg: #f1f5f9;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .paper-header {
+            background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+        .paper-header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 12px; }
+        .paper-header .meta { font-size: 0.85rem; opacity: 0.9; }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.2);
+        }
+        .section {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .section h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+        .section h3 {
+            font-size: 1.1rem;
+            color: var(--text);
+            margin: 20px 0 12px;
+        }
+        .highlight-box {
+            background: var(--highlight);
+            border-left: 4px solid #f59e0b;
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .key-point {
+            background: #eff6ff;
+            border-left: 4px solid var(--primary);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background: var(--code-bg);
+            font-weight: 600;
+            color: var(--text);
+        }
+        tr:hover { background: #f8fafc; }
+        .metric { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+        .model-card {
+            background: var(--code-bg);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 12px 0;
+            border-left: 4px solid var(--danger);
+        }
+        .model-card h4 {
+            color: var(--danger);
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+<!-- Header -->
+<div class="paper-header">
+<span class="badge">System Card 2025</span>
+<span class="badge">May 2025</span>
+<h1>Claude 4: Opus 4 & Sonnet 4</h1>
+<div class="meta">Anthropic | Hybrid Reasoning | 200K Context | Extended Thinking</div>
+</div>
+
+<!-- TL;DR -->
+<div class="section">
+<h2>📌 TL;DR 核心规格</h2>
+<div class="highlight-box">
+<strong>发布日期：</strong> 2025年5月22日 (Sonnet 4)
+            <br/>
+            <strong>上下文窗口：</strong> <span class="metric">200,000 tokens</span>
+            <br/>
+            <strong>扩展推理：</strong> 最高~1,000,000 tokens
+            <br/>
+            <strong>架构：</strong> Dense Transformer (非MoE)
+        </div>
+<div class="key-point">
+<strong>关键创新：</strong>
+            <ul>
+<li>混合双模式推理：快速模式 vs 扩展思考模式</li>
+<li>Memory Files：外部工作笔记持久化</li>
+<li>工具使用原生集成</li>
+<li>Constitutional Classifier：95%越狱拦截率</li>
+</ul>
+</div>
+</div>
+
+<!-- Model Variants -->
+<div class="section">
+<h2>🎭 Claude 4 模型系列</h2>
+<div class="model-card">
+<h4>Claude 4 Opus</h4>
+<table>
+<tr><td>定位</td><td>最强推理能力</td></tr>
+<tr><td>架构</td><td>Dense Transformer</td></tr>
+<tr><td>上下文</td><td>200K tokens</td></tr>
+<tr><td>扩展思考</td><td>支持~1M tokens</td></tr>
+</table>
+</div>
+<div class="model-card">
+<h4>Claude 4 Sonnet</h4>
+<table>
+<tr><td>定位</td><td>性能与效率平衡</td></tr>
+<tr><td>发布日期</td><td>2025年5月22日</td></tr>
+<tr><td>知识截止</td><td>2025年3月</td></tr>
+<tr><td>上下文</td><td>200K tokens</td></tr>
+</table>
+</div>
+</div>
+
+<!-- Architecture -->
+<div class="section">
+<h2>🏗️ 架构特点</h2>
+<table>
+<tr>
+<th>特性</th>
+<th>配置</th>
+</tr>
+<tr>
+<td>架构类型</td>
+<td>Dense (非MoE)</td>
+</tr>
+<tr>
+<td>上下文窗口</td>
+<td>200,000 tokens</td>
+</tr>
+<tr>
+<td>扩展推理</td>
+<td>~1,000,000 tokens</td>
+</tr>
+<tr>
+<td>工具使用</td>
+<td>原生集成</td>
+</tr>
+</table>
+<div class="key-point">
+<strong>注：</strong> Anthropic未公开披露Claude 4的具体预训练token数量、参数量等细节
+        </div>
+</div>
+
+<!-- Hybrid Reasoning -->
+<div class="section">
+<h2>🧠 混合双模式推理</h2>
+<h3>快速模式 (Fast Mode)</h3>
+<ul>
+<li>近乎即时的响应</li>
+<li>适合日常对话、简单任务</li>
+<li>低延迟</li>
+</ul>
+<h3>扩展思考模式 (Extended Thinking)</h3>
+<ul>
+<li>深度推理链</li>
+<li>复杂问题分解</li>
+<li>自我验证与修正</li>
+<li>支持~1M tokens上下文</li>
+</ul>
+</div>
+
+<!-- Memory -->
+<div class="section">
+<h2>💾 Memory Files</h2>
+<div class="highlight-box">
+<strong>外部工作笔记：</strong> Claude 4可创建外部"工作笔记"文件，实现长期任务连续性
+        </div>
+<h3>应用场景</h3>
+<ul>
+<li>长期项目跟踪</li>
+<li>复杂多会话任务</li>
+<li>知识积累与引用</li>
+<li>跨对话状态保持</li>
+</ul>
+</div>
+
+<!-- Tool Use -->
+<div class="section">
+<h2>🔧 工具使用</h2>
+<h3>内置工具</h3>
+<ul>
+<li><strong>Web搜索：</strong> 联网信息检索</li>
+<li><strong>代码执行：</strong> 沙箱代码运行</li>
+<li><strong>文件读取：</strong> 分析上传文档</li>
+</ul>
+<h3>工具调用特点</h3>
+<ul>
+<li>推理过程中自主决定工具使用</li>
+<li>多工具链组合</li>
+<li>结果验证与迭代</li>
+</ul>
+</div>
+
+<!-- Safety -->
+<div class="section">
+<h2>🛡️ Constitutional Classifier</h2>
+<div class="highlight-box">
+<strong>安全系统升级：</strong> 新的Constitutional Classifier可拦截95%的越狱尝试
+        </div>
+<h3>安全特性</h3>
+<ul>
+<li>基于Constitutional AI原则</li>
+<li>实时有害内容检测</li>
+<li>对抗性提示防护</li>
+<li>透明拒绝机制</li>
+</ul>
+</div>
+
+<!-- Performance -->
+<div class="section">
+<h2>📊 性能表现</h2>
+<table>
+<tr>
+<th>基准</th>
+<th>表现</th>
+</tr>
+<tr>
+<td>推理任务</td>
+<td>业界领先</td>
+</tr>
+<tr>
+<td>代码生成</td>
+<td>顶级水平</td>
+</tr>
+<tr>
+<td>长上下文理解</td>
+<td>200K-1M tokens</td>
+</tr>
+<tr>
+<td>工具使用</td>
+<td>Agentic能力增强</td>
+</tr>
+</table>
+</div>
+
+<div class="section" style="text-align: center; color: var(--text-light);">
+<p>精读笔记框架 | Claude 4 System Card</p>
+<p>Anthropic: https://www.anthropic.com/</p>
+</div>
+</div>
+</body>
+</html>

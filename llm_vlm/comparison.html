@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>主流基座模型对比 | 精读笔记</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    :root {
+        --bg-deep: #0a0e17; --bg-card: #111827; --border: rgba(56,189,248,0.12);
+        --border-bright: rgba(56,189,248,0.3); --cyan: #22d3ee; --cyan-dim: rgba(34,211,238,0.15);
+        --blue: #38bdf8; --blue-dim: rgba(56,189,248,0.12); --purple: #a78bfa;
+        --purple-dim: rgba(167,139,250,0.12); --green: #34d399; --green-dim: rgba(52,211,153,0.12);
+        --amber: #fbbf24; --amber-dim: rgba(251,191,36,0.10); --red: #f87171;
+        --red-dim: rgba(248,113,113,0.10); --pink: #f472b6; --pink-dim: rgba(244,114,182,0.10);
+        --text: #e2e8f0; --text-dim: #94a3b8; --text-muted: #64748b;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-deep); color: var(--text); line-height: 1.75;
+        background-image: radial-gradient(ellipse 600px 200px at 10% 0%, rgba(34,211,238,0.04) 0%, transparent 100%),
+        radial-gradient(ellipse 400px 300px at 90% 100%, rgba(167,139,250,0.03) 0%, transparent 100%); }
+    .container { max-width: 1060px; margin: 0 auto; padding: 48px 24px; }
+    .paper-header { position: relative; background: linear-gradient(135deg, rgba(34,211,238,0.08) 0%, rgba(167,139,250,0.08) 100%);
+        border: 1px solid var(--border-bright); padding: 44px 40px; border-radius: 16px; margin-bottom: 32px; overflow: hidden; }
+    .paper-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+        background: linear-gradient(90deg, var(--cyan), var(--purple), var(--amber), var(--green), var(--cyan)); opacity: 0.8; }
+    .paper-header h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 14px; letter-spacing: -0.02em;
+        background: linear-gradient(135deg, #fff 30%, var(--cyan) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .paper-header .meta { font-size: 0.8rem; color: var(--text-dim); line-height: 1.6; }
+    .badge { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; margin-right: 6px; margin-bottom: 8px;
+        background: rgba(34,211,238,0.1); color: var(--cyan); border: 1px solid rgba(34,211,238,0.2); letter-spacing: 0.03em; text-transform: uppercase; }
+    .section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 32px; margin-bottom: 24px; transition: border-color 0.3s; }
+    .section:hover { border-color: var(--border-bright); }
+    .section h2 { font-size: 0.95rem; font-weight: 700; color: var(--cyan); margin-bottom: 20px; padding-bottom: 14px;
+        border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.06em; }
+    .section h3 { font-size: 1.02rem; font-weight: 600; color: var(--text); margin: 24px 0 12px; }
+    .section p, .section ul, .section ol { color: var(--text-dim); font-size: 0.9rem; }
+    .section ul, .section ol { padding-left: 20px; } .section li { margin-bottom: 6px; } .section li strong { color: var(--text); }
+    .highlight-box { background: var(--amber-dim); border-left: 3px solid var(--amber); padding: 18px 22px; margin: 18px 0; border-radius: 0 10px 10px 0; font-size: 0.9rem; color: var(--text-dim); }
+    .highlight-box strong { color: var(--amber); }
+    .key-point { background: var(--blue-dim); border-left: 3px solid var(--blue); padding: 18px 22px; margin: 18px 0; border-radius: 0 10px 10px 0; font-size: 0.9rem; color: var(--text-dim); }
+    .key-point strong { color: var(--blue); }
+    .success-box { background: var(--green-dim); border-left: 3px solid var(--green); padding: 18px 22px; margin: 18px 0; border-radius: 0 10px 10px 0; font-size: 0.9rem; color: var(--text-dim); }
+    .success-box strong { color: var(--green); }
+    .purple-box { background: var(--purple-dim); border-left: 3px solid var(--purple); padding: 18px 22px; margin: 18px 0; border-radius: 0 10px 10px 0; font-size: 0.9rem; color: var(--text-dim); }
+    .purple-box strong { color: var(--purple); }
+    .danger-box { background: var(--red-dim); border-left: 3px solid var(--red); padding: 18px 22px; margin: 18px 0; border-radius: 0 10px 10px 0; font-size: 0.9rem; color: var(--text-dim); }
+    .danger-box strong { color: var(--red); }
+
+    table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 18px 0; font-size: 0.8rem; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { background: rgba(34,211,238,0.06); font-weight: 600; color: var(--cyan); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; position: sticky; top: 0; }
+    td { color: var(--text-dim); } td strong { color: var(--text); }
+    tr:last-child td { border-bottom: none; } tr:hover td { background: rgba(56,189,248,0.04); }
+    .m { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--cyan); font-size: 0.8rem; }
+    .hi { color: var(--green) !important; font-weight: 600; }
+    .md { color: var(--amber) !important; font-weight: 600; }
+    .lo { color: var(--red) !important; }
+
+    code { font-family: 'JetBrains Mono', monospace; background: rgba(34,211,238,0.08); border: 1px solid rgba(34,211,238,0.15); padding: 2px 7px; border-radius: 5px; font-size: 0.78em; color: var(--cyan); }
+    .footer-section { text-align: center; color: var(--text-muted); font-size: 0.82rem; padding: 20px; border-top: 1px solid var(--border); margin-top: 8px; }
+
+    .tag { display: inline-block; padding: 2px 10px; border-radius: 6px; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.03em; white-space: nowrap; }
+    .t-qwen    { background: rgba(99,102,241,0.15); color: #818cf8; border: 1px solid rgba(99,102,241,0.25); }
+    .t-glm     { background: rgba(56,189,248,0.15); color: var(--blue); border: 1px solid rgba(56,189,248,0.25); }
+    .t-ds      { background: rgba(52,211,153,0.15); color: var(--green); border: 1px solid rgba(52,211,153,0.25); }
+    .t-kimi    { background: rgba(248,113,113,0.15); color: var(--red); border: 1px solid rgba(248,113,113,0.25); }
+    .t-llama   { background: rgba(251,191,36,0.15); color: var(--amber); border: 1px solid rgba(251,191,36,0.25); }
+    .t-claude  { background: rgba(244,114,182,0.15); color: var(--pink); border: 1px solid rgba(244,114,182,0.25); }
+    .t-gemini  { background: rgba(167,139,250,0.15); color: var(--purple); border: 1px solid rgba(167,139,250,0.25); }
+    .t-intern  { background: rgba(45,212,191,0.15); color: #2dd4bf; border: 1px solid rgba(45,212,191,0.25); }
+    .t-step    { background: rgba(74,222,128,0.15); color: #4ade80; border: 1px solid rgba(74,222,128,0.25); }
+    .t-mm      { background: rgba(251,146,60,0.15); color: #fb923c; border: 1px solid rgba(251,146,60,0.25); }
+    .t-seed    { background: rgba(139,92,246,0.15); color: #a78bfa; border: 1px solid rgba(139,92,246,0.25); }
+    .t-mimo    { background: rgba(236,72,153,0.15); color: #f472b6; border: 1px solid rgba(236,72,153,0.25); }
+
+    .overflow-x { overflow-x: auto; }
+    ::selection { background: rgba(34,211,238,0.25); color: #fff; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-track { background: var(--bg-deep); } ::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- Header -->
+<div class="paper-header">
+<span class="badge">14 Models</span>
+<span class="badge">2025-2026</span>
+<span class="badge">Pre &amp; Post Training</span>
+<h1>Frontier Model Comparison:<br/>Architecture / Training / Benchmarks</h1>
+<div class="meta">
+Qwen3-VL | GLM-5 | DeepSeek-V3 | Kimi-K2 | Kimi-K2.5 | Llama 4 | Gemini 2.5 | Claude 4 | Intern-S1 | Step 3.5 Flash | MiniMax M2.1 | MiniMax M2.5 | Seed-VL | MimoVL
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- 1. Core Specs -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section">
+<h2>01 &mdash; 核心规格总览</h2>
+<div class="overflow-x">
+<table>
+<tr>
+<th>模型</th>
+<th>Total Params</th>
+<th>Active Params</th>
+<th>架构</th>
+<th>Experts</th>
+<th>Attention</th>
+<th>Context</th>
+<th>PT Tokens</th>
+</tr>
+<tr>
+<td><span class="tag t-qwen">Qwen3-VL</span></td>
+<td>—</td> <td>—</td> <td>Dense</td> <td>—</td> <td>RoPE ABF</td>
+<td class="m">256K</td> <td class="hi">36T</td>
+</tr>
+<tr>
+<td><span class="tag t-llama">Llama 4</span></td>
+<td>109B–2T</td> <td>17B–288B</td> <td>MoE</td> <td>128+1, Top-?</td> <td>—</td>
+<td class="m">1M–10M</td> <td class="hi">30T+</td>
+</tr>
+<tr>
+<td><span class="tag t-glm">GLM-5</span></td>
+<td>744B</td> <td>40B</td> <td>MoE</td> <td>256/8</td> <td>DSA</td>
+<td class="m">200K</td> <td class="hi">28.5T</td>
+</tr>
+<tr>
+<td><span class="tag t-kimi">Kimi-K2</span></td>
+<td>1T</td> <td>32B</td> <td>MoE</td> <td>384+1, Top-8</td> <td>MLA</td>
+<td class="m">128K</td> <td class="md">15.5T</td>
+</tr>
+<tr>
+<td><span class="tag t-kimi">Kimi-K2.5</span></td>
+<td>1T</td> <td>32B</td> <td>MoE</td> <td>384+1, Top-8</td> <td>MLA</td>
+<td class="m">256K</td> <td class="md">~15T MM</td>
+</tr>
+<tr>
+<td><span class="tag t-ds">DeepSeek-V3</span></td>
+<td>671B</td> <td>37B</td> <td>MoE</td> <td>256+1, Top-8</td> <td>MLA</td>
+<td class="m">128K</td> <td class="md">14.8T</td>
+</tr>
+<tr>
+<td><span class="tag t-step">Step 3.5 Flash</span></td>
+<td>196B</td> <td>11B</td> <td>MoE</td> <td>288+1, Top-8</td> <td>3:1 SWA</td>
+<td class="m">256K</td> <td>—</td>
+</tr>
+<tr>
+<td><span class="tag t-mm">MiniMax M2/2.1/2.5</span></td>
+<td>230B</td> <td>10B</td> <td>MoE</td> <td>Top-8</td> <td>Full MHA+RoPE</td>
+<td class="m">128K–204K</td> <td>—</td>
+</tr>
+<tr>
+<td><span class="tag t-seed">Seed-VL</span></td>
+<td>—</td> <td>—</td> <td>Dense/MoE</td> <td>—</td> <td>RoPE</td>
+<td class="m">128K</td> <td class="hi">~20T</td>
+</tr>
+<tr>
+<td><span class="tag t-mimo">MimoVL</span></td>
+<td>—</td> <td>—</td> <td>Dense</td> <td>—</td> <td>RoPE</td>
+<td class="m">64K</td> <td class="md">12T</td>
+</tr>
+<tr>
+<td><span class="tag t-intern">Intern-S1-Pro</span></td>
+<td>1T</td> <td>22B</td> <td>MoE</td> <td>512, Grouped 8xTop-1</td> <td>FoPE</td>
+<td>—</td> <td class="md">6T CPT</td>
+</tr>
+<tr>
+<td><span class="tag t-gemini">Gemini 2.5</span></td>
+<td>—</td> <td>—</td> <td>—</td> <td>—</td> <td>—</td>
+<td class="m">1M–2M</td> <td>—</td>
+</tr>
+<tr>
+<td><span class="tag t-claude">Claude 4</span></td>
+<td>—</td> <td>—</td> <td>Dense</td> <td>—</td> <td>—</td>
+<td class="m">200K–1M</td> <td>—</td>
+</tr>
+</table>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- 2. Architecture Deep Dive -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section">
+<h2>02 &mdash; MoE 架构设计对比</h2>
+<div class="overflow-x">
+<table>
+<tr>
+<th>模型</th>
+<th>Total / Active</th>
+<th>稀疏比</th>
+<th>Experts 配置</th>
+<th>注意力</th>
+<th>独特技术</th>
+</tr>
+<tr>
+<td><span class="tag t-kimi">Kimi-K2/2.5</span></td>
+<td>1T / 32B</td> <td class="m">31:1</td>
+<td>384 routed + 1 shared, Top-8</td>
+<td>MLA</td>
+<td>MuonClip (QK-Clip), QAT INT4</td>
+</tr>
+<tr>
+<td><span class="tag t-glm">GLM-5</span></td>
+<td>744B / 40B</td> <td class="m">19:1</td>
+<td>256 routed, Top-8</td>
+<td>DeepSeek Sparse Attn</td>
+<td>昇腾芯片 + MindSpore</td>
+</tr>
+<tr>
+<td><span class="tag t-ds">DeepSeek-V3</span></td>
+<td>671B / 37B</td> <td class="m">18:1</td>
+<td>256 routed + 1 shared, Top-8</td>
+<td>MLA</td>
+<td>FP8 首创, MTP, 无辅助损失 MoE</td>
+</tr>
+<tr>
+<td><span class="tag t-step">Step 3.5 Flash</span></td>
+<td>196B / 11B</td> <td class="m hi">18:1</td>
+<td>288 routed + 1 shared, Top-8</td>
+<td>3:1 SWA (window=512)</td>
+<td>MTP-3 (4-token prediction)</td>
+</tr>
+<tr>
+<td><span class="tag t-mm">MiniMax M2.x</span></td>
+<td>230B / 10B</td> <td class="m hi">23:1</td>
+<td>Top-8</td>
+<td>Full MHA + RoPE</td>
+<td>Lightning Attention, CISPO RL</td>
+</tr>
+<tr>
+<td><span class="tag t-llama">Llama 4</span></td>
+<td>109B–2T / 17B–288B</td> <td class="m">~7:1</td>
+<td>128 routed + 1 shared</td>
+<td>—</td>
+<td>FP8, 原生多模态 PT</td>
+</tr>
+<tr>
+<td><span class="tag t-intern">Intern-S1-Pro</span></td>
+<td>1T / 22B</td> <td class="m">45:1</td>
+<td>512 experts, Grouped 8xTop-1</td>
+<td>FoPE</td>
+<td>STE Routing, Rollout Router Replay, Mixed-Precision RL</td>
+</tr>
+</table>
+</div>
+
+<div class="key-point">
+<strong>MoE 设计趋势：</strong>
+<ul>
+<li><strong>Expert 数量分化：</strong>S1-Pro 512 > Kimi 384 > Step/GLM/DSV3 256-288 > Llama 128</li>
+<li><strong>Top-K 收敛到 8：</strong>几乎所有 MoE 都用 Top-8（S1-Pro 用 Grouped 8xTop-1 等效）</li>
+<li><strong>Shared Expert 标配：</strong>K2, DSV3, Step, Llama 都有 1 个 always-on shared expert</li>
+<li><strong>激活参数三档：</strong>大 30-40B (K2/GLM/DSV3)，中 22B (S1-Pro)，效率 10-11B (Step/MiniMax)</li>
+<li><strong>最高稀疏比：</strong>S1-Pro <strong>45:1</strong> (1T/22B) > MiniMax 23:1 > Kimi 31:1</li>
+<li><strong>Grouped Router：</strong>S1-Pro 的分组路由实现绝对设备负载均衡，解决���大 expert 数量下的稳定性</li>
+</ul>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- 3. Pre-training Strategy -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section">
+<h2>03 &mdash; Pre-training 策略对比</h2>
+<div class="overflow-x">
+<table>
+<tr>
+<th>模型</th>
+<th>总 Tokens</th>
+<th>阶段划分</th>
+<th>LR 策略</th>
+<th>关键技术</th>
+</tr>
+<tr>
+<td><span class="tag t-qwen">Qwen3-VL</span></td>
+<td class="hi">36T</td>
+<td>S1: 30T 通用 → S2: 5T STEM → S3: 500B long</td>
+<td>Cosine</td>
+<td>ABF(1M), DCA, YARN, 动态 FPS</td>
+</tr>
+<tr>
+<td><span class="tag t-llama">Llama 4</span></td>
+<td class="hi">30T+</td>
+<td>原生多模态 (文本+图像+视频)</td>
+<td>—</td>
+<td>FP8, 128 experts, 32K GPUs</td>
+</tr>
+<tr>
+<td><span class="tag t-glm">GLM-5</span></td>
+<td class="hi">28.5T</td>
+<td>PT 28.5T + 160B 软件工程 → 三阶段 long-ctx</td>
+<td>—</td>
+<td>DSA Attention, 昇腾 + MindSpore</td>
+</tr>
+<tr>
+<td><span class="tag t-kimi">Kimi-K2</span></td>
+<td class="md">15.5T</td>
+<td>10T stable + 5.5T decay</td>
+<td>WSD (2e-4 → 2e-5)</td>
+<td>MuonClip, 零 loss spike</td>
+</tr>
+<tr>
+<td><span class="tag t-kimi">Kimi-K2.5</span></td>
+<td class="md">~15T MM</td>
+<td>ViT training → Joint PT → Mid-train</td>
+<td>—</td>
+<td>原生多模态联合训练, MoonViT-3D</td>
+</tr>
+<tr>
+<td><span class="tag t-ds">DeepSeek-V3</span></td>
+<td class="md">14.8T</td>
+<td>单阶段 PT + 两阶段 long-ctx</td>
+<td>Multi-step 离散下降</td>
+<td>FP8, MTP, FIM 双向推理</td>
+</tr>
+<tr>
+<td><span class="tag t-step">Step 3.5 Flash</span></td>
+<td>—</td>
+<td>PT → Mid-train → RL (全栈开源)</td>
+<td>—</td>
+<td>MTP-3, On-policy distillation</td>
+</tr>
+<tr>
+<td><span class="tag t-mm">MiniMax M2.x</span></td>
+<td>—</td>
+<td>PT → CISPO RL → Forge RL (M2.5)</td>
+<td>—</td>
+<td>CISPO, 200K+ 真实环境 RL</td>
+</tr>
+<tr>
+<td><span class="tag t-intern">Intern-S1-Pro</span></td>
+<td class="md">6T CPT</td>
+<td>S1 (235B) → 4x expert expand → 6T CPT → RL</td>
+<td>—</td>
+<td>Grouped Router, STE, 270B 科学数据, FoPE</td>
+</tr>
+<tr>
+<td><span class="tag t-seed">Seed-VL</span></td>
+<td class="hi">~20T</td>
+<td>视觉预训练 → 多模态联合 → 指令微调</td>
+<td>Cosine warmup + decay</td>
+<td>视觉感知清洗, 多尺度训练, 4K 图像支持</td>
+</tr>
+<tr>
+<td><span class="tag t-mimo">MimoVL</span></td>
+<td class="md">12T</td>
+<td>基础 PT → STEM 增强 → 代码验证</td>
+<td>Warmup-stable-decay</td>
+<td>执行验证管线, CoT 合成, 推理优化</td>
+</tr>
+</table>
+</div>
+
+<div class="highlight-box">
+<strong>Token Scaling 分层：</strong>
+<ul>
+<li><strong>第一梯队 (28T+)：</strong>Qwen3-VL 36T, Llama 4 30T+, GLM-5 28.5T</li>
+<li><strong>第二梯队 (14-16T)：</strong>Kimi-K2 15.5T, Kimi-K2.5 ~15T MM, DeepSeek-V3 14.8T</li>
+<li><strong>效率派 (未公开)：</strong>Step 3.5 Flash, MiniMax M2.x — 小激活参数 + 强 RL 补偿</li>
+</ul>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- 3.5 Pre-training Data Specs (Detailed) -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section">
+<h2>03.5 &mdash; 预训练数据规格深度对比</h2>
+
+<h3>数据规模与序列长度</h3>
+<div class="overflow-x">
+<table>
+<tr>
+<th>模型</th>
+<th>总 Tokens</th>
+<th>Seq Length</th>
+<th>图像数据</th>
+<th>视频数据</th>
+<th>数据截止</th>
+</tr>
+<tr>
+<td><span class="tag t-qwen">Qwen3-VL</span></td>
+<td class="hi">36T</td>
+<td class="m">256K</td>
+<td> billions 图像-文本对</td>
+<td>动态 FPS 采样</td>
+<td>2025-01</td>
+</tr>
+<tr>
+<td><span class="tag t-kimi">Kimi-K2.5</span></td>
+<td class="md">~15T MM</td>
+<td class="m">256K</td>
+<td>MoonViT-3D 原生处理</td>
+<td>4帧压缩表示</td>
+<td>2025-01</td>
+</tr>
+<tr>
+<td><span class="tag t-llama">Llama 4</span></td>
+<td class="hi">30T+</td>
+<td class="m hi">1M-10M</td>
+<td>原生多模态 PT</td>
+<td>原生视频支持</td>
+<td>—</td>
+</tr>
+<tr>
+<td><span class="tag t-glm">GLM-5</span></td>
+<td class="hi">28.5T</td>
+<td class="m">200K</td>
+<td>多模态联合训练</td>
+<td>时序编码</td>
+<td>—</td>
+</tr>
+<tr>
+<td><span class="tag t-seed">Seed-VL</span></td>
+<td class="hi">~20T</td>
+<td class="m">128K</td>
+<td class="hi">数万亿图像-文本</td>
+<td>视频帧序列</td>
+<td>2025-03</td>
+</tr>
+<tr>
+<td><span class="tag t-mimo">MimoVL</span></td>
+<td class="md">12T</td>
+<td class="m">64K</td>
+<td>高质量图文对</td>
+<td>短视频片段</td>
+<td>2025-02</td>
+</tr>
+<tr>
+<td><span class="tag t-ds">DeepSeek-V3</span></td>
+<td class="md">14.8T</td>
+<td class="m">128K</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td><span class="tag t-intern">Intern-S1-Pro</span></td>
+<td class="md">6T CPT</td>
+<td>—</td>
+<td class="md">270B 科学图像-文本</td>
+<td>科学视频</td>
+<td>—</td>
+</tr>
+</table>
+</div>
+
+<h3>数据配比 (Data Mixture)</h3>
+<div class="overflow-x">
+<table>
+<tr>
+<th>模型</th>
+<th>网页/通用</th>
+<th>代码</th>
+<th>STEM/科学</th>
+<th>多模态</th>
+<th>长文本</th>
+</tr>
+<tr>
+<td><span class="tag t-qwen">Qwen3-VL</span></td>
+<td>~70% (S1)</td>
+<td>~15%</td>
+<td class="md">5T dedicated STEM</td>
+<td>~10%</td>
+<td>500B long-context</td>
+</tr>
+<tr>
+<td><span class="tag t-kimi">Kimi-K2.5</span></td>
+<td>~50%</td>
+<td>~20%</td>
+<td>~15%</td>
+<td class="hi">~15% (联合训练)</td>
+<td>渐进扩展</td>
+</tr>
+<tr>
+<td><span class="tag t-seed">Seed-VL</span></td>
+<td>~40%</td>
+<td class="md">~25%</td>
+<td>~15%</td>
+<td class="hi">~20% (图文+视频)</td>
+<td>~5%</td>
+</tr>
+<tr>
+<td><span class="tag t-mimo">MimoVL</span></td>
+<td>~45%</td>
+<td>~20%</td>
+<td class="hi">~25% (推理导向)</td>
+<td class="md">~10%</td>
+<td>渐进</td>
+</tr>
+<tr>
+<td><span class="tag t-llama">Llama 4</span></td>
+<td>~60%</td>
+<td>~15%</td>
+<td>~10%</td>
+<td class="md">~15% (原生)</td>
+<td class="hi">原生支持 10M</td>
+</tr>
+<tr>
+<td><span class="tag t-glm">GLM-5</span></td>
+<td>~65%</td>
+<td class="hi">160B SWE专用</td>
+<td>~10%</td>
+<td>~10%</td>
+<td>三阶段 200K</td>
+</tr>
+<tr>
+<td><span class="tag t-ds">DeepSeek-V3</span></td>
+<td>~70%</td>
+<td class="md">~20%</td>
+<td>~10%</td>
+<td>—</td>
+<td>两阶段 128K</td>
+</tr>
+</table>
+</div>
+
+<h3>数据管线 (Data Pipeline)</h3>
+<div class="overflow-x">
+<table>
+<tr>
+<th>模型</th>
+<th>数据清洗</th>
+<th>去重策略</th>
+<th>质量过滤</th>
+<th>数据增强</th>
+</tr>
+<tr>
+<td><span class="tag t-qwen">Qwen3-VL</span></td>
+<td>多轮过滤 + DNN 评分</td>
+<td>MinHash + SimHash</td>
+<td>基于困惑度的质量模型</td>
+<td>动态 FPS, 随机裁剪</td>
+</tr>
+<tr>
+<td><span class="tag t-kimi">Kimi-K2.5</span></td>
+<td>MoonViT-3D 原生解析</td>
+<td>跨模态去重</td>
+<td>多模态质量评估器</td>
+<td>4帧关键帧压缩</td>
+</tr>
+<tr>
+<td><span class="tag t-seed">Seed-VL</span></td>
+<td>视觉感知清洗管道</td>
+<td>图像+文本联合去重</td>
+<td>CLIP 相似度 + 人工校验</td>
+<td>多尺度训练, 混合分辨率</td>
+</tr>
+<tr>
+<td><span class="tag t-mimo">MimoVL</span></td>
+<td>推理链提取 + 验证</td>
+<td>代码级精确去重</td>
+<td>执行验证 + 模型评分</td>
+<td>代码合成, 思维链增强</td>
+</tr>
+<tr>
+<td><span class="tag t-llama">Llama 4</span></td>
+<td>原生多模态 tokenization</td>
+<td>大规模集群去重</td>
+<td>多维度质量评分</td>
+<td>多模态混合增强</td>
+</tr>
+<tr>
+<td><span class="tag t-glm">GLM-5</span></td>
+<td>昇腾加速清洗</td>
+<td>文档级去重</td>
+<td>规则 + 模型混合过滤</td>
+<td>时序数据增强</td>
+</tr>
+<tr>
+<td><span class="tag t-ds">DeepSeek-V3</span></td>
+<td>规则 + 模型过滤</td>
+<td>大规模 MinHash</td>
+<td>基于模型的质量评分</td>
+<td>FIM 双向训练</td>
+</tr>
+</table>
+</div>
+
+<div class="key-point">
+<strong>Seed-VL 数据特色：</strong>
+<ul>
+<li><strong>视觉为中心：</strong>~20% 多模态数据占比，数万亿图像-文本对</li>
+<li><strong>多尺度训练：</strong>支持 224px 到 4K 分辨率的渐进式训练</li>
+<li><strong>视频理解：</strong>视频帧序列与文本交错训练，支持长视频理解</li>
+<li><strong>感知清洗：</strong>基于视觉感知的文档解析和图表理解专用数据</li>
+</ul>
+</div>
+
+<div class="purple-box">
+<strong>MimoVL 数据特色：</strong>
+<ul>
+<li><strong>推理导向：</strong>25% STEM 数据，注重数学/代码/科学推理</li>
+<li><strong>代码验证：</strong>所有代码数据经过执行验证，确保可运行性</li>
+<li><strong>思维链增强：</strong>合成高质量 CoT 数据用于预训练阶段</li>
+<li><strong>高效管线：</strong>64K seq length 聚焦高质量短序列，训练效率优先</li>
+</ul>
+</div>
+
+<div class="highlight-box">
+<strong>数据趋势总结：</strong>
+<ul>
+<li><strong>多模态占比提升：</strong>从 &lt;5% (早期) → 10-20% (Seed-VL, Llama 4, K2.5)</li>
+<li><strong>质量 &gt; 数量：</strong>20T 高质量数据 (Seed-VL) vs 36T 全量数据 (Qwen3)</li>
+<li><strong>专业化数据：</strong>STEM/代码专用数据成为差异化关键 (GLM-5 SWE, Intern-S1 科学)</li>
+<li><strong>长文本专门化：</strong>独立的长文本扩展阶段成为标配</li>
+<li><strong>视觉原生：</strong>从"图文拼接"走向"原生多模态 tokenization"</li>
+</ul>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- 4. Context Extension -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section">
+<h2>04 &mdash; 上下文扩展策略</h2>
+<div class="overflow-x">
+<table>
+<tr>
+<th>模型</th>
+<th>基础</th>
+<th>最终</th>
+<th>方法</th>
+<th>扩展数据量</th>
+</tr>
+<tr>
+<td><span class="tag t-llama">Llama 4 Scout</span></td>
+<td>—</td> <td class="m hi">10M</td> <td>—</td> <td>—</td>
+</tr>
+<tr>
+<td><span class="tag t-gemini">Gemini 2.5</span></td>
+<td>—</td> <td class="m">1M–2M</td> <td>—</td> <td>—</td>
+</tr>
+<tr>
+<td><span class="tag t-claude">Claude 4</span></td>
+<td>—</td> <td class="m">200K–1M</td> <td>—</td> <td>—</td>
+</tr>
+<tr>
+<td><span class="tag t-qwen">Qwen3-VL</span></td>
+<td>4K</td> <td class="m">256K</td> <td>ABF + DCA + YARN</td> <td>数百B (32K seq)</td>
+</tr>
+<tr>
+<td><span class="tag t-kimi">Kimi-K2.5</span></td>
+<td>4K</td> <td class="m">256K</td> <td>YaKN</td> <td>Mid-train 阶段集成</td>
+</tr>
+<tr>
+<td><span class="tag t-step">Step 3.5 Flash</span></td>
+<td>—</td> <td class="m">256K</td> <td>3:1 SWA (window=512)</td> <td>—</td>
+</tr>
+<tr>
+<td><span class="tag t-mm">MiniMax M2.5</span></td>
+<td>—</td> <td class="m">204K</td> <td>Lightning Attention</td> <td>—</td>
+</tr>
+<tr>
+<td><span class="tag t-glm">GLM-5</span></td>
+<td>32K</td> <td class="m">200K</td> <td>三阶段渐进</td> <td>1T → 500B → 50B</td>
+</tr>
+<tr>
+<td><span class="tag t-kimi">Kimi-K2</span></td>
+<td>4K</td> <td class="m">128K</td> <td>YaKN</td> <td>400B(4K) + 60B(32K)</td>
+</tr>
+<tr>
+<td><span class="tag t-ds">DeepSeek-V3</span></td>
+<td>4K</td> <td class="m">128K</td> <td>YaRN-like</td> <td>60B@32K + 60B@128K</td>
+</tr>
+<tr>
+<td><span class="tag t-mm">MiniMax M2.1</span></td>
+<td>—</td> <td class="m">128K</td> <td>Full MHA + RoPE</td> <td>—</td>
+</tr>
+</table>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- 5. Post-Training & RL -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section">
+<h2>05 &mdash; Post-Training & RL 策略对比</h2>
+<div class="overflow-x">
+<table>
+<tr>
+<th>模型</th>
+<th>SFT 策略</th>
+<th>RL 算法</th>
+<th>RL 特色</th>
+<th>涌现能力</th>
+</tr>
+<tr>
+<td><span class="tag t-kimi">Kimi-K2.5</span></td>
+<td>Zero-Vision SFT (纯文本)</td>
+<td>Joint MM RL</td>
+<td>按能力(非模态)划分 domain; GRM 跨模态</td>
+<td>文本 SFT 激活视觉推理</td>
+</tr>
+<tr>
+<td><span class="tag t-mm">MiniMax M2.5</span></td>
+<td>—</td>
+<td>CISPO + Forge RL</td>
+<td>200K+ 真实环境; 40x 训练加速; Process Reward</td>
+<td>Spec-Writing (先规划再编码)</td>
+</tr>
+<tr>
+<td><span class="tag t-mm">MiniMax M2.1</span></td>
+<td>—</td>
+<td>CISPO</td>
+<td>序列级 clipping; FP32 LLM head; MIS+PPO 过滤</td>
+<td>Interleaved Thinking</td>
+</tr>
+<tr>
+<td><span class="tag t-step">Step 3.5 Flash</span></td>
+<td>—</td>
+<td>Scalable RL</td>
+<td>On-policy distillation; Agent-native 设计</td>
+<td>—</td>
+</tr>
+<tr>
+<td><span class="tag t-ds">DeepSeek-V3</span></td>
+<td>1.5M 指令数据</td>
+<td>GRPO</td>
+<td>Rule-based reward; 数学/代码/写作多域</td>
+<td>—</td>
+</tr>
+<tr>
+<td><span class="tag t-glm">GLM-5</span></td>
+<td>—</td>
+<td>—</td>
+<td>160B 软件工程 mid-train</td>
+<td>—</td>
+</tr>
+<tr>
+<td><span class="tag t-kimi">Kimi-K2</span></td>
+<td>—</td>
+<td>—</td>
+<td>Agentic 能力原生设计</td>
+<td>—</td>
+</tr>
+<tr>
+<td><span class="tag t-intern">Intern-S1-Pro</span></td>
+<td>科学数据 SFT (Prompt Isolation)</td>
+<td>Mixed-Precision RL (FP8/BF16/FP32)</td>
+<td>Rollout Router Replay; Dual IS + LOO baseline; 万亿级 RL</td>
+<td>科学推理 3.8x 超 GPT-5.2</td>
+</tr>
+</table>
+</div>
+
+<div class="purple-box">
+<strong>Post-Training 趋势：</strong>
+<ul>
+<li><strong>环境交互 RL 崛起：</strong>MiniMax Forge (200K 环境), Step Scalable RL — 从静态数据走向真实环境反馈</li>
+<li><strong>Process Reward 普及：</strong>M2.5 和 2512.07783 都验证了步骤级奖励的优势</li>
+<li><strong>CISPO > PPO for MoE：</strong>序列级 clipping 比 token 级更稳定</li>
+<li><strong>FP32 LM Head 是 MoE RL 硬约束：</strong>S1-Pro 和 MiniMax CISPO 独立发现同一问题</li>
+<li><strong>Rollout Router Replay：</strong>S1-Pro 发现 MoE RL 中 routing 不一致会破坏训练，需要记录并重放路由</li>
+<li><strong>Zero-Vision SFT：</strong>K2.5 证明强联合预训练下 post-training 可极大简化</li>
+<li><strong>Interleaved Thinking：</strong>MiniMax M2 系列的交错思考模式（<code>&lt;think&gt;</code> 标签）</li>
+</ul>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- 6. Benchmarks -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section">
+<h2>06 &mdash; Benchmark 性能对比</h2>
+
+<h3>推理 & 知识</h3>
+<div class="overflow-x">
+<table>
+<tr>
+<th>模型</th>
+<th>AIME 2025</th>
+<th>GPQA Diamond</th>
+<th>MMLU-Pro</th>
+<th>HLE-Full</th>
+</tr>
+<tr>
+<td><span class="tag t-step">Step 3.5 Flash</span></td>
+<td class="m hi">97.3</td> <td class="m">83.5</td> <td class="m">84.4</td> <td>—</td>
+</tr>
+<tr>
+<td><span class="tag t-kimi">Kimi-K2.5</span></td>
+<td class="m">96.1</td> <td class="m hi">87.6</td> <td class="m hi">87.1</td> <td class="m hi">50.2 (tools)</td>
+</tr>
+<tr>
+<td><span class="tag t-ds">DeepSeek-V3</span></td>
+<td class="m">—</td> <td class="m">—</td> <td class="m">—</td> <td>—</td>
+</tr>
+<tr>
+<td><span class="tag t-intern">Intern-S1-Pro</span></td>
+<td class="m">93.1</td> <td class="m">—</td> <td class="m">86.6</td> <td>—</td>
+</tr>
+<tr>
+<td><span class="tag t-kimi">Kimi-K2</span></td>
+<td class="m">49.5</td> <td class="m">75.1</td> <td>—</td> <td>—</td>
+</tr>
+</table>
+</div>
+
+<h3>代码 & Agent</h3>
+<div class="overflow-x">
+<table>
+<tr>
+<th>模型</th>
+<th>SWE-Bench Verified</th>
+<th>Tau2-Bench</th>
+<th>LiveCodeBench-V6</th>
+<th>BrowseComp (CM)</th>
+</tr>
+<tr>
+<td><span class="tag t-mm">MiniMax M2.5</span></td>
+<td class="m hi">80.2</td> <td>—</td> <td>—</td> <td class="m hi">76.3</td>
+</tr>
+<tr>
+<td><span class="tag t-step">Step 3.5 Flash</span></td>
+<td class="m">74.4</td> <td class="m hi">88.2</td> <td class="m hi">86.4</td> <td class="m">69.0</td>
+</tr>
+<tr>
+<td><span class="tag t-mm">MiniMax M2.1</span></td>
+<td class="m">74</td> <td>—</td> <td>—</td> <td>—</td>
+</tr>
+<tr>
+<td><span class="tag t-kimi">Kimi-K2.5</span></td>
+<td class="m">65.8</td> <td class="m">66.1</td> <td>—</td> <td>—</td>
+</tr>
+<tr>
+<td><span class="tag t-intern">Intern-S1-Pro</span></td>
+<td>—</td> <td class="m">80.9</td> <td>—</td> <td>—</td>
+</tr>
+<tr>
+<td><span class="tag t-kimi">Kimi-K2</span></td>
+<td class="m">65.8</td> <td class="m">66.1</td> <td class="m">53.7</td> <td>—</td>
+</tr>
+</table>
+</div>
+
+<h3>视觉多模态 (VLM)</h3>
+<div class="overflow-x">
+<table>
+<tr>
+<th>模型</th>
+<th>MMMU Pro</th>
+<th>MathVision</th>
+<th>VideoMMMU</th>
+</tr>
+<tr>
+<td><span class="tag t-kimi">Kimi-K2.5</span></td>
+<td class="m hi">78.5</td> <td class="m hi">84.2</td> <td class="m hi">86.6</td>
+</tr>
+<tr>
+<td><span class="tag t-intern">Intern-S1-Pro</span></td>
+<td class="m">72.8</td> <td>—</td> <td>—</td>
+</tr>
+</table>
+</div>
+
+<div class="success-box">
+<strong>Benchmark 分析：</strong>
+<ul>
+<li><strong>推理王者：</strong>Step 3.5 Flash AIME 97.3，K2.5 紧随 96.1 — 两个开源模型逼近 GPT-5.2</li>
+<li><strong>Agent/代码：</strong>M2.5 SWE-Bench 80.2 领先开源（接近 Opus 4.6 的 80.8）</li>
+<li><strong>效率 + 性能：</strong>Step 11B active = AIME 97.3, Tau2 88.2 — 极致效率比</li>
+<li><strong>VLM 领先：</strong>K2.5 在 MMMU Pro / MathVision / VideoMMMU 全面领先</li>
+<li><strong>M2→M2.5 同架构：</strong>SWE-Bench 65% → 74% → 80.2%，纯 RL 方法驱动 +15 ppt</li>
+</ul>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- 7. Efficiency & Cost -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section">
+<h2>07 &mdash; 推理效率 & 成本</h2>
+<div class="overflow-x">
+<table>
+<tr>
+<th>模型</th>
+<th>Active Params</th>
+<th>推理速度</th>
+<th>Input 价格 ($/1M)</th>
+<th>Output 价格 ($/1M)</th>
+<th>关键效率技术</th>
+</tr>
+<tr>
+<td><span class="tag t-step">Step 3.5 Flash</span></td>
+<td class="m">11B</td> <td class="m hi">100–350 tok/s</td> <td>—</td> <td>—</td>
+<td>MTP-3 (4-token prediction), SWA</td>
+</tr>
+<tr>
+<td><span class="tag t-mm">M2.5 Lightning</span></td>
+<td class="m">10B</td> <td class="m">100 tok/s</td> <td class="m hi">$0.30</td> <td>$2.40</td>
+<td>Lightning Attention, $1/hr</td>
+</tr>
+<tr>
+<td><span class="tag t-mm">M2.5 Standard</span></td>
+<td class="m">10B</td> <td class="m">50 tok/s</td> <td class="m hi">$0.15</td> <td>$1.20</td>
+<td>$0.30/hr</td>
+</tr>
+<tr>
+<td><span class="tag t-kimi">Kimi-K2.5</span></td>
+<td class="m">32B</td> <td>—</td> <td>—</td> <td>—</td>
+<td>QAT INT4 原生量化 (2x 加速)</td>
+</tr>
+<tr>
+<td><span class="tag t-ds">DeepSeek-V3</span></td>
+<td class="m">37B</td> <td>—</td> <td>—</td> <td>—</td>
+<td>FP8, DualPipe 92% 利用率, $5.58M 训练</td>
+</tr>
+</table>
+</div>
+
+<div class="highlight-box">
+<strong>效率竞争格局：</strong>
+<ul>
+<li><strong>10B active = Agent 最优点？</strong>MiniMax 三代固定 10B，Step 11B — Agent 场景高频多轮调用需要低延迟</li>
+<li><strong>MTP 是推理加速关键：</strong>Step MTP-3 (4-token) + DSV3 MTP — 单次 forward pass 多 token 输出</li>
+<li><strong>成本颠覆：</strong>M2.5 SWE-Bench 持平 Opus 4.6，成本仅 1/10</li>
+</ul>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- 8. Training Stability -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section">
+<h2>08 &mdash; 训练稳定性技术</h2>
+<div class="overflow-x">
+<table>
+<tr>
+<th>模型</th>
+<th>稳定性方案</th>
+<th>效果</th>
+</tr>
+<tr>
+<td><span class="tag t-kimi">Kimi-K2/2.5</span></td>
+<td>MuonClip (QK-Clip)</td>
+<td>15.5T tokens 全程零 loss spike</td>
+</tr>
+<tr>
+<td><span class="tag t-ds">DeepSeek-V3</span></td>
+<td>无辅助损失 MoE + FP8</td>
+<td>14.8T tokens 训练稳定</td>
+</tr>
+<tr>
+<td><span class="tag t-mm">MiniMax M2.x</span></td>
+<td>CISPO (序列级 clipping)</td>
+<td>MoE 大规模 RL 训练稳定</td>
+</tr>
+<tr>
+<td><span class="tag t-glm">GLM-5</span></td>
+<td>DSA Attention</td>
+<td>昇腾芯片上稳定训练</td>
+</tr>
+<tr>
+<td><span class="tag t-intern">Intern-S1-Pro</span></td>
+<td>Grouped Router + STE + Rollout Router Replay + Mixed-Precision (FP8/BF16/FP32)</td>
+<td>万亿级 MoE 稳定 RL 训练；4x expert expansion 仅 ~20% 效率下降</td>
+</tr>
+</table>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- 9. Multimodal -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section">
+<h2>09 &mdash; 多模态能力</h2>
+<div class="overflow-x">
+<table>
+<tr>
+<th>模型</th>
+<th>视觉编码器</th>
+<th>多模态训练方式</th>
+<th>视频支持</th>
+<th>关键创新</th>
+</tr>
+<tr>
+<td><span class="tag t-kimi">Kimi-K2.5</span></td>
+<td>MoonViT-3D (400M)</td>
+<td>原生联合预训练 ~15T</td>
+<td>2K 分辨率, 4 帧压缩</td>
+<td>Zero-Vision SFT; 图像/视频共享参数</td>
+</tr>
+<tr>
+<td><span class="tag t-qwen">Qwen3-VL</span></td>
+<td>ViT (原生分辨率)</td>
+<td>多阶段 (通用→STEM→long)</td>
+<td>动态 FPS 采样</td>
+<td>DCA; ABF 1M base</td>
+</tr>
+<tr>
+<td><span class="tag t-llama">Llama 4</span></td>
+<td>—</td>
+<td>原生多模态 PT (文本+图像+视频)</td>
+<td>原生支持</td>
+<td>30T+ 多模态 tokens</td>
+</tr>
+<tr>
+<td><span class="tag t-gemini">Gemini 2.5</span></td>
+<td>—</td>
+<td>原生多模态</td>
+<td>原生支持</td>
+<td>1M–2M 上下文</td>
+</tr>
+<tr>
+<td><span class="tag t-intern">Intern-S1-Pro</span></td>
+<td>Native ViT + 时序编码器</td>
+<td>6T CPT (270B 科学 image-text)</td>
+<td>时序信号 (10^0–10^6)</td>
+<td>FoPE; SAGE 框架; 100+ 科学任务; SciReasoner 3.8x GPT-5.2</td>
+</tr>
+</table>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- 10. Key Insights -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section">
+<h2>10 &mdash; 关键洞察</h2>
+
+<h3>架构趋势</h3>
+<div class="key-point">
+<ul>
+<li><strong>MoE 绝对主导：</strong>12 个模型中 8 个为 MoE，仅 Claude 4 / Qwen3-VL 坚持 Dense</li>
+<li><strong>两种路线：</strong>大 MoE (K2 1T/32B, GLM 744B/40B) vs 效率 MoE (Step 196B/11B, MM 230B/10B)</li>
+<li><strong>MLA 扩散：</strong>DeepSeek MLA 被 Kimi-K2 直接采用</li>
+<li><strong>SWA 兴起：</strong>Step 的 3:1 SWA 是长上下文 + 效率的新方案</li>
+</ul>
+</div>
+
+<h3>训练范式</h3>
+<div class="highlight-box">
+<ul>
+<li><strong>Token Scaling 放缓：</strong>第一梯队 30T+，第二梯队 15T — 增量收益递减，质量/方法 > 数量</li>
+<li><strong>Mid-training 成标配：</strong>Qwen3/K2/Step 都开源了 mid-train checkpoint</li>
+<li><strong>RL 成为核心差异化：</strong>M2→M2.5 同架构纯 RL 提升 15 ppt SWE-Bench，Step/K2.5 也重度投入 RL</li>
+<li><strong>环境交互 RL 趋势：</strong>从 preference data → 真实环境 task completion reward</li>
+</ul>
+</div>
+
+<h3>效率竞争</h3>
+<div class="success-box">
+<ul>
+<li><strong>"Small Active, Big Brain"：</strong>10-11B active 足以达到 frontier 性能 (Step AIME 97.3, MM SWE 80.2)</li>
+<li><strong>MTP 推理加速：</strong>4-token prediction 成为标准 (Step MTP-3, DSV3 MTP)</li>
+<li><strong>训练时量化：</strong>K2.5 QAT INT4 在训练中引入量化噪声，部署 2x 加速无损</li>
+<li><strong>成本颠覆：</strong>开源 MoE ($0.15-0.30/1M input) vs 闭源 API ($3-15/1M) — 10-50x 差距</li>
+</ul>
+</div>
+
+<h3>多模态融合</h3>
+<div class="purple-box">
+<ul>
+<li><strong>原生联合预训练主流化：</strong>K2.5 / Llama 4 / Gemini 2.5 都采用原生多模态</li>
+<li><strong>K2.5 Zero-Vision SFT 启示：</strong>联合预训练足够强 → post-training 可极简化视觉数据</li>
+<li><strong>视频处理收敛：</strong>4 帧压缩 (K2.5) / 动态 FPS (Qwen3-VL) — 时序压缩是关键</li>
+</ul>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- Links -->
+<!-- ════════════════════════════════════════════ -->
+<div class="section">
+<h2>11 &mdash; 精读笔记索引</h2>
+<div class="overflow-x">
+<table>
+<tr><th>模型</th><th>路径</th></tr>
+<tr><td><span class="tag t-qwen">Qwen3-VL</span></td><td><code>paper_reading/llm_vlm/qwen3-vl/</code></td></tr>
+<tr><td><span class="tag t-glm">GLM-5</span></td><td><code>paper_reading/llm_vlm/GLM-5/</code></td></tr>
+<tr><td><span class="tag t-ds">DeepSeek-V3</span></td><td><code>paper_reading/llm_vlm/deepseek-v3/</code></td></tr>
+<tr><td><span class="tag t-kimi">Kimi-K2</span></td><td><code>paper_reading/llm_vlm/kimi-k2/kimi-k2.html</code></td></tr>
+<tr><td><span class="tag t-kimi">Kimi-K2.5</span></td><td><code>paper_reading/llm_vlm/kimi-k2/kimi-k2.5.html</code></td></tr>
+<tr><td><span class="tag t-llama">Llama 4</span></td><td><code>paper_reading/llm_vlm/llama-4/</code></td></tr>
+<tr><td><span class="tag t-gemini">Gemini 2.5</span></td><td><code>paper_reading/llm_vlm/gemini-2.5/</code></td></tr>
+<tr><td><span class="tag t-claude">Claude 4</span></td><td><code>paper_reading/llm_vlm/claude-4/</code></td></tr>
+<tr><td><span class="tag t-intern">Intern-S1-Pro</span></td><td><code>paper_reading/llm_vlm/intern-s1/intern-s1.html</code></td></tr>
+<tr><td><span class="tag t-step">Step 3.5 Flash</span></td><td><code>paper_reading/llm_vlm/step-3.5-flash/</code></td></tr>
+<tr><td><span class="tag t-mm">MiniMax M2.1</span></td><td><code>paper_reading/llm_vlm/minimax-m2/minimax-m2.1.html</code></td></tr>
+<tr><td><span class="tag t-mm">MiniMax M2.5</span></td><td><code>paper_reading/llm_vlm/minimax-m2/minimax-m2.5.html</code></td></tr>
+<tr><td><span class="tag t-seed">Seed-VL</span></td><td><code>paper_reading/llm_vlm/seed-vl/</code></td></tr>
+<tr><td><span class="tag t-mimo">MimoVL</span></td><td><code>paper_reading/llm_vlm/mimovl/</code></td></tr>
+</table>
+</div>
+</div>
+
+<!-- Footer -->
+<div class="section" style="background: transparent; border: none;">
+<div class="footer-section">
+<p>Frontier Model Comparison | 14 Models | 2025-2026</p>
+<p style="margin-top: 4px; font-size: 0.75rem;">Last updated: 2026-03-30</p>
+</div>
+</div>
+
+</div>
+</body>
+</html>

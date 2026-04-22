@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>精读笔记: OneVision-Encoder</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --fg: #c9d1d9;
+            --muted: #8b949e;
+            --accent: #58a6ff;
+            --accent2: #3fb950;
+            --border: #30363d;
+            --card: #161b22;
+            --warn: #d29922;
+            --danger: #f85149;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            line-height: 1.7;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        header {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        h1 {
+            font-size: 1.8rem;
+            color: var(--accent);
+            margin: 0 0 0.5rem 0;
+        }
+        .meta {
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 0.4rem;
+            margin-bottom: 0.3rem;
+        }
+        .badge-primary { background: rgba(88,166,255,0.15); color: var(--accent); }
+        .badge-success { background: rgba(63,185,80,0.15); color: var(--accent2); }
+        .badge-warn { background: rgba(210,153,34,0.15); color: var(--warn); }
+        .section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        h2 {
+            font-size: 1.3rem;
+            color: var(--accent);
+            margin-top: 0;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+        h3 {
+            font-size: 1.1rem;
+            color: var(--fg);
+            margin-top: 1.5rem;
+        }
+        .highlight-box {
+            background: rgba(88,166,255,0.08);
+            border-left: 3px solid var(--accent);
+            padding: 1rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1rem 0;
+        }
+        .insight-box {
+            background: rgba(63,185,80,0.08);
+            border-left: 3px solid var(--accent2);
+            padding: 1rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1rem 0;
+        }
+        .warn-box {
+            background: rgba(210,153,34,0.08);
+            border-left: 3px solid var(--warn);
+            padding: 1rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1rem 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.6rem 0.8rem;
+            text-align: left;
+        }
+        th {
+            background: rgba(88,166,255,0.1);
+            font-weight: 600;
+        }
+        tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        .image-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .image-card img {
+            width: 100%;
+            display: block;
+        }
+        .image-caption {
+            padding: 0.6rem;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+        ul { padding-left: 1.3rem; }
+        li { margin-bottom: 0.4rem; }
+        code {
+            background: rgba(255,255,255,0.06);
+            padding: 0.15rem 0.35rem;
+            border-radius: 4px;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+        }
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .metric:last-child { border-bottom: none; }
+        .metric-value {
+            font-weight: 600;
+            color: var(--accent2);
+        }
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .footer {
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.8rem;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📄 OneVision-Encoder: Codec-Aligned Sparsity as a Foundational Principle for Multimodal Intelligence</h1>
+            <div class="meta">
+                <span class="badge badge-primary">arXiv:2602.08683</span>
+                <span class="badge badge-success">CVPR 2026 (Preprint)</span>
+                <span class="badge badge-warn">Vision Encoder</span><br>
+                <strong>Authors:</strong> Feilong Tang, Xiang An, Yunyao Yan, Yin Xie, Bin Qin, Kaicheng Yang, Yifei Shen, Yuanhan Zhang, Chunyuan Li, Shikun Feng, Changrui Chen, Huajie Tan, Ming Hu, Manyuan Zhang, Bo Li, Ziyong Feng, Ziwei Liu, Zongyuan Ge, Jiankang Deng<br>
+                <strong>Date:</strong> 2026/02/09 &nbsp;|&nbsp;
+                <strong>Institution:</strong> Glint Lab, AIM for Health Lab, MVP Lab<br>
+                <a href="https://arxiv.org/abs/2602.08683">arXiv</a> &middot;
+                <a href="https://github.com/EvolvingLMMs-Lab/OneVision-Encoder">Code</a> &middot;
+                <a href="https://huggingface.co/collections/lmms-lab-encoder/onevision-encoder">Model</a>
+            </div>
+        </header>
+
+        <!-- TL;DR -->
+        <div class="section">
+            <h2>📌 TL;DR</h2>
+            <div class="highlight-box">
+                <strong>核心思想：</strong>将视频编解码器（Codec）的结构原理引入视觉编码器设计。视频信号本质上是高度冗余的——关键信息（运动、残差）稀疏分布。OneVision-Encoder 利用 HEVC 编码暴露的运动矢量和残差信号，<strong>只处理 3.1%~25% 的高信息熵区域</strong>，在大幅降低 token 数量的同时，实现了 SOTA 的多模态理解性能。
+            </div>
+            <div class="metric">
+                <span>Token 压缩率</span>
+                <span class="metric-value">87.5% ↓</span>
+            </div>
+            <div class="metric">
+                <span>vs Qwen3-ViT (视频任务平均提升)</span>
+                <span class="metric-value">+4.1%</span>
+            </div>
+            <div class="metric">
+                <span>vs SigLIP2 (Diving-48, 同 patch budget)</span>
+                <span class="metric-value">+17.1% Top-1</span>
+            </div>
+            <div class="metric">
+                <span>vs DINOv3 (Diving-48, 同 patch budget)</span>
+                <span class="metric-value">+8.1% Top-1</span>
+            </div>
+            <div class="metric">
+                <span>预训练数据量 (对比 Qwen3-ViT 的 2.1T)</span>
+                <span class="metric-value">~100B tokens</span>
+            </div>
+        </div>
+
+        <!-- 研究动机 -->
+        <div class="section">
+            <h2>🎯 研究动机与问题定义</h2>
+            <h3>当前视觉编码器的困境</h3>
+            <ul>
+                <li><strong>密集网格处理的浪费：</strong>现有视频 Transformer 对密集像素网格进行均匀计算，将大量算力耗费在静态背景上</li>
+                <li><strong>帧采样丢失时序信息：</strong>均匀帧采样会遗漏快速或细微动作的关键中间帧</li>
+                <li><strong>语义结构缺失：</strong>对比学习（CLIP/SigLIP）聚焦实例级判别，缺乏显式语义结构；重建方法（MAE/V-JEPA）捕获低层相关但缺乏高层语义</li>
+            </ul>
+            <h3>核心观察：视频信号的编解码器本质</h3>
+            <div class="insight-box">
+                <strong>关键洞见：</strong>自然视频具有极强的时空冗余性。H.264/H.265 等视频编解码器早已揭示了这一点——它们将视频分解为：
+                <ul>
+                    <li><strong>I-帧：</strong>完整的空间上下文（intra-coded）</li>
+                    <li><strong>P-帧：</strong>通过运动补偿和残差编码帧间变化（predicted）</li>
+                </ul>
+                绝大多数视频信号对应于<strong>运动驱动的增量更新</strong>，而非独立判别的视觉证据。判别性信息是<strong>稀疏的</strong>。
+            </div>
+        </div>
+
+        <!-- 方法详解 -->
+        <div class="section">
+            <h2>🔧 方法详解</h2>
+            
+            <h3>2.1 HEVC 引导的 Patch 选择</h3>
+            <p>利用 HEVC 编码器暴露的两种信号作为"信息熵代理"：</p>
+            <table>
+                <tr><th>信号</th><th>含义</th><th>作用</th></tr>
+                <tr><td>Motion Vectors (运动矢量)</td><td>块级位移编码</td><td>反映局部运动强度</td></tr>
+                <tr><td>Residual Signal (残差信号)</td><td>运动补偿后不可预测的外观变化</td><td>捕获不可预测的视觉变异</td></tr>
+            </table>
+            <p>在 Patch 级别聚合运动幅度和残差能量，选择固定比例 <code>r</code> 的最显著 Patch（<code>|Ω| = ⌊r·P₀⌋</code>）。</p>
+
+            <h3>2.2 Codec Patchification（三种输入模式）</h3>
+            <div class="image-grid">
+                <div class="image-card">
+                    <img src="images/p5_0.png" alt="Overview">
+                    <div class="image-caption">图2: OneVision-Encoder 框架总览</div>
+                </div>
+            </div>
+            <table>
+                <tr><th>模式</th><th>适用场景</th><th>Token 策略</th></tr>
+                <tr>
+                    <td><strong>Dense Video-Codec</strong></td>
+                    <td>密集视频输入（64帧）</td>
+                    <td>I-帧全编码(256 tokens) + P-帧稀疏选择(1536 tokens)，共2048 tokens</td>
+                </tr>
+                <tr>
+                    <td><strong>Chunk-wise</strong></td>
+                    <td>稀疏时间采样</td>
+                    <td>视频分块，每块随机采样一帧，缓解空间中心偏置</td>
+                </tr>
+                <tr>
+                    <td><strong>Single-Image Spatial</strong></td>
+                    <td>静态图像</td>
+                    <td>逐行 patchify，确定性空间排序</td>
+                </tr>
+            </table>
+            <div class="highlight-box">
+                <strong>统一性：</strong>三种模式共享同一个 ViT 主干和 <strong>3D RoPE</strong> 位置编码，通过虚拟 64 帧时间网格统一时间位置。
+            </div>
+
+            <h3>2.3 3D Rotary Position Embedding (3D-RoPE)</h3>
+            <p>统一的相对位置编码方案，支持不规则 token 布局：</p>
+            <ul>
+                <li><strong>Dense Video:</strong> Δp = (Δt, Δx, Δy) — 完整时空偏移</li>
+                <li><strong>Chunk-wise:</strong> Δp = (Δc, Δx, Δy) — 块级时间偏移</li>
+                <li><strong>Single-Image:</strong> Δp = (0, Δx, Δy) — 纯空间偏移</li>
+            </ul>
+
+            <h3>2.4 训练目标：大规模聚类判别</h3>
+            <div class="image-grid">
+                <div class="image-card">
+                    <img src="images/p6_0.png" alt="Cluster Discrimination">
+                    <div class="image-caption">图3: 对比学习 vs 聚类判别学习</div>
+                </div>
+            </div>
+            <p>不同于标准对比学习（batch 内负样本），OV-Encoder 采用<strong>聚类判别</strong>：</p>
+            <ul>
+                <li><strong>Image 分支：</strong>200万类 object-level 语义中心</li>
+                <li><strong>Video 分支：</strong>40万类 motion-level 语义中心</li>
+                <li>统一概念库超过 <strong>100万</strong> 个语义概念</li>
+                <li>每个样本分配 Top-10 最近中心作为多标签监督</li>
+            </ul>
+            <p>损失函数同时对 object-level 和 motion-level 粒度进行多标签语义判别：</p>
+            <p style="text-align:center"><code>L = Σₘ∈{obj,vid} E₍ᵤ,ₖ₎~Cₘ log(1 + exp(-yᵐᵤ,ₖ · σᵐᵤ,ₖ))</code></p>
+
+            <h3>2.5 架构配置</h3>
+            <table>
+                <tr><th>组件</th><th>配置</th></tr>
+                <tr><td>Backbone</td><td>ViT-Large (24 layers, hidden dim 1024, 16 heads)</td></tr>
+                <tr><td>Patch size</td><td>14 × 14</td></tr>
+                <tr><td>Position Encoding</td><td>3D RoPE (T:H:W = 4:6:6)</td></tr>
+                <tr><td>Attention</td><td>Flash Attention 2</td></tr>
+                <tr><td>Pooling</td><td>Multi-head Attention Pooling (from SigLIP)</td></tr>
+            </table>
+        </div>
+
+        <!-- 实验结果 -->
+        <div class="section">
+            <h2>📊 实验结果</h2>
+            
+            <h3>3.1 预训练设置</h3>
+            <table>
+                <tr><th>阶段</th><th>数据</th><th>样本数</th><th>分辨率</th><th>学习率</th></tr>
+                <tr><td>Stage 1</td><td>Image only (LAION-400M, COYO-700M等)</td><td>13B</td><td>224</td><td>1e-3</td></tr>
+                <tr><td>Stage 2</td><td>Image + OCR + Video (HowTo100M, Panda-70M等)</td><td>4B</td><td>448 (img) / 224 (video)</td><td>1e-4</td></tr>
+            </table>
+            <p>训练硬件：128 × A800 GPUs (16 nodes × 8 GPUs)</p>
+
+            <h3>3.2 LMM Probing 评估（多模态理解）</h3>
+            <p>固定语言模型为 <strong>Qwen3-4B-Instruct</strong>，仅替换视觉编码器，在 1.5M 指令数据上微调：</p>
+            <table>
+                <tr><th>任务类型</th><th>Benchmark</th><th>OV-Encoder-Lang (Codec)</th><th>Qwen3-ViT</th><th>SigLIP2</th></tr>
+                <tr><td rowspan="7">Video</td><td>MVBench</td><td><strong>53.2</strong></td><td>52.4</td><td>47.2</td></tr>
+                <tr><td>MLVU-dev</td><td>47.4</td><td>46.3</td><td><strong>48.4</strong></td></tr>
+                <tr><td>NExT-QA</td><td><strong>76.1</strong></td><td>75.6</td><td>70.6</td></tr>
+                <tr><td>VideoMME</td><td><strong>54.1</strong></td><td>53.4</td><td>46.8</td></tr>
+                <tr><td>Perception Test</td><td><strong>60.6</strong></td><td>60.3</td><td>56.0</td></tr>
+                <tr><td>LongVideoBench</td><td><strong>51.6</strong></td><td>50.4</td><td>45.2</td></tr>
+                <tr><td colspan="4" style="text-align:center;color:var(--muted)">视频任务平均: <strong>OV-Encoder +4.1% over Qwen3-ViT</strong></td></tr>
+                <tr><td rowspan="9">Image / Doc</td><td>AI2D</td><td><strong>80.2</strong></td><td>75.7</td><td>78.6</td></tr>
+                <tr><td>ChartQA</td><td><strong>80.1</strong></td><td>76.5</td><td>76.4</td></tr>
+                <tr><td>DocVQA</td><td>83.2</td><td>78.4</td><td><strong>85.1</strong> (SigLIP2-caption)</td></tr>
+                <tr><td>InfoVQA</td><td><strong>51.6</strong></td><td>43.1</td><td>42.0</td></tr>
+                <tr><td>MMBench-EN</td><td><strong>80.2</strong></td><td>77.2</td><td>79.6</td></tr>
+                <tr><td>OCRBench</td><td>657</td><td>605</td><td><strong>706</strong> (SigLIP2-caption)</td></tr>
+                <tr><td>OCRBench v2</td><td><strong>30.8</strong></td><td>26.3</td><td>26.1</td></tr>
+                <tr><td>MMStar</td><td><strong>56.6</strong></td><td>52.1</td><td>55.0</td></tr>
+                <tr><td>RealWorldQA</td><td><strong>66.1</strong></td><td>60.8</td><td>62.1</td></tr>
+            </table>
+            <div class="insight-box">
+                <strong>关键发现：</strong>OV-Encoder 在 <strong>16 个 video/image/doc 基准</strong>上全面超越 Qwen3-ViT，且其预训练仅使用了约 <strong>100B</strong> caption tokens，而 Qwen3-ViT 使用了超过 <strong>2.1T</strong> tokens。这说明性能提升来自<strong>更有效的视觉表征学习</strong>，而非数据规模。
+            </div>
+
+            <h3>3.3 Attentive Probing 评估（表征质量）</h3>
+            <p>冻结视觉编码器，仅训练轻量 attention-based 分类头：</p>
+            <table>
+                <tr><th>方法</th><th>SSV2</th><th>Diving48</th><th>PerceptionTest</th><th>Kinetics-400</th><th>HMDB51</th><th>Avg</th></tr>
+                <tr><td>SigLIP2</td><td>52.6</td><td>50.1</td><td>52.7</td><td>80.9</td><td>79.1</td><td>53.1</td></tr>
+                <tr><td>DINOv3</td><td>57.4</td><td>58.6</td><td>59.3</td><td>82.9</td><td>78.6</td><td>58.0</td></tr>
+                <tr><td>OV-Encoder (Frame)</td><td>57.7</td><td>57.6</td><td>58.3</td><td>84.3</td><td>83.1</td><td>58.4</td></tr>
+                <tr><td><strong>OV-Encoder (Codec)</strong></td><td><strong>58.5</strong></td><td><strong>67.2</strong></td><td><strong>60.0</strong></td><td><strong>84.4</strong></td><td><strong>83.4</strong></td><td><strong>60.2</strong></td></tr>
+            </table>
+            <p>在相同 2048 patch budget 下，OV-Encoder (Codec) 在 <strong>Diving-48 上比 SigLIP2 高 17.1%</strong>，比 DINOv3 高 8.1%。</p>
+
+            <h3>3.4 Patch 效率分析</h3>
+            <table>
+                <tr><th>Patch Budget</th><th>SigLIP2 Avg</th><th>OV-Encoder (Codec) Avg</th><th>Patch 保留率</th></tr>
+                <tr><td>512</td><td>47.0</td><td><strong>55.1</strong></td><td>3.1%</td></tr>
+                <tr><td>1024</td><td>53.4</td><td><strong>62.4</strong></td><td>6.25%</td></tr>
+                <tr><td>2048</td><td>56.6</td><td><strong>66.5</strong></td><td>12.5%</td></tr>
+                <tr><td>4096</td><td>59.9</td><td><strong>67.5</strong></td><td>25.0%</td></tr>
+            </table>
+            <div class="insight-box">
+                OV-Encoder (Codec) 在仅保留 <strong>3.1%~25%</strong> patch 的情况下，全面超越使用全部 patch 的 SigLIP2。<strong>效率与精度正相关</strong>，而非权衡。
+            </div>
+
+            <h3>3.5 消融实验：Codec 引导 Patch 选择的因果性</h3>
+            <table>
+                <tr><th>干预设置</th><th>Avg</th><th>Diving48</th><th>说明</th></tr>
+                <tr><td>OV-Encoder (Codec)</td><td>61.4</td><td>69.4</td><td>完整模型</td></tr>
+                <tr><td>Non-motion Patch Replacement (50%)</td><td>55.4</td><td>55.4</td><td>运动patch替换为同视频非运动patch</td></tr>
+                <tr><td>Counterfactual Motion Replacement (50%)</td><td>54.9</td><td>57.2</td><td>运动patch替换为其他视频的运动patch</td></tr>
+                <tr><td>Patch-Position Shuffle</td><td>48.1</td><td>46.3</td><td>保留内容，随机打乱时空位置</td></tr>
+            </table>
+            <div class="warn-box">
+                <strong>结论：</strong>性能下降呈现一致层级：正确运动 patch > 非运动替换 > 错误运动替换 > 位置打乱。这说明 Codec 引导的 patch 选择捕获的是<strong>语义正确且结构对齐</strong>的运动证据，而非简单的稀疏正则化或噪声注入效应。
+            </div>
+        </div>
+
+        <!-- 关键图表 -->
+        <div class="section">
+            <h2>🖼️ 关键图表</h2>
+            <div class="image-grid">
+                <div class="image-card">
+                    <img src="images/p2_9.png" alt="Figure 1">
+                    <div class="image-caption">图1: 视觉智能作为编解码器对齐的预测压缩</div>
+                </div>
+                <div class="image-card">
+                    <img src="images/p5_0.png" alt="Figure 2">
+                    <div class="image-caption">图2: OneVision-Encoder 框架总览</div>
+                </div>
+                <div class="image-card">
+                    <img src="images/p6_0.png" alt="Figure 3">
+                    <div class="image-caption">图3: 对比学习 vs 聚类判别</div>
+                </div>
+                <div class="image-card">
+                    <img src="images/p7_0.png" alt="Figure 4">
+                    <div class="image-caption">图4: 用于 Codec Patchification 的 3D-RoPE</div>
+                </div>
+                <div class="image-card">
+                    <img src="images/p15_0.png" alt="Figure 5">
+                    <div class="image-caption">图5: HEVC 中 I-帧和 P-帧分解的可视化</div>
+                </div>
+                <div class="image-card">
+                    <img src="images/p16_0.png" alt="Figure 6">
+                    <div class="image-caption">图6: 视频处理流程对比</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 关键洞察 -->
+        <div class="section">
+            <h2>💡 关键洞察与启发</h2>
+            <div class="insight-box">
+                <strong>1. 效率与精度正相关</strong><br>
+                传统观点认为压缩会带来信息损失，但 OV-Encoder 证明：<strong>对齐数据固有结构的稀疏性，反而能提升表征质量。</strong>去除冗余背景后，模型聚焦于真正携带判别信息的区域。
+            </div>
+            <div class="insight-box">
+                <strong>2. Codec 是免费的"信息熵探测器"</strong><br>
+                HEVC 等成熟编解码器已经花费了大量算力分析运动与残差。OV-Encoder 直接复用这些信号作为 saliency proxy，无需额外训练昂贵的模块。
+            </div>
+            <div class="insight-box">
+                <strong>3. 统一的图像-视频表征空间</strong><br>
+                通过 3D-RoPE 和共享 ViT，OV-Encoder 将图像视为 T=1 的视频特例，真正实现了图像和视频的统一编码。这是其作为多模态模型视觉主干的关键优势。
+            </div>
+            <div class="insight-box">
+                <strong>4. 聚类判别 vs 对比学习的优势</strong><br>
+                对比学习局限于 batch 内负样本，而聚类判别利用全局概念库（100万+中心），强制表征空间形成结构化的语义分离，更适合细粒度视觉理解。
+            </div>
+        </div>
+
+        <!-- 局限性与未来方向 -->
+        <div class="section">
+            <h2>⚠️ 局限性与未来方向</h2>
+            <ul>
+                <li><strong>Codec 依赖性：</strong>当前依赖 HEVC 编码器提取运动矢量和残差。对于已压缩视频（如 YouTube 下载）可直接使用，但对原始 RGB 视频需要额外编码步骤</li>
+                <li><strong>空间中心偏置：</strong>Codec 引导的 patch 选择存在明显的空间中心偏置（图8）。Chunk-wise patchification 可缓解但无法完全消除</li>
+                <li><strong>I-帧分配策略：</strong>当前仅使用 1~2 个 I-帧建立空间上下文。对于场景切换频繁的视频，可能需要动态 GOP 策略</li>
+                <li><strong>端到端训练：</strong>聚类中心是离线预计算的。探索在线聚类或端到端可学习的 saliency 估计可能是未来方向</li>
+            </ul>
+        </div>
+
+        <!-- 相关方法对比 -->
+        <div class="section">
+            <h2>🔗 相关方法对比</h2>
+            <table>
+                <tr><th>方法</th><th>核心策略</th><th>与 OV-Encoder 的区别</th></tr>
+                <tr><td>MAE / V-JEPA</td><td>像素/特征级重建</td><td>OV-Encoder 聚焦语义级聚类判别，非重建</td></tr>
+                <tr><td>CLIP / SigLIP</td><td>实例级对比学习</td><td>OV-Encoder 使用全局聚类中心，结构化语义分离更强</td></tr>
+                <tr><td>DINOv2 / DINOv3</td><td>自蒸馏 + 无标签学习</td><td>OV-Encoder 显式利用视频时序结构和 codec 信号</td></tr>
+                <tr><td>Token Merging</td><td>语义驱动的 token 合并</td><td>OV-Encoder 是选择性编码（skip），非合并</td></tr>
+                <tr><td>PatchDropout</td><td>随机 token 丢弃</td><td>OV-Encoder 是原则性选择，非随机正则化</td></tr>
+                <tr><td>Qwen3-ViT</td><td>密集帧采样 + 大规模预训练</td><td>OV-Encoder 用 20 倍更少数据超越，证明效率-精度正相关</td></tr>
+            </table>
+        </div>
+
+        <!-- 一句话总结 -->
+        <div class="section">
+            <h2>📝 一句话总结</h2>
+            <div class="highlight-box" style="font-size: 1.05rem;">
+                OneVision-Encoder 是一个<strong>"向编解码器学习"</strong>的视觉编码器：它利用 HEVC 暴露的运动和残差信号，只处理视频中 3%~25% 的高信息区域，在减少 87.5% token 的同时，用比 Qwen3-ViT 少 20 倍的数据，在 16 个多模态基准上实现了全面领先。它证明了——<strong>对于视觉智能，效率不是精度的代价，而是其前提。</strong>
+            </div>
+        </div>
+
+        <div class="footer">
+            精读笔记由 Paper Research 自动生成 &middot; 2026-04-19<br>
+            论文: <a href="https://arxiv.org/abs/2602.08683">arXiv:2602.08683</a>
+        </div>
+    </div>
+</body>
+</html>

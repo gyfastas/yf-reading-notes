@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SWE-Factory · 精读笔记</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #080c10;
+  --s0:      #0d1218;
+  --s1:      #121820;
+  --s2:      #181e28;
+  --border:  #1c2430;
+  --border2: #243040;
+  --text:    #c4ccd8;
+  --muted:   #4e6070;
+  --muted2:  #364450;
+  --head:    #dde6f0;
+  --cyan:    #5ec4d8;
+  --cyan2:   #3a9ab4;
+  --green:   #60c88a;
+  --red:     #d46e68;
+  --amber:   #c8a04a;
+  --blue:    #5090d0;
+  --purple:  #8878c0;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; font-size:15px; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 300;
+  line-height: 1.8;
+}
+
+/* ── layout ── */
+.layout { display:flex; min-height:100vh; }
+aside {
+  position:fixed; top:0; left:0;
+  width:210px; height:100vh;
+  background:var(--s0);
+  border-right:1px solid var(--border);
+  display:flex; flex-direction:column;
+  overflow-y:auto; z-index:200;
+}
+.aside-head { padding:26px 20px 20px; border-bottom:1px solid var(--border); }
+.back-link {
+  font-family:'JetBrains Mono',monospace;
+  font-size:9.5px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--muted); text-decoration:none;
+  display:flex; align-items:center; gap:6px;
+  margin-bottom:14px; transition:color .2s;
+}
+.back-link:hover { color:var(--cyan); }
+.aside-title { font-family:'Lora',serif; font-size:14px; font-weight:600; color:var(--head); line-height:1.4; }
+.aside-sub { font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--muted); margin-top:5px; letter-spacing:.06em; }
+nav { padding:14px 0; flex:1; }
+.nav-item {
+  display:flex; align-items:center; gap:9px;
+  padding:6px 20px; font-size:12px; color:var(--muted);
+  text-decoration:none; cursor:pointer;
+  transition:color .2s, background .2s;
+  border-left:2px solid transparent;
+}
+.nav-item:hover { color:var(--text); background:rgba(255,255,255,.02); }
+.nav-item.active { color:var(--cyan); border-left-color:var(--cyan); background:rgba(94,196,216,.05); }
+.nav-item .n { font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--muted2); min-width:16px; }
+.aside-foot {
+  padding:14px 20px; border-top:1px solid var(--border);
+  font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--muted2); line-height:1.8;
+}
+
+/* ── main ── */
+main { margin-left:210px; flex:1; max-width:780px; padding:52px 48px 100px; }
+
+/* ── hero ── */
+.hero { margin-bottom:52px; }
+.hero-eyebrow {
+  font-family:'JetBrains Mono',monospace; font-size:9.5px;
+  letter-spacing:.22em; text-transform:uppercase; color:var(--cyan); margin-bottom:14px;
+}
+.hero h1 {
+  font-family:'Lora',serif; font-size:36px; font-weight:500;
+  color:var(--head); line-height:1.2; margin-bottom:6px; letter-spacing:-.02em;
+}
+.hero h1 em { font-style:italic; color:var(--cyan); }
+.hero-sub { font-family:'Lora',serif; font-style:italic; font-size:16px; color:var(--muted); margin-bottom:20px; }
+.hero-chips { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:24px; }
+.chip { font-family:'JetBrains Mono',monospace; font-size:10px; padding:3px 10px; border-radius:3px; text-decoration:none; transition:opacity .15s; }
+.chip:hover { opacity:.75; }
+.chip-arxiv { background:rgba(94,196,216,.10); color:var(--cyan);   border:1px solid rgba(94,196,216,.22); }
+.chip-gh    { background:rgba(255,255,255,.04); color:var(--muted);  border:1px solid var(--border2); }
+.chip-venue { background:rgba(96,200,138,.10);  color:var(--green);  border:1px solid rgba(96,200,138,.2); }
+.chip-model { background:rgba(136,120,192,.10); color:var(--purple); border:1px solid rgba(136,120,192,.22); }
+
+.hero-abstract {
+  background:var(--s1); border:1px solid var(--border);
+  border-left:3px solid var(--cyan); border-radius:0 8px 8px 0;
+  padding:16px 20px; font-size:13.5px; color:#8898a8; line-height:1.75;
+}
+.hero-abstract strong { color:var(--text); }
+
+/* ── section ── */
+.sec { margin-bottom:56px; }
+.sec-header {
+  display:flex; align-items:center; gap:12px;
+  margin-bottom:24px; padding-bottom:12px; border-bottom:1px solid var(--border);
+}
+.sec-num { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted2); letter-spacing:.08em; min-width:24px; }
+.sec-line { width:3px; height:20px; border-radius:2px; flex-shrink:0; }
+.sec-title { font-family:'Lora',serif; font-size:22px; font-weight:500; color:var(--head); }
+
+/* ── prose ── */
+p { margin-bottom:12px; font-size:13.5px; }
+p:last-child { margin-bottom:0; }
+strong { color:var(--head); font-weight:500; }
+em { color:var(--amber); font-style:italic; }
+
+/* ── callout ── */
+.callout {
+  border-radius:7px; padding:13px 16px; font-size:13px; line-height:1.7;
+  margin:14px 0; display:flex; gap:12px;
+}
+.callout-icon { font-size:14px; flex-shrink:0; padding-top:1px; }
+.callout-body { flex:1; }
+.callout-body strong { font-weight:500; }
+.callout.warn  { background:rgba(200,160,74,.08);  border:1px solid rgba(200,160,74,.18);  color:#a89060; }
+.callout.info  { background:rgba(94,196,216,.07);  border:1px solid rgba(94,196,216,.16);  color:#5898a8; }
+.callout.good  { background:rgba(96,200,138,.08);  border:1px solid rgba(96,200,138,.18);  color:#5a9870; }
+.callout.key   { background:rgba(136,120,192,.08); border:1px solid rgba(136,120,192,.18); color:#8070b0; }
+
+/* ── agents grid ── */
+.agents-grid { display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--border); border-radius:8px; overflow:hidden; margin:20px 0; }
+.agent-card { background:var(--s1); padding:16px 18px; transition:background .2s; }
+.agent-card:hover { background:var(--s2); }
+.agent-tag { font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--cyan); margin-bottom:6px; }
+.agent-name { font-size:13.5px; font-weight:500; color:var(--head); margin-bottom:7px; }
+.agent-body { font-size:12.5px; color:var(--muted); line-height:1.65; }
+.agent-body code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--purple); padding:1px 5px; border-radius:3px; }
+.agent-body strong { color:var(--text); }
+
+/* ── pipeline / step ── */
+.pipeline { display:flex; flex-direction:column; gap:2px; margin-bottom:20px; }
+.pipeline-step { display:grid; grid-template-columns:40px 1fr; background:var(--s1); border:1px solid var(--border); border-radius:7px; overflow:hidden; transition:border-color .2s; }
+.pipeline-step:hover { border-color:var(--border2); }
+.step-gutter { background:var(--s0); display:flex; align-items:flex-start; justify-content:center; padding:16px 0 0; border-right:1px solid var(--border); }
+.step-badge { font-family:'JetBrains Mono',monospace; font-size:9.5px; font-weight:500; color:var(--cyan); letter-spacing:.06em; }
+.step-inner { padding:14px 18px; }
+.step-h { font-size:13.5px; font-weight:500; color:var(--head); margin-bottom:6px; }
+.step-p { font-size:12.5px; color:var(--muted); line-height:1.65; }
+.step-p code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--purple); padding:1px 5px; border-radius:3px; }
+.step-p strong { color:var(--text); }
+.step-connector { display:flex; align-items:center; justify-content:center; height:22px; color:var(--muted2); font-size:11px; }
+
+/* ── mechanism box ── */
+.mech-box {
+  background:var(--s1); border:1px solid var(--border); border-radius:8px;
+  overflow:hidden; margin:16px 0;
+}
+.mech-head {
+  display:flex; align-items:center; gap:10px;
+  padding:11px 18px; border-bottom:1px solid var(--border);
+  background:var(--s0);
+}
+.mech-icon { font-size:16px; }
+.mech-title { font-family:'Lora',serif; font-size:15px; font-weight:500; color:var(--head); }
+.mech-tag { font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-left:auto; }
+.mech-body { padding:16px 18px; }
+.mech-body p { font-size:13px; color:var(--muted); margin-bottom:10px; }
+.mech-body p:last-child { margin-bottom:0; }
+.mech-body strong { color:var(--text); }
+.mech-body code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--purple); padding:1px 5px; border-radius:3px; }
+
+/* ── flow diagram ── */
+.flow {
+  background:var(--s0); border:1px solid var(--border); border-radius:8px;
+  padding:16px 20px; margin:14px 0;
+  font-family:'JetBrains Mono',monospace; font-size:11px; overflow-x:auto;
+}
+.flow-row { display:flex; align-items:center; gap:0; white-space:nowrap; margin-bottom:6px; }
+.flow-row:last-child { margin-bottom:0; }
+.fbox { background:var(--s2); border:1px solid var(--border2); border-radius:5px; padding:5px 10px; color:var(--cyan); font-size:10.5px; }
+.fbox.red { color:var(--red); border-color:rgba(212,110,104,.3); background:rgba(212,110,104,.07); }
+.fbox.grn { color:var(--green); border-color:rgba(96,200,138,.3); background:rgba(96,200,138,.07); }
+.fbox.amb { color:var(--amber); border-color:rgba(200,160,74,.3); background:rgba(200,160,74,.07); }
+.farr { color:var(--muted2); padding:0 8px; }
+.flow-note { font-size:10px; color:var(--muted2); margin-top:8px; padding-left:8px; border-left:2px solid var(--border2); line-height:1.8; }
+
+/* ── code block ── */
+.codeblock { background:var(--s0); border:1px solid var(--border); border-radius:8px; overflow:hidden; margin:14px 0; font-family:'JetBrains Mono',monospace; font-size:11.5px; line-height:1.75; }
+.codeblock-head { background:var(--s1); border-bottom:1px solid var(--border); padding:7px 16px; font-size:9.5px; color:var(--muted); letter-spacing:.1em; display:flex; align-items:center; gap:8px; }
+.codeblock-head .dot { width:8px; height:8px; border-radius:50%; }
+.codeblock pre { padding:14px 18px; white-space:pre; overflow-x:auto; color:#506080; }
+.tok-comment { color:#26323e; }
+.tok-key     { color:var(--purple); }
+.tok-str     { color:var(--amber); }
+.tok-num     { color:var(--cyan); }
+.tok-op      { color:var(--green); }
+.tok-em      { color:var(--red); }
+
+/* ── stat grid ── */
+.stat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--border); border-radius:8px; overflow:hidden; margin:16px 0; }
+.stat-cell { background:var(--s1); padding:16px 18px; }
+.stat-val { font-family:'Lora',serif; font-size:24px; font-weight:500; color:var(--head); margin-bottom:3px; line-height:1.1; }
+.stat-val .unit { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); font-weight:400; }
+.stat-label { font-size:11.5px; color:var(--muted); }
+
+/* ── bench table ── */
+.bench-table { width:100%; border-collapse:collapse; font-size:13px; margin:16px 0; }
+.bench-table th { font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted2); padding:9px 14px; text-align:left; background:var(--s0); border-bottom:1px solid var(--border); }
+.bench-table td { padding:9px 14px; border-bottom:1px solid var(--border); color:var(--muted); vertical-align:middle; }
+.bench-table tr:last-child td { border-bottom:none; }
+.bench-table .best { color:var(--cyan); font-weight:500; font-family:'JetBrains Mono',monospace; }
+.bench-table .win  { color:var(--green); }
+.bench-table .us   { background:rgba(94,196,216,.04); }
+
+/* ── error table ── */
+.err-table { width:100%; border-collapse:collapse; font-size:12.5px; margin:16px 0; }
+.err-table th { font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted2); padding:8px 12px; text-align:left; background:var(--s0); border-bottom:1px solid var(--border); }
+.err-table td { padding:8px 12px; border-bottom:1px solid var(--border); color:var(--muted); }
+.err-table tr:last-child td { border-bottom:none; }
+.err-table .delta-good { color:var(--green); font-family:'JetBrains Mono',monospace; font-size:11px; }
+.err-table .delta-bad  { color:var(--red);   font-family:'JetBrains Mono',monospace; font-size:11px; }
+
+/* ── mix table ── */
+.mix-table { width:100%; border-collapse:collapse; font-size:12.5px; margin:16px 0; }
+.mix-table th { font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.10em; text-transform:uppercase; color:var(--muted2); padding:8px 12px; text-align:center; background:var(--s0); border-bottom:1px solid var(--border); }
+.mix-table td { padding:8px 12px; border-bottom:1px solid var(--border); color:var(--muted); text-align:center; }
+.mix-table td:first-child { text-align:left; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text); }
+.mix-table tr:last-child td { border-bottom:none; }
+.mix-table .peak { color:var(--cyan); font-weight:500; }
+.mix-table .highlight-row { background:rgba(94,196,216,.04); }
+
+/* ── curriculum vis ── */
+.curric { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--border); border-radius:8px; overflow:hidden; margin:16px 0; }
+.cv-cell { background:var(--s1); padding:14px 16px; }
+.cv-tag { font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.14em; text-transform:uppercase; margin-bottom:5px; }
+.cv-name { font-size:14px; font-weight:500; color:var(--head); margin-bottom:4px; font-family:'Lora',serif; }
+.cv-desc { font-size:11.5px; color:var(--muted); line-height:1.6; }
+.cv-weight { font-family:'JetBrains Mono',monospace; font-size:18px; font-weight:500; margin-top:8px; }
+
+/* ── insight cards ── */
+.insight-cards { display:flex; flex-direction:column; gap:10px; }
+.insight-card { display:grid; grid-template-columns:3px 1fr; gap:14px; background:var(--s1); border:1px solid var(--border); border-radius:7px; overflow:hidden; padding:14px 16px; transition:border-color .2s; }
+.insight-card:hover { border-color:var(--border2); }
+.insight-stripe { border-radius:2px; }
+.insight-title { font-size:13.5px; font-weight:500; color:var(--head); margin-bottom:5px; }
+.insight-body  { font-size:12.5px; color:var(--muted); line-height:1.65; }
+.insight-body strong { color:var(--text); }
+.insight-body code { font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); color:var(--purple); padding:1px 5px; border-radius:3px; }
+
+/* ── bar rows ── */
+.bar-row { display:grid; grid-template-columns:200px 1fr 70px; align-items:center; gap:12px; margin:7px 0; font-size:12px; }
+.bar-track { background:var(--border); height:4px; border-radius:2px; overflow:hidden; }
+.bar-fill  { height:100%; border-radius:2px; }
+
+/* ── divider / scrollbar ── */
+.divider { border:none; border-top:1px solid var(--border); margin:28px 0; }
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+@media (max-width:700px) {
+  aside { display:none; }
+  main  { margin-left:0; padding:28px 18px 60px; }
+  .agents-grid, .curric { grid-template-columns:1fr; }
+  .stat-grid { grid-template-columns:1fr 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <div class="aside-head">
+    <a href="../../Reference.html" class="back-link">← 返回 Reference</a>
+    <div class="aside-title">SWE-Factory</div>
+    <div class="aside-sub">精读笔记 · 2025.06</div>
+  </div>
+  <nav>
+    <a class="nav-item active" href="#overview"><span class="n">00</span>概览</a>
+    <a class="nav-item" href="#problems"><span class="n">01</span>三大瓶颈</a>
+    <a class="nav-item" href="#builder"><span class="n">02</span>SWE-Builder</a>
+    <a class="nav-item" href="#validation"><span class="n">03</span>Exit-Code 验证</a>
+    <a class="nav-item" href="#experiments"><span class="n">04</span>实验与消融</a>
+    <a class="nav-item" href="#sft"><span class="n">05</span>SFT 探索</a>
+    <a class="nav-item" href="#takeaways"><span class="n">06</span>对我们的启发</a>
+  </nav>
+  <div class="aside-foot">
+    arXiv:2506.10954<br>
+    2025.06 · Lianghong Guo et al.<br>
+    SYSU & Huawei<br>
+    Auto SE Data Factory
+  </div>
+</aside>
+
+<main>
+
+<div class="hero" id="overview">
+  <div class="hero-eyebrow">Paper Deep-Dive · arXiv:2506.10954</div>
+  <h1>SWE-<em>Factory</em></h1>
+  <div class="hero-sub">Your Automated Factory for Issue Resolution Training Data and Evaluation Benchmarks</div>
+  <div class="hero-chips">
+    <a href="https://arxiv.org/abs/2506.10954" target="_blank" class="chip chip-arxiv">↗ arXiv:2506.10954</a>
+    <span class="chip chip-gh">github.com/DeepSoftwareAnalytics/swe-factory</span>
+    <span class="chip chip-venue">SE Data Factory · 2025.06</span>
+  </div>
+  <div class="hero-abstract">
+    SWE-Factory 是第一个开源的、全自动、跨语言的 GitHub issue resolution 数据构建流水线。它针对现有 SWE-bench 风格流水线中的<strong>三大瓶颈</strong>——二进制测试文件缺失、环境构建依赖大量人工、fail2pass 验证需要手写 parser——分别提出了自动化解决方案：<strong>Binary Test File Recovery</strong>、<strong>SWE-Builder（四 Agent 多智能体系统）</strong>和 <strong>Exit-Code-Based Log Parsing</strong>。在 671 个真实 issue（4 种语言）上的实验表明，SWE-Builder 以 GPT-4.1 mini 为基座可达到 <strong>50.2% F2P / 64.8% Output Rate</strong>，平均成本仅 $0.047/instance；exit-code 验证方法的 F1 高达 <strong>0.99</strong>。此外，基于 SWE-Factory 收集的 2,809 条轨迹进行 SFT，可使 Qwen2.5-Coder-14B 在 SWE-bench Verified 上的 resolve rate 从 5.8% 提升到 <strong>21.0%</strong>。
+  </div>
+</div>
+
+<section class="sec" id="problems">
+  <div class="sec-header">
+    <span class="sec-num">01</span>
+    <div class="sec-line" style="background:var(--red)"></div>
+    <h2 class="sec-title">三大瓶颈</h2>
+  </div>
+
+  <p>传统的 GitHub issue resolution 数据集构建遵循 SWE-bench 的四阶段流水线：Repository Selection → Issue Data Collection → Evaluation Environment Construction → Fail2Pass Validation。SWE-Factory 指出其中存在三个尚未被系统解决的关键痛点。</p>
+
+  <div class="mech-box">
+    <div class="mech-head">
+      <div class="mech-icon">🗂️</div>
+      <div class="mech-title">P1 · 二进制测试文件缺失</div>
+      <div class="mech-tag" style="background:rgba(212,110,104,.15);color:var(--red);border:1px solid rgba(212,110,104,.3)">数据收集</div>
+    </div>
+    <div class="mech-body">
+      <p>当 PR 的 test patch 包含二进制文件（如 <code>.png</code>, <code>.tif</code>, <code>.zip</code>）时，GitHub API 返回的 patch 中这些文件的内容为空（显示为 "Binary files ... differ"）。这导致：</p>
+      <p>· 测试缺少必要的输入资源；<br>· <code>git apply</code> 无法成功应用 test patch， codebase 卡在 base commit。</p>
+      <p>在 Pillow 中 30.43% 的实例受此影响，matplotlib 中 22.10%。这些 issue 被静默丢弃，限制了数据的多样性，尤其对多模态理解任务不利。</p>
+    </div>
+  </div>
+
+  <div class="mech-box">
+    <div class="mech-head">
+      <div class="mech-icon">🔧</div>
+      <div class="mech-title">P2 · 评估环境构建依赖大量人工</div>
+      <div class="mech-tag" style="background:rgba(200,160,74,.15);color:var(--amber);border:1px solid rgba(200,160,74,.3)">环境构建</div>
+    </div>
+    <div class="mech-body">
+      <p>不同仓库使用不同语言、依赖管理工具和测试框架；同一仓库的不同版本也可能需要不同的安装命令。现有方法需要为每个 task instance 手动编写 Dockerfile 和测试脚本，人力成本极高。</p>
+    </div>
+  </div>
+
+  <div class="mech-box">
+    <div class="mech-head">
+      <div class="mech-icon">📋</div>
+      <div class="mech-title">P3 · Fail2Pass 验证需要手写 Parser</div>
+      <div class="mech-tag" style="background:rgba(136,120,192,.15);color:var(--purple);border:1px solid rgba(136,120,192,.3)">验证</div>
+    </div>
+    <div class="mech-body">
+      <p>现有 fail2pass 验证阶段需要研究者手动 inspect 测试日志，并为不同仓库、不同测试框架编写定制的日志解析代码。当日志格式随项目演进发生变化时，parser 需要不断重写。</p>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="builder">
+  <div class="sec-header">
+    <span class="sec-num">02</span>
+    <div class="sec-line" style="background:var(--blue)"></div>
+    <h2 class="sec-title">SWE-Builder：四 Agent 多智能体系统</h2>
+  </div>
+
+  <p>为了解决 P2（环境构建），SWE-Factory 提出了 <strong>SWE-Builder</strong>——一个 LLM-based 多智能体系统，通过四个专职 agent 的协作自动完成评估环境的构建与测试脚本的生成。</p>
+
+  <div class="agents-grid">
+    <div class="agent-card">
+      <div class="agent-tag">Agent 01</div>
+      <div class="agent-name">Repository Explorer</div>
+      <div class="agent-body">
+        自动收集仓库的关键构建信息：<br><br>
+        · 环境依赖（<code>requirements.txt</code>, <code>pom.xml</code> 等）<br>
+        · 测试命令（<code>pytest</code>, <code>mvn test</code> 等）<br>
+        · 文档与安装脚本（<code>CONTRIBUTING.md</code>）<br><br>
+        通过 <code>browse_file</code>, <code>browse_dir</code>, <code>search_keyword</code> 等工具迭代检索，直到收集到足够信息。
+      </div>
+    </div>
+    <div class="agent-card">
+      <div class="agent-tag">Agent 02</div>
+      <div class="agent-name">Environment Manager</div>
+      <div class="agent-body">
+        基于 Repository Explorer 的信息<strong>生成或更新 Dockerfile</strong>，将复杂的环境配置脚本化为可复现的容器镜像。<br><br>
+        保留生成历史，在失败时可用前序版本作为 fallback，确保连续性。
+      </div>
+    </div>
+    <div class="agent-card">
+      <div class="agent-tag">Agent 03</div>
+      <div class="agent-name">Test Manager</div>
+      <div class="agent-body">
+        生成在容器内运行的<strong>测试执行脚本</strong>。<br><br>
+        职责包括：处理二进制文件变更（插入下载/删除命令）、路径设置、环境变量注入，以及最关键的一步——在脚本末尾输出唯一的 exit code 标记：<br><br>
+        <code>rc=$?; echo "OMNIGRIL_EXIT_CODE=$rc"</code><br><br>
+        这为后续全自动验证提供了标准化接口。
+      </div>
+    </div>
+    <div class="agent-card">
+      <div class="agent-tag">Agent 04</div>
+      <div class="agent-name">Test Analyst</div>
+      <div class="agent-body">
+        执行构建与测试，<strong>提炼失败摘要并 orchestrate 下一轮迭代</strong>。<br><br>
+        使用 <code>build_image</code>, <code>start_container</code>, <code>run_eval</code> 验证环境。若失败，分析日志并生成 targeted optimization plan，召回相关 agent 继续迭代。最多迭代 5 轮。
+      </div>
+    </div>
+  </div>
+
+  <div class="callout info" style="margin-top:18px">
+    <div class="callout-icon">ℹ</div>
+    <div class="callout-body"><strong>Evaluation Environment Memory Pool</strong>：SWE-Builder 维护一个 per-repo 的记忆池，复用同一仓库此前成功的环境配置。消融实验表明，移除 Memory Pool 后 F2P Rate 平均下降 <strong>5.2%</strong>，且处理时间延长。</div>
+  </div>
+
+  <div class="callout key" style="margin-top:12px">
+    <div class="callout-icon">💡</div>
+    <div class="callout-body"><strong>DockSmith 正是在 SWE-Builder 的这一架构上做了扩展</strong>：保留了 Context Retrieval (Explorer)、Dockerfile Agent (Environment Manager)、Eval Script Agent (Test Manager) 和 Test Analysis Agent 的四 Agent 分工，同时新增了 <em>Loop-Detection Controller</em> 和 <em>Cross-Task Success Memory</em>，将 per-task memory 升级为跨 repo 复用。→ <a href="DockSmith.html" style="color:var(--cyan)">查看 DockSmith 精读笔记</a></div>
+  </div>
+</section>
+
+<section class="sec" id="validation">
+  <div class="sec-header">
+    <span class="sec-num">03</span>
+    <div class="sec-line" style="background:var(--green)"></div>
+    <h2 class="sec-title">Exit-Code-Based Fail2Pass 验证</h2>
+  </div>
+
+  <p>为了解决 P3（验证），SWE-Factory 提出了一种全新的全自动验证方法：利用主流测试框架（pytest、Jest、Maven 等）都通过 <strong>exit code</strong> 报告测试结果这一事实，直接从测试脚本捕获 exit code，而无需解析五花八门的日志文本。</p>
+
+  <div class="mech-box">
+    <div class="mech-head">
+      <div class="mech-icon">🎯</div>
+      <div class="mech-title">标准化接口：OMNIGRIL_EXIT_CODE</div>
+    </div>
+    <div class="mech-body">
+      <p>Test Manager 被 prompt 要求在脚本末尾显式捕获并输出 exit code：</p>
+      <pre style="background:var(--s0);padding:10px 12px;border-radius:6px;border:1px solid var(--border);margin:8px 0;font-family:'JetBrains Mono',monospace;font-size:11.5px"><code>rc=$?
+echo "OMNIGRIL_EXIT_CODE=$rc"</code></pre>
+      <p>外部验证器只需要 grep 这一固定标记，即可 100% 准确地知道测试是 pass (exit=0) 还是 fail (exit≠0)。</p>
+    </div>
+  </div>
+
+  <p style="margin-top:14px">为了验证 exit-code 方法的准确性，研究者对 1,201 个 task instance 进行了人工评估：三位经验丰富的研究者独立 inspect 测试日志，通过讨论解决分歧，建立 ground truth。结果如下：</p>
+
+  <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);margin:14px 0">
+    <div class="stat-card"><div class="stat-num" style="color:var(--green)">100%</div><div class="stat-label">Precision</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--green)">98.3%</div><div class="stat-label">Recall</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--green)">0.991</div><div class="stat-label">F1 Score</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--cyan)">0</div><div class="stat-label">False Positives</div></div>
+  </div>
+
+  <p>16 个 False Negative 全部源于 LLM 生成的测试脚本错误（4 个标识符拼写错误，12 个因误加 <code>set -e</code> 导致脚本提前终止），而非 exit code 本身的不可靠。手动修正这些脚本错误后，F1 可达 1.0。</p>
+
+  <div class="callout good">
+    <div class="callout-icon">✓</div>
+    <div class="callout-body">这一发现极具工程价值：<strong>只要强制规范测试脚本的输出接口，exit code 就是判断测试状态的黄金标准</strong>。它完全消除了为不同框架/仓库维护定制 parser 的人力负担。</div>
+  </div>
+</section>
+
+<section class="sec" id="experiments">
+  <div class="sec-header">
+    <span class="sec-num">04</span>
+    <div class="sec-line" style="background:var(--amber)"></div>
+    <h2 class="sec-title">实验与消融研究</h2>
+  </div>
+
+  <p><strong>数据集</strong>：SweSetupBench —— 从 12 个知名开源仓库中分层采样得到的 671 个 issue，覆盖 Python、Java、TypeScript、JavaScript 四种语言。</p>
+
+  <p><strong>基座模型</strong>：GPT-4.1 mini、Kimi-K2、DeepSeek-V3-0324。</p>
+
+  <h3 style="font-family:'Lora',serif;font-size:16px;color:var(--head);margin:18px 0 10px">主实验：SWE-Builder 效果</h3>
+
+  <table class="mix-table" style="margin-bottom:16px">
+    <thead>
+      <tr><th>Model</th><th>F2P Rate (↑)</th><th>Output Rate (↑)</th><th>Time (min↓)</th><th>Cost ($↓)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>GPT-4.1 mini</strong></td><td><strong>50.2%</strong> (337/671)</td><td><strong>64.8%</strong></td><td>26.3</td><td>0.047</td></tr>
+      <tr><td>Kimi-K2</td><td>47.8% (321/671)</td><td>63.2%</td><td>30.2</td><td>0.056</td></tr>
+      <tr><td>DeepSeek-V3</td><td>42.0% (282/671)</td><td>53.4%</td><td>23.0</td><td>0.037</td></tr>
+    </tbody>
+  </table>
+
+  <p>GPT-4.1 mini 在 F2P 和 Output Rate 上均表现最佳；DeepSeek-V3 虽然 F2P 略低，但<strong>性价比最高</strong>（$0.037/instance，约 11.4 valid instances per dollar），是大规模数据构建的优选。</p>
+
+  <h3 style="font-family:'Lora',serif;font-size:16px;color:var(--head);margin:18px 0 10px">消融实验</h3>
+
+  <table class="mix-table" style="margin-bottom:14px">
+    <thead>
+      <tr><th>Component (GPT-4.1 mini)</th><th>F2P Rate</th><th>Output Rate</th></tr>
+    </thead>
+    <tbody>
+      <tr class="highlight-row"><td><strong>Baseline</strong></td><td><strong>50.2%</strong></td><td><strong>64.8%</strong></td></tr>
+      <tr><td>w/o Binary Test File Detecting*</td><td>0%</td><td>63.6%</td></tr>
+      <tr><td>w/o Repository Explorer</td><td>42.9%</td><td>55.3%</td></tr>
+      <tr><td>w/o Memory Pool</td><td>45.0%</td><td>58.3%</td></tr>
+      <tr><td>w/o Execution Feedback</td><td>0.3%</td><td>3.8%</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:11.5px;color:var(--muted)">* 在 44 个含二进制 test patch 的实例上测试；移除后 F2P 直接归零，证明该组件对这类 issue 是必需的。</p>
+
+  <div class="callout warn" style="margin-top:12px">
+    <div class="callout-icon">⚠</div>
+    <div class="callout-body"><strong>Execution Feedback 是最关键的组件</strong>：移除后 F2P Rate 从 50.2% 暴跌至 0.3%。这说明「构建环境 → 执行测试 → 分析错误 → 迭代修复」的闭环反馈是 SWE-Builder 生效的核心机制。没有真实执行反馈，仅靠静态代码审查几乎无法构建出可用的评估环境。</div>
+  </div>
+</section>
+
+<section class="sec" id="sft">
+  <div class="sec-header">
+    <span class="sec-num">05</span>
+    <div class="sec-line" style="background:var(--purple)"></div>
+    <h2 class="sec-title">SFT 探索：数据质量 = 模型能力</h2>
+  </div>
+
+  <p>为了验证 SWE-Factory 收集的数据能否真正提升模型的软件工程能力，作者用 Kimi-K2 + DeepSWE agent 框架在 2,809 个自动收集的 Python task instance 上生成了轨迹，并对 5 个模型做了 3 epoch 的全参数 SFT。</p>
+
+  <table class="mix-table" style="margin:14px 0">
+    <thead>
+      <tr><th>Model</th><th>Base RR</th><th>SFT RR</th><th>Δ</th></tr>
+    </thead>
+    <tbody>
+      <tr class="highlight-row"><td><strong>Qwen2.5-Coder-14B</strong></td><td>5.8%</td><td><strong>21.0%</strong></td><td class="delta-good">+15.2</td></tr>
+      <tr><td>Qwen2.5-Coder-7B</td><td>4.4%</td><td>13.6%</td><td class="delta-good">+9.2</td></tr>
+      <tr><td>Qwen2.5-Coder-3B</td><td>0.0%</td><td>3.4%</td><td class="delta-good">+3.4</td></tr>
+      <tr><td>Qwen3-8B</td><td>3.4%</td><td>16.2%</td><td class="delta-good">+12.8</td></tr>
+      <tr><td>Llama-3.1-8B</td><td>1.2%</td><td>5.2%</td><td class="delta-good">+4.0</td></tr>
+    </tbody>
+  </table>
+
+  <p>所有模型在 SWE-bench Verified 和 SWE-bench Lite 上均有显著提升，Empty Patch Rate 和 Tool Call Failure Rate 同步下降。这说明 <strong>SWE-Factory 不仅是一个数据构建工具，更是一个可扩展的模型能力增强引擎</strong>。</p>
+</section>
+
+<section class="sec" id="takeaways">
+  <div class="sec-header">
+    <span class="sec-num">06</span>
+    <div class="sec-line" style="background:var(--green)"></div>
+    <h2 class="sec-title">对我们的启发</h2>
+  </div>
+
+  <div class="insight-cards">
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--cyan)"></div>
+      <div class="insight-content">
+        <div class="insight-title">Docker 环境构建可直接继承 SWE-Builder 的四 Agent 架构</div>
+        <div class="insight-body">DockSmith 已经证明这条路径的正确性。如果我们要构建自己的环境构建流水线，<strong>Repository Explorer → Environment Manager → Test Manager → Test Analyst 的分工模式</strong>是一个经过实验验证的可靠起点。DockSmith 在此基础上新增的 Loop-Detection 和 Cross-Task Memory 可以视为「第二代」扩展。</div>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--amber)"></div>
+      <div class="insight-content">
+        <div class="insight-title">Exit-Code 验证法是环境数据建设的「基础设施」</div>
+        <div class="insight-body">与其为每个 repo/测试框架写定制 parser，不如<strong>强制规范测试脚本输出统一的 exit code 标记</strong>。这是从「工程脚本」向「自动化工厂」质变的关键一步。F1=0.99 的验证精度足以支撑大规模无人值守的数据生产。</div>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--blue)"></div>
+      <div class="insight-content">
+        <div class="insight-title">Memory Pool 值得从 per-repo 升级到 cross-repo</div>
+        <div class="insight-body">SWE-Factory 的 Memory Pool 只在一个 task 的多次尝试间复用成功经验。DockSmith 的 Cross-Task Memory 将其扩展到了 repo 间——这是 F2P 提升的重要来源。我们在设计 D^env 收集流水线时，应尽早引入<strong>跨仓库环境配置复用机制</strong>，减少重复劳动。</div>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--green)"></div>
+      <div class="insight-content">
+        <div class="insight-title">Execution Feedback 是不可妥协的核心</div>
+        <div class="insight-body">消融实验中，移除 Execution Feedback 后 F2P 几近归零。这提醒我们：任何环境构建 agent 的 prompt / 训练数据都必须包含<strong>「构建 → 执行 → 观察错误 → 迭代」的完整闭环</strong>。仅让模型「猜测」Dockerfile 而不与真实执行环境交互，是行不通的。</div>
+      </div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-stripe" style="background:var(--purple)"></div>
+      <div class="insight-content">
+        <div class="insight-title">Binary Test File 修复是个容易被低估的数据增量来源</div>
+        <div class="insight-body">在 Pillow 等视觉/多模态相关 repo 中，超过 20% 的 issue 因二进制 test patch 缺失而被丢弃。若我们要收集 VLM-related SE 数据，这一修复步骤将直接决定数据集的大小与多样性。</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+  <div class="callout good">
+    <div class="callout-icon">→</div>
+    <div class="callout-body">
+      <strong>建议行动</strong>：① 在 D^env 流水线中强制采用 OMNIGRIL_EXIT_CODE 风格的 exit-code 验证接口，替代人工 parser；② 以 SWE-Builder 四 Agent 架构为起点设计环境构建模块，逐步叠加 Loop-Detection 与 Cross-Task Memory；③ 如果涉及图像/二进制测试资源，优先集成 Binary Test File Recovery 模块。
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+
+<script>
+const secs = document.querySelectorAll('section[id], div[id]');
+const items = document.querySelectorAll('.nav-item');
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting)
+      items.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+  });
+}, { rootMargin: '-30% 0px -60% 0px' });
+secs.forEach(s => io.observe(s));
+</script>
+</body>
+</html>
