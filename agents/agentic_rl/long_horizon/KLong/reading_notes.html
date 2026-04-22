@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="paper-title" content="KLong: Training LLM Agent for Extremely Long-horizon Tasks">
+  <meta name="arxiv-id" content="2602.17547">
+  <meta name="last-updated" content="2026-04-22T03:00:00+08:00">
+  <title>KLong — Reading Notes</title>
+  <style>
+    :root {
+      --bg: #f8f9fa;
+      --card: #ffffff;
+      --text: #1a1a2e;
+      --text-secondary: #555;
+      --accent: #0066cc;
+      --accent-light: #e6f0fa;
+      --border: #e0e0e0;
+      --success: #2e7d32;
+      --warning: #ed6c02;
+      --danger: #d32f2f;
+      --purple: #7c4dff;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f1115;
+        --card: #1a1d24;
+        --text: #e0e2e8;
+        --text-secondary: #a0a4b0;
+        --accent: #4da3ff;
+        --accent-light: #1a2d4a;
+        --border: #2a2d36;
+      }
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding-bottom: 60px;
+    }
+    .container { max-width: 900px; margin: 0 auto; padding: 0 20px; }
+    .header {
+      background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);
+      color: white;
+      padding: 50px 0 40px;
+      margin-bottom: 30px;
+    }
+    .header h1 { font-size: 2.2rem; font-weight: 700; line-height: 1.3; margin-bottom: 12px; }
+    .header .subtitle { font-size: 1.1rem; opacity: 0.9; margin-bottom: 20px; }
+    .header .meta { display: flex; flex-wrap: wrap; gap: 16px; font-size: 0.9rem; opacity: 0.85; }
+    .header .meta span { display: flex; align-items: center; gap: 6px; }
+    .header .badge { display: inline-block; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; margin-top: 16px; }
+    .card { background: var(--card); border-radius: 12px; padding: 28px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid var(--border); }
+    .card h2 { font-size: 1.4rem; color: var(--accent); margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--accent-light); }
+    .card h3 { font-size: 1.1rem; color: var(--text); margin: 20px 0 10px; }
+    .card p { margin-bottom: 12px; color: var(--text-secondary); }
+    .card ul { padding-left: 22px; margin-bottom: 12px; }
+    .card li { margin-bottom: 8px; color: var(--text-secondary); }
+    .highlight-box { background: var(--accent-light); border-left: 4px solid var(--accent); padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+    .highlight-box strong { color: var(--accent); }
+    .insight-box { background: #fff3e0; border-left: 4px solid var(--warning); padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+    .insight-box strong { color: var(--warning); }
+    .key-box { background: #e8f5e9; border-left: 4px solid var(--success); padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+    .key-box strong { color: var(--success); }
+    table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem; }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { background: var(--accent-light); color: var(--accent); font-weight: 600; }
+    tr:hover { background: #fafafa; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin: 20px 0; }
+    .stat-item { background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%); color: white; padding: 20px; border-radius: 10px; text-align: center; }
+    .stat-item .number { font-size: 2rem; font-weight: 700; display: block; margin-bottom: 4px; }
+    .stat-item .label { font-size: 0.85rem; opacity: 0.9; }
+    .qa-item { margin-bottom: 20px; padding: 16px; background: var(--bg); border-radius: 8px; }
+    .qa-q { color: var(--accent); font-weight: 600; margin-bottom: 8px; }
+    .qa-a { color: var(--text-secondary); margin-bottom: 6px; }
+    .qa-time { color: #999; font-size: 0.8rem; }
+    .tag { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; margin-right: 6px; }
+    .tag-blue { background: var(--accent-light); color: var(--accent); }
+    .tag-green { background: #e8f5e9; color: var(--success); }
+    .tag-orange { background: #fff3e0; color: var(--warning); }
+    .footer { text-align: center; padding: 30px; color: #999; font-size: 0.85rem; }
+    @media (max-width: 600px) { .header h1 { font-size: 1.5rem; } .card { padding: 18px; } }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="container">
+    <h1>KLong</h1>
+    <div class="subtitle">Training LLM Agent for Extremely Long-horizon Tasks</div>
+    <div class="meta">
+      <span>📄 arXiv:2602.17547</span>
+      <span>🏢 NUS, HKUST, 上交, 北大, MIT</span>
+      <span>📅 2026.02</span>
+      <span>👥 Liu et al.</span>
+    </div>
+    <div class="badge">Agentic RL · Long Horizon · Trajectory Splitting · Progressive RL</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="card">
+    <h2>基本信息</h2>
+    <table>
+      <tr><th>项目</th><th>内容</th></tr>
+      <tr><td>标题</td><td>KLong: Training LLM Agent for Extremely Long-horizon Tasks</td></tr>
+      <tr><td>作者</td><td>Yue Liu, Yingwei Ma, Yibo Miao 等</td></tr>
+      <tr><td>机构</td><td>NUS, HKUST, 上交, 北大, MIT</td></tr>
+      <tr><td>arXiv</td><td><a href="https://arxiv.org/abs/2602.17547">arXiv:2602.17547</a></td></tr>
+      <tr><td>GitHub</td><td><a href="https://github.com/yueliu1999/KLong">github.com/yueliu1999/KLong</a></td></tr>
+      <tr><td>状态</td><td>ICLR LLA Workshop 2026 接收</td></tr>
+      <tr><td>数据</td><td>KLongTrain (sampled training dataset) 已开源</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>一句话总结</h2>
+    <div class="highlight-box">
+      <strong>KLong 解决的是超长时域 Agent 训练</strong>——当任务需要 100+ 步、跨越多轮会话、甚至超出上下文窗口时，怎么让 Agent 仍然保持连贯性。<br><br>
+      参数只有 Kimi K2 Thinking 的 1/10（106B vs 1T），但在 PaperBench 上<strong>超过 11.28%</strong>。这说明：长轨迹能力不是参数规模的线性函数，而是<strong>训练范式的函数</strong>。
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>核心问题</h2>
+    <p>Agent 的轨迹（trajectory）一旦变长，有两个致命问题：</p>
+    <ol>
+      <li><strong>上下文装不下</strong>——整个交互历史塞不进模型的上下文窗口</li>
+      <li><strong>信用分配崩溃</strong>——强化学习的 reward 信号在超长链上稀释，模型不知道哪一步该 credit 还是 blame</li>
+    </ol>
+    <p>这导致现有 Agent 在长任务上表现极差—— PaperBench（一个需要 10+ 小时连续工作的学术 benchmark）上，即使 Kimi K2 Thinking（1T 参数）也搞不定。</p>
+  </div>
+
+  <div class="card">
+    <h2>两段式训练方法</h2>
+
+    <h3>1. Trajectory-Splitting SFT（轨迹分割监督微调）</h3>
+    <p>不是一次性把整个长轨迹喂给模型，而是：</p>
+    <ul>
+      <li><strong>保留早期上下文</strong>（任务的初始设定、用户意图）作为固定锚点</li>
+      <li><strong>逐步截断后期</strong>，把长轨迹切成重叠的子轨迹</li>
+      <li>每个子轨迹都有<strong>早期上下文 + 一段局部历史</strong>，确保连续性</li>
+    </ul>
+    <div class="key-box">
+      <strong>类比：</strong>就像看一部 100 集的剧，每集开头都带一段前情提要，但你不需要从头再看一遍。
+    </div>
+
+    <h3>2. Progressive RL（渐进式强化学习）</h3>
+    <p>分多阶段训练，每个阶段逐步延长 timeout（允许 Agent 执行更长时间）：</p>
+    <table>
+      <tr><th>阶段</th><th>Timeout</th><th>训练目标</th></tr>
+      <tr><td>早期阶段</td><td>较短（1-2 小时）</td><td>学基础模式：读论文、写代码、跑简单实验</td></tr>
+      <tr><td>中期阶段</td><td>中等</td><td>叠加多步依赖：代码出错了怎么 debug、实验结果不对怎么调整</td></tr>
+      <tr><td>后期阶段</td><td>较长（6 小时，RL6H）</td><td>完整长程任务：从读论文到复现所有结果</td></tr>
+    </table>
+    <p><strong>关键设计：</strong>每个阶段用上一阶段训练好的模型做初始化，timeout 逐步放开。不是一开始就给 6 小时让模型乱逛，而是让它先在短时间里学会基本操作，再慢慢适应更长的决策链。</p>
+
+    <h3>为什么这样设计？</h3>
+    <table>
+      <tr><th>痛点</th><th>Progressive RL 解法</th></tr>
+      <tr><td>信用分配稀疏</td><td>早期 timeout 短，任务天然被切成更短片段，reward 更密集，模型先学会"局部正确"</td></tr>
+      <tr><td>探索空间爆炸</td><td>渐进式解锁相当于课程表：先学会走路，再学跑步，再学马拉松</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>实验结果</h2>
+
+    <div class="stats-grid">
+      <div class="stat-item">
+        <span class="number">+11.28%</span>
+        <span class="label">vs Kimi K2 Thinking (1T)<br>on PaperBench</span>
+      </div>
+      <div class="stat-item">
+        <span class="number">106B</span>
+        <span class="label">KLong 参数量<br>(1/10 of 1T)</span>
+      </div>
+      <div class="stat-item">
+        <span class="number">62.59</span>
+        <span class="label">PaperBench 平均分<br>(RL6H 配置)</span>
+      </div>
+      <div class="stat-item">
+        <span class="number">6.67</span>
+        <span class="label">Progressive RL<br>绝对提升 (%)</span>
+      </div>
+    </div>
+
+    <h3>消融实验</h3>
+    <table>
+      <tr><th>配置</th><th>PaperBench 平均分</th></tr>
+      <tr><td>Baseline（只有综合 SFT）</td><td>38.63</td></tr>
+      <tr><td>+ Split SFT</td><td>55.92</td></tr>
+      <tr><td><strong>+ Split SFT + Progressive RL（RL6H）</strong></td><td><strong>62.59</strong></td></tr>
+    </table>
+
+    <h3>不同任务对 RL 时长的敏感度</h3>
+    <ul>
+      <li><strong>test-time-model-adaptation</strong>：从更长的 RL 中持续受益，RL6H 达到 80.09</li>
+      <li><strong>fre / mechanistic-understanding</strong>：短 RL 时长就有显著增益，说明这类任务模式更局部</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>数据与 Reward 设计</h2>
+
+    <h3>Research-Factory 自动流水线</h3>
+    <ol>
+      <li><strong>搜索 Agent</strong> 去顶会（ICML、NeurIPS、ICLR 等过去五年）爬论文，过滤质量高的</li>
+      <li><strong>评估 Agent</strong> 读论文 + 读官方代码，自动生成评估 rubric（复现标准）</li>
+      <li>喂给 <strong>Claude 4.5 Sonnet (Thinking)</strong> 执行，生成超长轨迹</li>
+      <li><strong>Rejection sampling</strong>：只保留 judge score 达标的轨迹</li>
+    </ol>
+
+    <h3>RL 阶段的 Reward</h3>
+    <ul>
+      <li><strong>Judge：</strong>GPT-OSS-120B（放弃了 PaperBench 原版的 o3-mini）</li>
+      <li><strong>Rubric：</strong>多维度结构化评估，不是简单 pass/fail
+        <ul>
+          <li>Experimental setup（实验设置是否复现）</li>
+          <li>Dataset usage（数据使用是否正确）</li>
+          <li>Result validation（结果是否匹配论文）</li>
+          <li>Core contributions（核心贡献是否覆盖）</li>
+        </ul>
+      </li>
+      <li><strong>Partial credit：</strong>即使没跑完完整复现，部分正确也能拿到非零 reward</li>
+    </ul>
+
+    <h3>RL 冷启动保障（三层）</h3>
+    <table>
+      <tr><th>层</th><th>作用</th></tr>
+      <tr><td>Comprehensive SFT</td><td>通用 Agent 技能激活：coding、math、search、tool use</td></tr>
+      <tr><td>Trajectory-Splitting SFT</td><td>长轨迹模式注入：Claude 4.5 蒸馏轨迹 + rejection sampling</td></tr>
+      <tr><td>Progressive 课程</td><td>从短 timeout 开始，逐步解锁长度</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>关键洞察</h2>
+    <ul>
+      <li><strong>"智能的瓶颈不是记住多少，而是如何在时间中保持连贯。"</strong></li>
+      <li>Trajectory splitting 本质上是在做<strong>时间维度上的压缩与展开</strong>——把一维的长序列，折叠成有层次的多维结构。</li>
+      <li>这跟人类记忆的"情节-语义"分层、小说叙事的"章-节-段"结构都是<strong>同构的</strong>。</li>
+      <li>长时域能力不是参数规模的线性函数，而是<strong>训练范式的函数</strong>。</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>深层思考：可验证奖励的来源</h2>
+
+    <div class="insight-box">
+      <strong>核心悖论：</strong> 形式化可验证的任务（代码执行、数学证明）覆盖范围有限；非形式化但关键的能力（创意、直觉、策略）没有形式验证器。如果只训练"可验证"的事，模型永远学不会"不可验证"但关键的事。
+    </div>
+
+    <h3>LLM-as-Judge 的脆弱性</h3>
+    <p>LLM judge 的 rubric 容易被 hack：</p>
+    <ul>
+      <li><strong>Format Hacking：</strong>生成三段式回答，结构完整但内容可能是编的</li>
+      <li><strong>Keyword Stuffing：</strong>密集塞入 rubric 关键词刷分</li>
+      <li><strong>Length Hacking：</strong>LLM judge 普遍有 length bias</li>
+      <li><strong>Self-Referential Hacking：</strong>利用 judge 和 policy 同家族的统计规律</li>
+    </ul>
+
+    <h3>Reward Hackability 排序（易 → 难）</h3>
+    <ol>
+      <li>字符串匹配 / BLEU / ROUGE —— 纯表面相似</li>
+      <li>LLM-as-judge outcome-based rubric —— 结构/格式 bias</li>
+      <li>Process-based LLM judge —— 奖励中间推理步骤</li>
+      <li>Rule-based 验证（编译通过、API 格式正确）</li>
+      <li><strong>Executable sandbox 验证 —— 最难 hack</strong></li>
+      <li>Human-in-the-loop —— 最安全，但无法 scale</li>
+    </ol>
+
+    <h3>可能的出路：社会性验证</h3>
+    <p>多智能体博弈——对手无法被取悦。对手是 Agent，不是死板的 assert，它会进化、会找漏洞、会识破表演。当验证节点（judge/agent/auditor）的密度超过临界值，集体智慧涌现。</p>
+  </div>
+
+  <div class="card" id="qa">
+    <h2>Q & A</h2>
+
+    <div class="qa-item">
+      <div class="qa-q">🙋 问：RL 阶段的 dataset 是什么？</div>
+      <div class="qa-a">和 SFT 同一套 Research-Factory 流水线构建的 prompts/tasks，但 RL 时不再喂蒸馏好的 Claude 轨迹，而是让模型自己在这些任务上做 online rollouts，用 rubric + judge model 给可执行的 reward。SFT 是"模仿"，RL 是"自己动手做"。</div>
+      <div class="qa-time">2026-04-21</div>
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">🙋 问：RL 阶段初始的 rollout 准确率能被保障吗？怎么保障的？</div>
+      <div class="qa-a">三层冷启动：1) Comprehensive SFT 激活通用 Agent 技能；2) Trajectory-Splitting SFT 注入 Claude 4.5 蒸馏的长轨迹模式（rejection sampling 筛选）；3) Progressive 课程从短 timeout 开始，让模型先学会"走路"再跑马拉松。SFT 负责"从随机拉到会做"，Progressive 负责"从短拉到长"。</div>
+      <div class="qa-time">2026-04-21</div>
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">🙋 问：短链任务怎么给 reward，怎么评价完成与否？</div>
+      <div class="qa-a">不是简单 pass/fail，而是 GPT-OSS-120B 执行的多维度 rubric 评估。即使没跑完完整复现，在"论文理解""代码结构"等子项上也能拿 partial credit。这保证了 RL 初期有稳定的非零信号。</div>
+      <div class="qa-time">2026-04-21</div>
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">🙋 问：LLM as judge 的 rubrics 容易 hacking 吗？一般什么 reward 容易 hack？</div>
+      <div class="qa-a">容易。本质是 Goodhart's Law——指标成为目标后就不再是好的指标。最容易被 hack 的是字符串匹配和纯文本 LLM judge；最难的是 executable sandbox（代码必须实际跑出正确结果）。KLong 的缓解：SFT 用真实执行轨迹冷启动 + rejection sampling 筛选，减少早期进入 hacking basin 的概率。更深层的出路可能是社会性验证——多智能体互相博弈，逼近"社会性完备性"。</div>
+      <div class="qa-time">2026-04-21</div>
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">🙋 问：怎么设计一个系统，产生源源不断的可验证奖励的来源？</div>
+      <div class="qa-a">Agent-World 的答案是三层架构：1) 从真实世界挖工具生态（MCP Servers、开源文档、工业 PRD）→ 天然可执行边界；2) 自动化任务合成（graph-based / programmatic）→ 先有验证方法再包装成任务；3) 自进化闭环 → 验证标准根据模型能力边界自动生长。终极答案可能不是"造更多验证器"，而是让验证本身成为智能行为的一部分——模型学会自己给自己出题、自己验证自己。</div>
+      <div class="qa-time">2026-04-21</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    阅读笔记整理于 2026-04-22 · KLong (arXiv:2602.17547)
+  </div>
+
+</div>
+</body>
+</html>
