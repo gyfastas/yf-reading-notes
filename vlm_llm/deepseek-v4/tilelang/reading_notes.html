@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TileLang 阅读笔记</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card: #161b22;
+      --text: #c9d1d9;
+      --muted: #8b949e;
+      --accent: #58a6ff;
+      --border: #30363d;
+      --code-bg: #1c2128;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #ffffff;
+        --card: #f6f8fa;
+        --text: #24292f;
+        --muted: #57606a;
+        --accent: #0969da;
+        --border: #d0d7de;
+        --code-bg: #f3f4f6;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+    h1 { font-size: 1.8rem; margin-bottom: 0.2rem; }
+    .meta { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.2rem 1.5rem;
+      margin-bottom: 1.2rem;
+    }
+    h2 { font-size: 1.25rem; margin-top: 0; color: var(--accent); }
+    h3 { font-size: 1.05rem; margin-top: 1.2rem; color: var(--text); }
+    ul, ol { padding-left: 1.3rem; }
+    li { margin-bottom: 0.4rem; }
+    code {
+      background: var(--code-bg);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+    .highlight {
+      background: rgba(88,166,255,0.1);
+      border-left: 3px solid var(--accent);
+      padding: 0.8rem 1rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1rem 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.7rem;
+      text-align: left;
+    }
+    th { background: var(--code-bg); }
+    .footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-top: 2rem;
+    }
+    .qa-item { margin-bottom: 1.2rem; }
+    .qa-q { font-weight: 600; color: var(--accent); margin-bottom: 0.3rem; }
+    .qa-a { color: var(--text); }
+  </style>
+</head>
+<body>
+
+<h1>TileLang: Bridge Programmability and Performance in Modern Neural Kernels</h1>
+<div class="meta">
+  ICLR 2026 · Lei Wang, Yu Cheng, Yining Shi, et al. (PKU / TileAI / MS Research)<br>
+  论文地址：<a href="https://github.com/tile-ai/tilelang" style="color:var(--accent)">https://github.com/tile-ai/tilelang</a><br>
+  笔记整理于 2026-04-25
+</div>
+
+<div class="card">
+  <h2>一句话总结</h2>
+  <p>TileLang 是一个 <strong>tile-level 可编程 DSL</strong>，通过显式原语（内存分配、数据搬运、并行调度）和统一的 <strong>FTG（Fused Tile-level Dataflow Graph）</strong>，在保持 Pythonic 简洁性（&lt;70 LOC）的同时，实现了接近手写 CUDA 的性能，在 H100 上平均比 Triton 快 <strong>3.02×</strong>。</p>
+</div>
+
+<div class="card">
+  <h2>研究背景与动机</h2>
+  <p>现代神经网络对高性能计算 kernel 的需求日益增长，尤其是注意力机制相关的内存密集型算子。但开发者面临两难选择：</p>
+  <ul>
+    <li><strong>手写 CUDA</strong>：性能极致，但代码复杂（FlashMLA ~500 LOC）、开发成本高、难以跨硬件移植</li>
+    <li><strong>Triton 等高级 DSL</strong>：代码简洁（FlashMLA Triton ~130 LOC），但性能只有手写 CUDA 的 <strong>14.2%</strong>，因为缺乏对 tile reuse、pipeline scheduling、内存放置的细粒度控制</li>
+  </ul>
+  <p class="highlight">核心矛盾：<strong>programmability vs. performance</strong> 之间的鸿沟需要一种新抽象来弥合。</p>
+</div>
+
+<div class="card">
+  <h2>核心方法</h2>
+
+  <h3>1. Tile-Level 编程模型</h3>
+  <p>TileLang 将 <strong>tile（张量的超矩形切片）</strong>提升为一级公民，提供显式原语让开发者直接操控硬件资源：</p>
+  <table>
+    <tr><th>原语</th><th>功能</th></tr>
+    <tr><td><code>T.alloc_shared</code></td><td>在共享内存（shared memory）分配 tile 缓冲区</td></tr>
+    <tr><td><code>T.alloc_fragment</code></td><td>在寄存器文件（register file）放置累加器 tile</td></tr>
+    <tr><td><code>T.copy</code></td><td> orchestrate 数据在内存层级间的搬运</td></tr>
+    <tr><td><code>T.annotate_layout</code> / <code>T.use_swizzle</code></td><td>定义自定义内存布局，避免 bank conflict</td></tr>
+    <tr><td><code>T.Parallel</code></td><td>warp 级别的并行协作策略</td></tr>
+    <tr><td><code>T.Pipelined</code></td><td>软件流水线调度，重叠计算与数据传输</td></tr>
+    <tr><td><code>T.gemm</code></td><td>tile 级别的矩阵乘，自动映射到 Tensor Core</td></tr>
+  </table>
+
+  <h3>2. FTG：统一融合 Tile 级数据流图</h3>
+  <p>TileLang 程序被表示为 <strong>FTG（Fused Tile-level Dataflow Graph）</strong>：</p>
+  <ul>
+    <li>每个节点 = tile 操作符（gemm、copy、reduce 等）</li>
+    <li>每条边 = 数据依赖关系</li>
+    <li>FTG 捕获六个关键优化维度：tile size、内存放置、warp 分区、内存布局、软件流水线、向量化</li>
+  </ul>
+
+  <h3>3. 两阶段优化：Recommendation + Inference</h3>
+  <p>基于 FTG，TileLang 提供互补的两阶段工作流：</p>
+  <ol>
+    <li><strong>Tile Recommendation（推荐）</strong>：分析 FTG 和部分标注的配置，提供硬件感知的默认值（tile shape、内存放置、warp 分区）。这些推荐是高质量的起点，开发者可接受、调整或进一步微调。</li>
+    <li><strong>Tile Inference（推理）</strong>：通过约束传播自动补全剩余配置（tile size、内存布局、流水线调度、向量化）。自动对齐上下游的缓冲区形状、布局和内存分配，保证一致性和硬件效率。</li>
+  </ol>
+  <p class="highlight">设计哲学：开发者在 FTG 上描述计算（可选标注优化维度），系统自动完成低层配置的推断和优化。支持全自动和 hint-guided 两种使用模式。</p>
+
+  <h3>4. FlashMLA 示例（核心案例）</h3>
+  <pre>with T.Kernel(batch, heads // min(block_H, kv_group_num), threads=256) as (bx, by):
+    # 1. 在目标内存层定义缓冲区
+    Q_shared = T.alloc_shared([block_H, dim], dtype)
+    S_shared = T.alloc_shared([block_H, block_N], dtype)
+    acc_s = T.alloc_fragment([block_H, block_N], accum_dtype)
+
+    # 2. 定义期望的数据布局
+    T.annotate_layout({{O_shared: T.make_swizzled_layout(O_shared)}})
+
+    # 3. 数据拷贝
+    T.copy(Q[bx, by*block_H:(by+1)*block_H, :], Q_shared)
+
+    # 4. 自动流水线调度
+    for k in T.Pipelined(T.ceildiv(seqlen_kv, block_N), num_stages=2):
+        T.copy(KV[bx, k*block_N:(k+1)*block_N, cur_kv_head, :], KV_shared)
+        T.clear(acc_s)
+        # 5. Warp 分区协作
+        T.gemm(Q_shared, KV_shared, acc_s, transpose_B=True,
+               policy=T.GemmWarpPolicy.FullCol)
+        # ... softmax + output gemm ...</pre>
+</div>
+
+<div class="card">
+  <h2>实验结果</h2>
+  <p>硬件平台：NVIDIA H100 (80GB, CUDA 12.8) + AMD MI300X (192GB, ROCm 6.2.0)</p>
+
+  <h3>综合性能 vs Triton</h3>
+  <table>
+    <tr><th>平台</th><th>加速范围</th><th>平均加速</th></tr>
+    <tr><td>NVIDIA H100</td><td>1.08× – 10.58×</td><td><strong>3.02×</strong></td></tr>
+    <tr><td>AMD MI300X</td><td>1.01× – 11.56×</td><td><strong>2.65×</strong></td></tr>
+  </table>
+
+  <h3>代表性算子表现（H100）</h3>
+  <table>
+    <tr><th>算子</th><th>vs PyTorch</th><th>vs Triton</th><th>vs 手写 CUDA</th><th>LOC</th></tr>
+    <tr><td>GEMM (FP16)</td><td>1.18–1.40×</td><td>1.08–1.43×</td><td>—</td><td>~30</td></tr>
+    <tr><td>Flash Attention</td><td>—</td><td>1.08–1.58×</td><td>0.98× (FA3)</td><td>66</td></tr>
+    <tr><td>FlashMLA</td><td>—</td><td>4.06–10.59×</td><td>1.00× (匹配)</td><td>73</td></tr>
+    <tr><td>Block Sparse Attention</td><td>—</td><td>3.42–7.87×</td><td>0.91–1.82×</td><td>68</td></tr>
+    <tr><td>Chunk Gated Delta Net</td><td>15.88–70.35×</td><td>1.10–1.45×</td><td>—</td><td>~50</td></tr>
+    <tr><td>Vertical Slash Sparse Attn</td><td>108–280×</td><td>1.16–1.97×</td><td>—</td><td>~40</td></tr>
+  </table>
+
+  <h3>代码复杂度</h3>
+  <ul>
+    <li>相比<strong>手写 CUDA</strong>：代码量减少 <strong>85.5%</strong>（FlashMLA: 73 LOC vs 500 LOC）</li>
+    <li>相比<strong>Triton</strong>：代码量更少或持平，但性能显著更高</li>
+    <li>相比<strong>ThunderKittens</strong>：性能持平 (0.99–1.11×)，代码量减少 77%</li>
+  </ul>
+
+  <h3>Ablation Study（FlashMLA）</h3>
+  <p>从手动启发式版本开始，逐步启用各组件：</p>
+  <ul>
+    <li><strong>H100</strong>：tiling (+Tile) 带来 1.31×，warp partitioning (+Partition) 贡献最大（额外 4.34×）</li>
+    <li><strong>MI300X</strong>：memory placement (+Alloc) 是主要优化（6.56×），结合 tiling 后再提升 1.75×</li>
+  </ul>
+  <p>说明不同硬件上瓶颈维度不同，TileLang 的成本模型能针对性地推荐最优配置。</p>
+
+  <h3>vs 最新 DSL（Helion / Gluon / Tilus）</h3>
+  <p>GEMM 上 TileLang 比 Helion 快 1.15–1.62×，比 Gluon 快 1.52–1.83×，比 Tilus 快 1.87–2.12×，同时代码量更少。</p>
+</div>
+
+<div class="card">
+  <h2>与 DeepSeek-V4 的关联</h2>
+  <p>DeepSeek-V4 技术报告（Section 3.2）明确提到使用 TileLang 来开发自定义 kernel：</p>
+  <ul>
+    <li>用于平衡 <strong>"development productivity and runtime efficiency"</strong></li>
+    <li>具体应用包括：MoE fused kernel、attention kernels（CSA + HCA 混合注意力架构）</li>
+    <li>TileLang 的硬件可移植性（NVIDIA + AMD）和 tile-level 控制，使 V4 能在不同部署环境中复用同一套 kernel 代码</li>
+  </ul>
+  <p class="highlight">Acknowledgement 中，TileLang 作者特别感谢 DeepSeek 的"pioneering adoption"和"significant code contributions"，表明双方是深度合作关系。</p>
+</div>
+
+<div class="card">
+  <h2>编译流程（5 阶段）</h2>
+  <ol>
+    <li>开发者用 Python DSL 编写 tile-level 代码</li>
+    <li>Parser 将 AST 转换为 TileLang AST</li>
+    <li>从 TensorIR 构建 FTG</li>
+    <li>应用 TileLang 优化 pass（tile recommendation + inference）和 TVM pass</li>
+    <li>Codegen 生成 CUDA / HIP / 其他后端代码</li>
+  </ol>
+  <p>TileLang 构建在 TVM 后端之上，但核心贡献（tile 抽象、FTG IR、优化 pass）位于 TVM 之上。</p>
+</div>
+
+<div class="card">
+  <h2>重要 Takeaways</h2>
+  <ol>
+    <li><strong>Tile 是正确的抽象粒度</strong>——比 scalar 高级（可移植），比 threadblock 低级（可控），在 GPU 内存层级和计算单元之间提供了实用的平衡点。</li>
+    <li><strong>显式控制 + 自动推断是最佳组合</strong>——开发者决定"做什么"（tile shape、内存放置、warp 策略），系统决定"怎么做"（布局、流水线、向量化）。这比纯自动化（Triton）或纯手动（CUDA）都更高效。</li>
+    <li><strong>FTG 是统一的优化载体</strong>——将 tile recommendation 和 inference 统一到同一张图上，使得跨算子的融合优化成为可能。</li>
+    <li><strong>硬件可移植性</strong>——同一套 TileLang 代码可在 NVIDIA 和 AMD GPU 上运行，且都能达到接近各平台最优库的性能。</li>
+    <li><strong>新兴算法的快速实验</strong>——Block Sparse Attention 只需在标准 MHA 基础上加 2 行代码；Vertical Slash Sparse Attention 等新型注意力变体可快速实现。</li>
+  </ol>
+</div>
+
+<div class="card">
+  <h2>局限与未来方向</h2>
+  <ul>
+    <li>tile 级别以下的极细粒度硬件行为（如指令级调度）无法通过稳定可移植的 API 捕获</li>
+    <li>目前主要面向 GPU，其他加速器（TPU、NPU）的支持有待扩展</li>
+    <li>成本模型虽准确，但对全新硬件架构需要重新校准</li>
+    <li>与自动调优（AutoTVM/AutoScheduler）的集成可进一步深化</li>
+  </ul>
+</div>
+
+<div class="card" id="qa">
+  <h2>Q & A</h2>
+  <p><em>等待补充...</em></p>
+</div>
+
+<div class="footer">
+  阅读笔记整理于 2026-04-25 · TileLang (ICLR 2026)
+</div>
+
+</div>
+</body>
+</html>
