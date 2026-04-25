@@ -275,7 +275,54 @@
 
   <div class="card" id="qa">
     <h2>Q & A</h2>
-    <p><em>等待补充...</em></p>
+
+    <div class="qa-item">
+      <div class="qa-q">Q1: DeepSeek-V4 的 MoE Pretrain 阶段情况如何？</div>
+      <div class="qa-a">
+        <p>V4 系列在 V3 预训练数据基础上构建了<strong>更多样化、更高质量、更长有效上下文</strong>的语料库，总计 <strong>32T+ tokens</strong>。关键特点：</p>
+        <ul>
+          <li><strong>数据构成</strong>：网页数据（过滤批量自动生成和模板内容，缓解模型 collapse）、数学与编程语料（核心，mid-training 加入 agentic 数据）、多语言数据（更大语料，改善长尾知识）、长文档数据（科学论文、技术报告为重点）</li>
+          <li><strong>Tokenizer</strong>：基于 V3 的 128K 词表，加入少量特殊 token；继承 token-splitting 和 Fill-in-Middle (FIM) 策略</li>
+          <li><strong>与 V3 的关键差异</strong>：使用 <strong>sample-level attention masking</strong>（而非 document-level）；不同来源文档打包到合适序列以最小化截断</li>
+        </ul>
+        <p><strong>Flash 训练设置</strong>（32T tokens）：</p>
+        <ul>
+          <li>优化器：<strong>Muon</strong>（大部分参数）+ <strong>AdamW</strong>（embedding、prediction head、RMSNorm）。Muon momentum=0.95，weight_decay=0.1，update RMS rescale=0.18</li>
+          <li>Batch size scheduling：从小逐步增加到 <strong>75.5M tokens</strong>，之后保持</li>
+          <li>LR：warmup 2000 steps → peak <strong>2.7×10⁻⁴</strong> → cosine decay 到 <strong>2.7×10⁻⁵</strong></li>
+          <li>序列长度渐进扩展：<strong>4K → 16K → 64K → 1M</strong></li>
+          <li>稀疏注意力引入：前 1T tokens 用 dense attention warmup；64K 时引入 sparse attention（先 short stage warmup lightning indexer）</li>
+          <li>Load balancing：auxiliary-loss-free，bias update speed=0.001；balance loss weight=0.0001（防止单序列内极端不平衡）</li>
+          <li>MTP loss weight：大部分训练 0.3，LR decay 开始时降至 0.1</li>
+        </ul>
+        <p><strong>Pro 训练设置</strong>（33T tokens）：与 Flash 基本一致，区别在于最大 batch size <strong>94.4M tokens</strong>，peak LR <strong>2.0×10⁻⁴</strong>，dense attention warmup 阶段更长。</p>
+      </div>
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">Q2: 遇到 loss spike 是怎么解决的？</div>
+      <div class="qa-a">
+        <p>万亿参数 MoE 训练存在显著稳定性挑战。团队 empirically 发现 loss spike 的发生<strong>始终与 MoE 层的 outliers 相关</strong>，且路由机制本身会加剧异常值的出现。他们从两个维度解决：</p>
+
+        <p><strong>① Anticipatory Routing（预判路由）</strong></p>
+        <ul>
+          <li><strong>核心思想</strong>：解耦 backbone 网络和路由网络的同步更新。在 step t 用当前参数 θ_t 计算特征，但用历史参数 θ_{t-Δt} 计算和应用路由索引</li>
+          <li><strong>工程实现</strong>：在 step t-Δt 提前获取 step t 的数据，"预判"地计算并缓存路由索引；预计算只需一次前向传播</li>
+          <li><strong>开销控制</strong>：精心编排流水线执行和 Expert Parallelism (EP) 通信重叠，额外 wall-clock 开销约 <strong>20%</strong></li>
+          <li><strong>动态触发</strong>：自动检测 loss spike → 短回滚并激活 Anticipatory Routing → 运行一段时间后恢复标准训练。总体额外开销 negligible，不影响模型性能</li>
+        </ul>
+
+        <p><strong>② SwiGLU Clamping</strong></p>
+        <ul>
+          <li>SwiGLU 的<strong>线性分量 clamp 到 [-10, 10]</strong></li>
+          <li>Gate 分量的<strong>上界限制为 10</strong></li>
+          <li>有效消除 outliers，大幅稳定训练，且<strong>不损害最终性能</strong></li>
+        </ul>
+
+        <p class="highlight">论文坦承这两种技术的底层原理"remains an open question"，但实践上非常有效。</p>
+      </div>
+    </div>
+
   </div>
 
   <div class="footer">
