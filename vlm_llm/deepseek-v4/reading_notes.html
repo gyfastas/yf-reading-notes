@@ -323,6 +323,42 @@
       </div>
     </div>
 
+    <div class="qa-item">
+      <div class="qa-q">Q3: 前 1T tokens 用 dense attention warmup，那怎么切换为 CSA + HCA 的稀疏注意力？</div>
+      <div class="qa-a">
+        <p>切换遵循一个<strong>两阶段渐进策略</strong>，与序列长度扩展同步进行：</p>
+
+        <p><strong>阶段一：Dense Attention Warmup（前 1T tokens）</strong></p>
+        <ul>
+          <li>前 1T tokens 完全使用标准 <strong>dense attention</strong>（所有层都是稠密注意力）</li>
+          <li>此阶段序列长度从 4K 逐步扩展到 16K、<strong>64K</strong></li>
+          <li>目的：让模型先学好基本的注意力模式，避免稀疏机制在早期训练不稳定</li>
+        </ul>
+
+        <p><strong>阶段二：引入 Sparse Attention（序列长度达到 64K 时）</strong></p>
+        <ul>
+          <li>当训练进入 64K 序列长度阶段时，开始引入稀疏注意力</li>
+          <li>引入时<strong>先设置一个 short stage 来 warmup lightning indexer</strong>（CSA 中负责 top-k 稀疏选择的核心组件），让其参数先稳定下来</li>
+          <li>之后大部分训练使用 CSA + HCA 的混合稀疏注意力</li>
+        </ul>
+
+        <p><strong>架构层面的交错配置</strong></p>
+        <ul>
+          <li><strong>Flash</strong>：前 2 层用纯 sliding window attention；后续 41 层中 CSA 和 HCA <strong>interleaved（交错）</strong>使用</li>
+          <li><strong>Pro</strong>：前 2 层用 HCA；后续 59 层 CSA 和 HCA 同样交错使用</li>
+          <li>CSA（压缩率 m=4）负责稀疏注意力 + 压缩；HCA（压缩率 m'=128）负责更激进的压缩但不使用稀疏选择</li>
+        </ul>
+
+        <p><strong>Pro vs Flash 的差异</strong></p>
+        <ul>
+          <li>Pro 的 dense attention warmup 阶段<strong>更长</strong>（具体 token 数未披露），其余切换策略与 Flash 一致</li>
+          <li>两版本都遵循同样的 two-stage training method</li>
+        </ul>
+
+        <p class="highlight">总结：不是"逐步替换层"的渐进式切换，而是在序列长度扩展到 64K 的<strong>时间节点</strong>上，一次性从 dense attention 切换到完整的 CSA+HCA 混合架构，但引入前会给 lightning indexer 一个短暂的 warmup 窗口。</p>
+      </div>
+    </div>
+
   </div>
 
   <div class="footer">
