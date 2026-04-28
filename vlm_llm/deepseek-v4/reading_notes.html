@@ -429,6 +429,34 @@
       </div>
     </div>
 
+    <div class="qa-item">
+      <div class="qa-q">Q6: MRCR task 是什么？</div>
+      <div class="qa-a">
+        <p><strong>MRCR</strong> = <strong>M</strong>ulti-needle <strong>R</strong>etrieval in a <strong>C</strong>orpus with <strong>R</strong>andom distractors，是 OpenAI 提出的一个<strong>长上下文检索</strong> benchmark，用于评估模型在超长上下文中的 in-context retrieval 能力。</p>
+
+        <p><strong>核心机制</strong>：</p>
+        <ul>
+          <li>"Needle in a Haystack" 的变体：在长文本中插入多个关键信息（needles），要求模型检索并回答</li>
+          <li>测试序列长度可达 <strong>1M tokens</strong></li>
+          <li>指标为 <strong>MMR</strong>（Mean Multi-needle Recall）：多针召回率的均值</li>
+        </ul>
+
+        <p><strong>V4 的表现</strong>（Figure 9）：</p>
+        <ul>
+          <li>在 128K 以内，检索性能<strong>非常稳定</strong></li>
+          <li>超过 128K 后开始出现性能衰减，但 1M token 时仍保持强劲</li>
+          <li>DeepSeek-V4-Pro <strong>超越 Gemini-3.1-Pro</strong>，但仍落后 Claude Opus 4.6</li>
+        </ul>
+
+        <p><strong>与 CorpusQA 的对比</strong>：</p>
+        <ul>
+          <li>MRCR 是<strong>合成任务</strong>（人工插入 needles），更偏向压力测试</li>
+          <li><strong>CorpusQA</strong> (Lu et al., 2026) 更接近<strong>真实场景</strong>的长文档问答</li>
+          <li>V4-Pro 在两个 benchmark 上都优于 Gemini-3.1-Pro</li>
+        </ul>
+      </div>
+    </div>
+
   </div>
 
   <div class="footer">
