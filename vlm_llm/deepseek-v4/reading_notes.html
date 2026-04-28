@@ -355,7 +355,48 @@
           <li>两版本都遵循同样的 two-stage training method</li>
         </ul>
 
-        <p class="highlight">总结：不是"逐步替换层"的渐进式切换，而是在序列长度扩展到 64K 的<strong>时间节点</strong>上，一次性从 dense attention 切换到完整的 CSA+HCA 混合架构，但引入前会给 lightning indexer 一个短暂的 warmup 窗口。</p>
+        <p class="highlight"><strong>关键澄清</strong>：Dense Attention = 标准全注意力（无压缩、无选择机制）；Sparse Attention = 完整的 CSA+HCA 混合架构（CSA 内含 lightning indexer 做 top-k 选择）。切换是<strong>一次性</strong>的——在 64K 时间节点上从 dense 直接切到 sparse，不是"逐步引入"选择机制。Warmup lightning indexer 只是给 CSA 的内置组件一个短暂的参数稳定期，而非渐进添加。</p>
+      </div>
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">Q4: DeepSeek-V4 测了哪些 Agent 榜单？</div>
+      <div class="qa-a">
+        <p>论文在 Section 5.3.1 中列出了完整的 Agent 评估套件，分为 Code Agent、Search Agent 和通用 Tool Agent 三类：</p>
+
+        <p><strong>Code Agent 任务</strong>（内部框架，提供 bash + file-edit 工具，最多 500 步交互，最大 512K context）</p>
+        <ul>
+          <li><strong>Terminal Bench 2.0</strong> (Merrill et al., 2026) — 也报告了 Verified subset，Pro 约 72.0 分</li>
+          <li><strong>SWE-Verified</strong> (OpenAI, 2024e)</li>
+          <li><strong>SWE Multilingual</strong> (Yang et al., 2025)</li>
+          <li><strong>SWE-Pro</strong> (Deng et al., 2025)</li>
+        </ul>
+
+        <p><strong>Search Agent 任务</strong>（内部 harness，websearch + Python 工具，最多 500 步，最大 512K context）</p>
+        <ul>
+          <li><strong>BrowseComp</strong> (Wei et al., 2025)</li>
+          <li><strong>HLE w/ tool</strong> — 用工具辅助的 HLE 评估</li>
+        </ul>
+
+        <p><strong>通用 Tool / MCP Agent 任务</strong></p>
+        <ul>
+          <li><strong>MCPAtlas Public</strong> (Bandi et al., 2026) — 覆盖广泛的工具和 MCP 服务</li>
+          <li><strong>GDPval-AA</strong> (AA, 2025; Patwardhan et al., 2025)</li>
+          <li><strong>Tool-Decathlon</strong> (Li et al., 2025) — 论文中也简写为 Toolathlon</li>
+        </ul>
+
+        <p><strong>Formal Math（Agentic 设置）</strong></p>
+        <ul>
+          <li><strong>Lean v4.28.0-rc1</strong> — 最多 500 次 tool call，使用 Lean compiler 和 semantic tactic search engine</li>
+        </ul>
+
+        <p><strong>核心结论</strong>：</p>
+        <ul>
+          <li>Code Agent：Pro 与 K2.6 / GLM-5.1 持平，但仍落后闭源模型（Claude Opus 4.5）</li>
+          <li>Flash 在 Code Agent 上弱于 Pro，尤其在 Terminal Bench 2.0 上差距明显</li>
+          <li>MCPAtlas 和 Toolathlon 上 Pro 表现突出，说明模型对多样工具和 MCP 服务的泛化能力强，不只是对内部框架过拟合</li>
+          <li>内部评估中 Pro 超越 Claude Sonnet 4.5，接近 Opus 4.5</li>
+        </ul>
       </div>
     </div>
 
