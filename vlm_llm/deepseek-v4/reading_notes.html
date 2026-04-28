@@ -400,6 +400,35 @@
       </div>
     </div>
 
+    <div class="qa-item">
+      <div class="qa-q">Q5: Putnam-200 bench 是什么？</div>
+      <div class="qa-a">
+        <p>Putnam-200 是论文中用于评估<strong>形式化数学推理</strong>（Formal Math）的一个 benchmark 设置，不是独立的数据集：</p>
+
+        <p><strong>数据来源</strong>：从 <strong>PutnamBench</strong> (Tsoukalas et al., 2024) 中抽取的一个<strong>固定随机子集</strong>，共 200 道题。PutnamBench 收集的是美国大学生数学竞赛 Putnam Mathematical Competition 的题目。</p>
+
+        <p><strong>评估设置</strong>：</p>
+        <ul>
+          <li><strong>Pass@8</strong>：每个问题生成 8 个候选解</li>
+          <li><strong>Practical regime</strong>：minimal tools + bounded sampling，属于轻量级设置</li>
+          <li>遵循 Seed-Prover 的评估协议，但把<strong>专有的搜索工具替换为开源的 LeanExplore</strong></li>
+          <li>在 Lean v4.28.0-rc1 上运行，使用 Lean compiler 和 semantic tactic search engine</li>
+          <li>最多 500 次 tool call，max reasoning effort</li>
+        </ul>
+
+        <p><strong>与 Putnam-2025 的对比</strong>：</p>
+        <table>
+          <tr><th></th><th>Putnam-200</th><th>Putnam-2025</th></tr>
+          <tr><td>规模</td><td>200 题（固定子集）</td><td>120 题（2025 年竞赛题）</td></tr>
+          <tr><td>Regime</td><td>Practical（轻量）</td><td>Frontier（极限）</td></tr>
+          <tr><td>方法</td><td>Minimal tools + bounded sampling</td><td>Hybrid formal-informal + 大量计算扩展</td></tr>
+          <tr><td>V4-Pro 成绩</td><td>35.50（Pass@8）</td><td><strong>120/120</strong>（proof-perfect）</td></tr>
+        </table>
+
+        <p>Putnam-200 用于横向对比（与 Seed-1.5-Prover、Gemini-3-Pro 等对比），Putnam-2025 用于展示 V4 在充分计算资源下的 frontier 能力。</p>
+      </div>
+    </div>
+
   </div>
 
   <div class="footer">
