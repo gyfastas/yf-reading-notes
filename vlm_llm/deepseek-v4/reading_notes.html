@@ -507,43 +507,40 @@ Assistant: aYooSG8CQg(second poem about tapirs)</pre>
     <div class="qa-item">
       <div class="qa-q">Q8: CSA 的 top-k 挑选具体是什么意思？</div>
       <div class="qa-a">
-        <p>CSA 的 top-k 挑选由 <strong>Lightning Indexer</strong> 完成，目的是在压缩后的 KV entries 中快速定位与当前 query 最相关的部分。整个流程如下：</p>
+        <p>CSA 的 top-k 挑选由 <strong>Lightning Indexer</strong> 完成。整体是<strong>先压缩 KV，再做 sparse selection</strong>，具体分 5 步：</p>
 
-        <p><strong>Step 1: 压缩 KV</strong></p>
+        <p><strong>Step 1: KV 压缩（Token-level → Block-level）</strong></p>
         <ul>
-          <li>每 m=4 个 token 的原始 KV 压缩成一个 entry，得到 C<sup>Comp</sup></li>
-          <li>对 C<sup>Comp</sup> 再做一次同样的压缩，得到 <strong>Indexer Keys</strong> K<sup>IComp</sup>（用于后续检索）</li>
+          <li>每 m=4 个 token 的原始 KV，用 weighted aggregation 压缩成一个 entry，得到 C<sup>Comp</sup></li>
+          <li>1M token 的序列 → 约 25 万个压缩 entries</li>
         </ul>
 
-        <p><strong>Step 2: 生成 Indexer Queries</strong></p>
+        <p><strong>Step 2: 构建 Indexer Keys（二次压缩）</strong></p>
         <ul>
-          <li>当前 query token 的 hidden state h<sub>t</sub> 先 down-project 为压缩 latent 向量 c<sub>t</sub><sup>Q</sup></li>
-          <li>再 up-project 生成 n<sub>h</sub><sup>I</sup> 个 indexer query heads：{q<sub>t</sub><sup>I,1</sup>, ..., q<sub>t</sub><sup>I,n<sub>h</sub><sup>I</sup></sup>}</li>
+          <li>对 C<sup>Comp</sup> 再做一次同样的压缩操作，得到 <strong>K<sup>IComp</sup></strong>（indexer keys，专门用于检索匹配）</li>
         </ul>
 
-        <p><strong>Step 3: 计算 Index Score</strong></p>
-        <pre>I<sub>t,s</sub> = Σ<sub>h</sub> w<sub>t</sub><sup>I,h</sup> · ReLU( q<sub>t</sub><sup>I,h</sup> · K<sub>s</sub><sup>IComp</sup> )</pre>
+        <p><strong>Step 3: 生成 Indexer Queries + 计算 Index Score</strong></p>
         <ul>
-          <li>对 query token t 和每个前面的压缩 block s 计算分数</li>
-          <li>w<sub>t</sub><sup>I,h</sup> = h<sub>t</sub> · W<sup>w</sup>：可学习的 indexer head 权重</li>
-          <li>ReLU 后加权求和：多个 indexer head 的相似度打分汇总成一个总分</li>
+          <li>当前 query token：h<sub>t</sub> → down-project → c<sub>t</sub><sup>Q</sup> → up-project → n<sub>h</sub><sup>I</sup> 个 indexer query heads</li>
+          <li>Score 计算：<code>I<sub>t,s</sub> = Σ<sub>h</sub> w<sub>t</sub><sup>I,h</sup> · ReLU( q<sub>t</sub><sup>I,h</sup> · K<sub>s</sub><sup>IComp</sup> )</code></li>
+          <li>w<sub>t</sub><sup>I,h</sup> = h<sub>t</sub> · W<sup>w</sup>：可学习的 head 权重，实现多 head 打分加权汇总</li>
         </ul>
 
-        <p><strong>Step 4: Top-k 选择</strong></p>
+        <p><strong>Step 4: Top-k 稀疏选择</strong></p>
         <ul>
-          <li>对所有前面的压缩 block 按 I<sub>t,s</sub> 排序</li>
-          <li>保留分数最高的 <strong>k 个</strong>压缩 KV entries：C<sub>t</sub><sup>sprs</sup> = {C<sub>s</sub><sup>Comp</sup> | I<sub>t,s</sub> ∈ Top-k(I<sub>t,:</sub>)}</li>
+          <li>按 I<sub>t,s</sub> 排序，保留分数最高的 <strong>k 个</strong>压缩 entries：C<sub>t</sub><sup>sprs</sup> = {C<sub>s</sub><sup>Comp</sup> | I<sub>t,s</sub> ∈ Top-k(I<sub>t,:</sub>)}</li>
           <li>Flash: <strong>k=512</strong>；Pro: <strong>k=1024</strong></li>
+          <li>未被选中的 entries 直接丢弃，不参与后续 attention</li>
         </ul>
 
         <p><strong>Step 5: Core Attention（MQA）</strong></p>
         <ul>
-          <li>选中的 top-k 压缩 KV entries 作为 key 和 value</li>
-          <li>用 <strong>Multi-Query Attention (MQA)</strong> 方式做核心 attention 计算</li>
-          <li>每个压缩 entry 同时充当 K 和 V</li>
+          <li>选中的 top-k 压缩 entries 同时充当 K 和 V</li>
+          <li>用 <strong>Multi-Query Attention (MQA)</strong> 做核心 attention 计算</li>
         </ul>
 
-        <p class="highlight"><strong>直观理解</strong>：Lightning Indexer 本质上是一个<strong>快速检索模块</strong>——在 1M token 的上下文中，先把 KV 压到 1/4（25万 entries），再用 indexer 快速筛出最相关的 512/1024 个，最后只对这 k 个做 attention。这样避免了全量 attention 的 O(n²) 开销，同时保留了关键信息。</p>
+        <p class="highlight"><strong>直观理解</strong>：整个流程像是一个"分层检索"——先把 1M token 的 KV 压到 1/4（Step 1），再对这个压缩表示建索引（Step 2），然后用 query 去索引里快速搜最相关的 512/1024 个（Step 3-4），最后只对这些做 attention（Step 5）。KV 压缩和 sparse selection 是<strong>串行</strong>的：没有压缩就没有 indexer keys，也就无法做 top-k 选择。</p>
       </div>
     </div>
 
