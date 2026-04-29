@@ -448,6 +448,31 @@
           <li>DeepSeek-V4-Pro <strong>超越 Gemini-3.1-Pro</strong>，但仍落后 Claude Opus 4.6</li>
         </ul>
 
+    <div class="qa-item">
+      <div class="qa-q">Q7: HCA 和 CSA 的区别主要是什么？</div>
+      <div class="qa-a">
+        <p>CSA 和 HCA 是 V4 混合注意力架构的两大组件，<strong>交错使用</strong>于 Transformer 层中。核心区别如下：</p>
+
+        <table>
+          <tr><th>维度</th><th>CSA（Compressed Sparse Attention）</th><th>HCA（Heavily Compressed Attention）</th></tr>
+          <tr><td><strong>压缩率</strong></td><td>m = <strong>4</strong>（每 4 个 token 压成 1 个 entry）</td><td>m' = <strong>128</strong>（每 128 个 token 压成 1 个 entry）</td></tr>
+          <tr><td><strong>稀疏选择</strong></td><td>✅ 使用 <strong>DeepSeek Sparse Attention</strong> + lightning indexer 做 top-k 选择</td><td>❌ <strong>不使用稀疏注意力</strong>（no sparse attention）</td></tr>
+          <tr><td><strong>压缩方式</strong></td><td>Overlapped compression（重叠压缩）</td><td><strong>Non-overlapped</strong> compression</td></tr>
+          <tr><td><strong>局部依赖</strong></td><td>通过 top-k 稀疏选择间接覆盖</td><td>额外引入 <strong>sliding window KV entries</strong> 分支增强局部细粒度依赖</td></tr>
+          <tr><td><strong>KV 计算</strong></td><td>两组 KV entries (Cᵃ, Cᵇ) + 两组压缩权重 (Zᵃ, Zᵇ)</td><td>一组 KV entry (C) + 一组压缩权重 (Z)</td></tr>
+          <tr><td><strong>角色定位</strong></td><td>精确检索：压缩后通过稀疏选择定位关键信息</td><td>极效压缩：以极高压缩率捕获长距离语义，靠 sliding window 补足局部细节</td></tr>
+        </table>
+
+        <p><strong>架构配置</strong>：</p>
+        <ul>
+          <li><strong>Flash</strong>（43 层）：前 2 层纯 sliding window；后续 41 层 CSA 和 HCA <strong>交错</strong>使用</li>
+          <li><strong>Pro</strong>（61 层）：前 2 层用 HCA；后续 59 层 CSA 和 HCA <strong>交错</strong>使用</li>
+        </ul>
+
+        <p><strong>直观理解</strong>：CSA 是"压缩 + 精确筛选"（先压到 1/4，再用 indexor 挑 top-k），HCA 是"极致压缩 + 局部兜底"（压到 1/128，不加筛选但保留 sliding window 补局部细节）。两者互补，CSA 负责需要精确 attention 的层，HCA 负责需要极长上下文覆盖的层。</p>
+      </div>
+    </div>
+
         <p><strong>与 CorpusQA 的对比</strong>：</p>
         <ul>
           <li>MRCR 是<strong>合成任务</strong>（人工插入 needles），更偏向压力测试</li>
